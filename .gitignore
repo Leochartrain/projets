@@ -20,3 +20,9 @@ __pycache__/
 mystic_woods/sprites/
 mystic_woods/read_me.txt
 mystic_woods/*.url
+
+# FPS1 : pack d'armes Retro Weapon Pack (trop lourd, redistribution non prévue).
+# Voir FPS1/README.md pour le récupérer et regénérer les assets.
+FPS1/RetroWeaponPack_V1.zip
+FPS1/.retro/
+FPS1/public/assets/
