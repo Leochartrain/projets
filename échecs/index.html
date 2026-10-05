@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Échecs du Bois</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">♞ Échecs du Bois</div>
+  <div class="top-actions">
+    <div class="elo-chip" id="eloChip" title="Ton classement Elo"></div>
+    <button class="icon-btn" id="soundBtn" title="Son">🔊</button>
+  </div>
+</header>
+
+<main class="layout">
+  <section class="play">
+    <div class="player-card" id="topCard"></div>
+    <div class="board-frame">
+      <div class="board" id="board"></div>
+    </div>
+    <div class="player-card" id="bottomCard"></div>
+  </section>
+
+  <aside class="side">
+    <div class="panel status-panel">
+      <div class="status" id="status"></div>
+      <div class="stakes" id="stakes"></div>
+    </div>
+
+    <div class="panel moves-panel">
+      <div class="panel-title">
+        Coups
+        <button class="link-btn" id="pgnBtn" title="Copier la partie au format PGN">Copier PGN</button>
+      </div>
+      <ol class="moves" id="moves"></ol>
+      <div class="nav">
+        <button id="navFirst" title="Début">⏮</button>
+        <button id="navPrev" title="Coup précédent (←)">◀</button>
+        <button id="navNext" title="Coup suivant (→)">▶</button>
+        <button id="navLast" title="Position actuelle">⏭</button>
+      </div>
+    </div>
+
+    <div class="panel actions">
+      <button id="drawBtn" title="Proposer la nulle au bot">½ Nulle</button>
+      <button id="takebackBtn" title="Demander à reprendre ton dernier coup (partie non classée)">↶ Reprendre</button>
+      <button id="hintBtn" title="Montrer un bon coup (partie non classée)">💡 Indice</button>
+      <button id="resignBtn" class="danger">🏳 Abandonner</button>
+    </div>
+
+    <div class="panel chat-panel">
+      <div class="panel-title">Chat</div>
+      <div class="chat-log" id="chatLog"></div>
+      <form class="chat-form" id="chatForm" autocomplete="off">
+        <input id="chatInput" maxlength="200" placeholder="Écris un message…">
+        <button type="submit">➤</button>
+      </form>
+    </div>
+  </aside>
+</main>
+
+<!-- Choix de l'adversaire -->
+<div class="modal" id="lobby">
+  <div class="modal-box lobby-box">
+    <h1>♞ Échecs du Bois</h1>
+    <div class="profile" id="profile"></div>
+    <h2>Choisis ton adversaire</h2>
+    <div class="bot-grid" id="botGrid"></div>
+    <div class="lobby-footer">
+      <div class="color-pick" id="colorPick">
+        <span>Couleur :</span>
+        <label><input type="radio" name="color" value="w"> ♔ Blancs</label>
+        <label><input type="radio" name="color" value="r" checked> 🎲 Aléatoire</label>
+        <label><input type="radio" name="color" value="b"> ♚ Noirs</label>
+      </div>
+      <button class="primary" id="playBtn">Jouer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fin de partie -->
+<div class="modal hidden" id="endModal">
+  <div class="modal-box end-box">
+    <div class="end-avatar" id="endAvatar"></div>
+    <h2 id="endTitle"></h2>
+    <p id="endReason"></p>
+    <div class="end-elo" id="endElo"></div>
+    <div class="end-buttons">
+      <button class="primary" id="rematchBtn">↻ Revanche</button>
+      <button id="lobbyBtn">Changer d'adversaire</button>
+      <button id="reviewBtn">Revoir la partie</button>
+    </div>
+  </div>
+</div>
+
+<!-- Promotion -->
+<div class="modal hidden" id="promoModal">
+  <div class="modal-box promo-box">
+    <h3>Promotion</h3>
+    <div class="promo-choices" id="promoChoices"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/chess.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/bots.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
