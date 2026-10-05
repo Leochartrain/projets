@@ -1,0 +1,22 @@
+# Fichiers système
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# Éditeurs
+.vscode/
+.idea/
+
+# Dépendances et builds (pour les futurs projets)
+node_modules/
+dist/
+build/
+__pycache__/
+*.pyc
+.env
+
+# Mystic Woods : les sprites sont sous licence (redistribution interdite).
+# Voir mystic_woods/README.md pour les récupérer.
+mystic_woods/sprites/
+mystic_woods/read_me.txt
+mystic_woods/*.url

@@ -1,0 +1,8 @@
+# Fins de ligne normalisées (LF dans le repo, adaptées à l'OS au checkout)
+* text=auto
+
+*.png binary
+*.jpg binary
+*.gif binary
+*.ico binary
+*.zip binary
