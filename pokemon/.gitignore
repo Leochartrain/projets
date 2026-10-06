@@ -1,0 +1,4 @@
+node_modules/
+dist/
+# Sprites Mystic Woods : licence sans redistribution, copiés depuis ../mystic_woods/sprites (voir le README).
+public/assets/mystic/

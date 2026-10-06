@@ -1,0 +1,19 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+  background: #101820;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+#screen {
+  display: block;
+  image-rendering: pixelated;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.6);
+}
