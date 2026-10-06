@@ -1,0 +1,6 @@
+node_modules/
+dist/
+# Clés Supabase locales (voir .env.example)
+.env.local
+.env.*.local
+*.tsbuildinfo

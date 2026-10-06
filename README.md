@@ -8,8 +8,9 @@ Mes petits projets, un dossier par projet.
 | [Échecs du Bois](échecs/) | Échecs contre 6 bots (Elo 200 à 1000) avec chat, classement Elo, nulle, revanche. | `échecs/index.html` |
 | [FPS1](FPS1/) | FPS inspiré de CS: Source, en Three.js + TypeScript, avec un 1 contre 1 en ligne. | `npm install` puis `npm run dev` dans `FPS1/` |
 | [Pokémon — Route 201](pokemon/) | Une route Pokémon façon Diamant et Perle : hautes herbes, 8 vrais Pokémon, combats et captures. | `npm install` puis `npm run dev` dans `pokemon/` (sprites Mystic Woods requis) |
+| [Carnet de famille](recettes/) | Recettes de famille partagées en groupes privés (React, Supabase), en cours. | `npm install` puis `npm run dev` dans `recettes/` (projet Supabase requis) |
 
-Les projets sont en HTML/JavaScript sans dépendance : il suffit d'ouvrir le fichier `index.html` dans un navigateur. Exceptions : FPS1 et Pokémon, qui demandent Node.js (voir leur README).
+Les projets sont en HTML/JavaScript sans dépendance : il suffit d'ouvrir le fichier `index.html` dans un navigateur. Exceptions : FPS1, Pokémon et Carnet de famille, qui demandent Node.js (voir leur README).
 
 ## Ajouter un nouveau projet
 

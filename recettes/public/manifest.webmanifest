@@ -1,0 +1,11 @@
+{
+  "name": "Carnet de famille",
+  "short_name": "Carnet",
+  "description": "Les recettes de famille, sauvées et partagées entre proches.",
+  "lang": "fr",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f6f7f2",
+  "theme_color": "#23507f",
+  "icons": [{ "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

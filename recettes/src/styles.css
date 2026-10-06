@@ -1,0 +1,99 @@
+@import 'tailwindcss';
+
+/* Couleurs des maquettes : papier clair, encre bleue de stylo-plume, vert basilic. */
+:root {
+  --paper: #f6f7f2;
+  --card: #ffffff;
+  --ink: #1d2733;
+  --muted: #5b6672;
+  --line: #dde2d6;
+  --field: #d3d9cd;
+  --accent: #23507f;
+  --accent-ink: #ffffff;
+  --accent-soft: #e3ecf6;
+  --basil: #3f6d34;
+  --basil-soft: #e6efdf;
+  --mustard: #8a6a12;
+  --mustard-soft: #f6eecf;
+  --danger: #b3261e;
+  --danger-soft: #fbe9e7;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #141a20;
+    --card: #1b232b;
+    --ink: #e6ebef;
+    --muted: #9aa6b1;
+    --line: #2c3742;
+    --field: #3a4754;
+    --accent: #8db8e6;
+    --accent-ink: #10202f;
+    --accent-soft: #1f3247;
+    --basil: #9ccb8b;
+    --basil-soft: #213322;
+    --mustard: #e2c46a;
+    --mustard-soft: #3a3119;
+    --danger: #f2b8b5;
+    --danger-soft: #3c1d1b;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-field: var(--field);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-basil: var(--basil);
+  --color-basil-soft: var(--basil-soft);
+  --color-mustard: var(--mustard);
+  --color-mustard-soft: var(--mustard-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-display: 'Familjen Grotesk', 'Segoe UI', system-ui, sans-serif;
+  --font-body: 'Literata', Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-paper text-ink font-body antialiased;
+    min-height: 100dvh;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-bold;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Petite étiquette en capitales (« INGRÉDIENTS », « VISIBLE PAR »…). */
+  .label {
+    @apply font-mono text-[11px] font-medium uppercase tracking-[0.08em] text-muted;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
