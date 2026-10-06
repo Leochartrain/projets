@@ -125,6 +125,7 @@ describe('recettes et groupes', () => {
   test('avis : les membres du groupe seulement, sur une recette partagée dans ce groupe', async () => {
     await as(BOB, `insert into public.reviews (recipe_id, group_id, rating, comment) values ($1, $2, 5, 'Délicieux !')`, [recipe, group]);
     await assert.rejects(as(CAROLE, `insert into public.reviews (recipe_id, group_id, rating) values ($1, $2, 1)`, [recipe, group]), /row-level security/);
+    await assert.rejects(as(BOB, `insert into public.reviews (recipe_id, group_id, rating) values ($1, $2, 4)`, [recipe, group]), /duplicate key/);
     assert.equal((await as(ALICE, 'select id from public.reviews')).length, 1);
     assert.equal((await as(CAROLE, 'select id from public.reviews')).length, 0);
   });

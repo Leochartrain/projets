@@ -5,7 +5,7 @@ import { Screen } from '@/components/layout';
 import { Button, ErrorBox, Spinner, TextArea, TextField } from '@/components/ui';
 import { useUserId } from '@/features/auth/AuthProvider';
 import { useMyGroups } from '@/features/groups/api';
-import type { RecipeCategory } from '@/lib/database.types';
+import type { RecipeCategory } from '@/lib/types';
 import { CATEGORIES } from '@/lib/format';
 import { ingredientToLine, parseIngredient } from '@/lib/ingredients';
 import { errorMessage } from '@/lib/supabase';

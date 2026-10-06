@@ -1,6 +1,6 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useUserId } from '@/features/auth/AuthProvider';
-import type { RecipeCategory } from '@/lib/database.types';
+import { asCategory, type RecipeCategory } from '@/lib/types';
 import { compressImage } from '@/lib/images';
 import { readIngredients, readSteps, type Ingredient } from '@/lib/ingredients';
 import { supabase } from '@/lib/supabase';
@@ -28,13 +28,13 @@ export interface RecipeSummary {
   shared: boolean;
 }
 
-const SUMMARY = 'id, title, passed_down_by, category, prep_minutes, cook_minutes, photo_paths, author_id, author:profiles!inner(display_name), shares:recipe_shares(group_id)';
+const SUMMARY = 'id, title, passed_down_by, category, prep_minutes, cook_minutes, photo_paths, author_id, author:profiles!recipes_author_id_fkey(display_name), shares:recipe_shares(group_id)';
 
 type SummaryRow = {
   id: string;
   title: string;
   passed_down_by: string | null;
-  category: RecipeCategory | null;
+  category: string | null;
   prep_minutes: number | null;
   cook_minutes: number | null;
   photo_paths: string[];
@@ -47,7 +47,7 @@ function toSummary(row: SummaryRow): RecipeSummary {
     id: row.id,
     title: row.title,
     passedDownBy: row.passed_down_by,
-    category: row.category,
+    category: asCategory(row.category),
     prepMinutes: row.prep_minutes,
     cookMinutes: row.cook_minutes,
     photo: row.photo_paths[0] ?? null,
@@ -110,7 +110,7 @@ export function useRecipe(id: string, enabled = true) {
     queryFn: async (): Promise<Recipe> => {
       const { data, error } = await supabase
         .from('recipes')
-        .select('*, author:profiles!inner(display_name), shares:recipe_shares(group:groups(id, name))')
+        .select('*, author:profiles!recipes_author_id_fkey(display_name), shares:recipe_shares(group:groups(id, name))')
         .eq('id', id)
         .single();
       if (error) throw error;
@@ -121,7 +121,7 @@ export function useRecipe(id: string, enabled = true) {
         title: data.title,
         passedDownBy: data.passed_down_by,
         story: data.story,
-        category: data.category,
+        category: asCategory(data.category),
         servings: data.servings,
         servingsLabel: data.servings_label,
         prepMinutes: data.prep_minutes,

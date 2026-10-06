@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useUserId } from '@/features/auth/AuthProvider';
+import { asRole, type MemberRole } from '@/lib/types';
 
 export const groupKeys = {
   all: ['groups'] as const,
@@ -12,7 +13,7 @@ export const groupKeys = {
 export interface GroupSummary {
   id: string;
   name: string;
-  role: 'admin' | 'member';
+  role: MemberRole;
   memberCount: number;
   recipeCount: number;
 }
@@ -32,7 +33,7 @@ export function useMyGroups() {
       return data.map(({ role, group }) => ({
         id: group.id,
         name: group.name,
-        role,
+        role: asRole(role),
         memberCount: group.members[0]?.count ?? 0,
         recipeCount: group.recipes[0]?.count ?? 0,
       }));
@@ -43,8 +44,8 @@ export function useMyGroups() {
 export interface GroupDetail {
   id: string;
   name: string;
-  myRole: 'admin' | 'member' | null;
-  members: { id: string; name: string; role: 'admin' | 'member' }[];
+  myRole: MemberRole | null;
+  members: { id: string; name: string; role: MemberRole }[];
 }
 
 export function useGroup(id: string) {
@@ -60,7 +61,7 @@ export function useGroup(id: string) {
       if (error) throw error;
       const members = [...data.members]
         .sort((a, b) => a.joined_at.localeCompare(b.joined_at))
-        .map((m) => ({ id: m.profile.id, name: m.profile.display_name, role: m.role }));
+        .map((m) => ({ id: m.profile.id, name: m.profile.display_name, role: asRole(m.role) }));
       return { id: data.id, name: data.name, members, myRole: members.find((m) => m.id === userId)?.role ?? null };
     },
   });

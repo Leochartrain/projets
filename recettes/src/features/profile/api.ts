@@ -43,7 +43,9 @@ export function useDeleteAccount() {
       }
       const { error } = await supabase.rpc('delete_my_account');
       if (error) throw error;
-      await supabase.auth.signOut();
+      // La session a disparu avec le compte : le serveur répond 403 à la déconnexion, ce qui est normal,
+      // et la session enregistrée sur cet appareil est effacée quand même.
+      await supabase.auth.signOut({ scope: 'local' });
     },
   });
 }

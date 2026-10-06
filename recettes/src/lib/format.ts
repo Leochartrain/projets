@@ -1,4 +1,4 @@
-import type { RecipeCategory } from './database.types';
+import type { RecipeCategory } from './types';
 
 export const CATEGORIES: { value: RecipeCategory; label: string }[] = [
   { value: 'apero', label: 'Apéro' },

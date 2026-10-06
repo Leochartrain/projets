@@ -17,7 +17,10 @@ export function Reviews({ recipeId, groups, isAuthor }: { recipeId: string; grou
   const { data: myGroups } = useMyGroups();
   const addReview = useAddReview(recipeId);
   const deleteReview = useDeleteReview(recipeId);
-  const reviewable = groups.filter((g) => myGroups?.some((m) => m.id === g.id));
+  // Un avis par groupe : une fois donné, le formulaire disparaît pour ce groupe.
+  const reviewable = groups.filter(
+    (g) => myGroups?.some((m) => m.id === g.id) && !reviews?.some((r) => r.groupId === g.id && r.authorId === userId),
+  );
   const [groupId, setGroupId] = useState<string | null>(null);
   const [rating, setRating] = useState<number | null>(null);
   const [comment, setComment] = useState('');

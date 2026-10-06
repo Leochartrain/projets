@@ -116,7 +116,7 @@ function InviteCard({ groupId, groupName }: { groupId: string; groupName: string
           <div className="grid grid-cols-2 gap-3">
             <Button variant="secondary" onClick={() => copy(invitation.code)}>
               <Icon name={copied ? 'check' : 'copy'} size={18} />
-              {copied ? 'Lien copié' : 'Copier le lien'}
+              {copied ? 'Copié !' : 'Copier'}
             </Button>
             <Button onClick={() => share(invitation.code)}>
               <Icon name="share" size={18} />
