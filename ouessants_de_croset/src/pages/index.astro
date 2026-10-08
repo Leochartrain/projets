@@ -4,6 +4,7 @@ import Clip from '../components/Clip.astro';
 import Todo from '../components/Todo.astro';
 import { ASSO } from '../config';
 import Base from '../layouts/Base.astro';
+import belierBrun from '../assets/photos/belier-brun.jpg';
 import boucRonces from '../assets/photos/bouc-ronces.jpg';
 import brebisAgneau from '../assets/photos/brebis-agneau.jpg';
 import givre from '../assets/photos/givre.jpg';
@@ -24,15 +25,16 @@ const polaroid = { width: 600, widths: [300, 450, 600], sizes: '(max-width: 760p
         <a class="btn" href="/contact">Parlez-nous de votre terrain</a>
       </div>
       <div class="photos">
+        <!-- Photo du domaine public (Wikimedia Commons), créditée dans les mentions légales. -->
         <figure class="polaroid scotch p1">
-          <Clip name="descente-remorque" label="Le troupeau descend de la remorque à son arrivée sur un terrain" />
-          <figcaption>Arrivée sur un chantier</figcaption>
+          <Image src={belierBrun} alt="Bélier d'Ouessant brun aux grandes cornes enroulées, sur la paille" width={640} widths={[320, 480, 640]} sizes="(max-width: 860px) 270px, 330px" format="webp" loading="eager" />
+          <figcaption>Un bélier d'Ouessant</figcaption>
         </figure>
         <figure class="polaroid p2">
           <Image src={brebisAgneau} alt="Brebis d'Ouessant brune et son agneau noir nouveau-né" {...polaroid} loading="eager" />
           <figcaption>Né ce printemps !</figcaption>
         </figure>
-        <p class="main note" aria-hidden="true">le plus petit mouton de France ↑</p>
+        <p class="note" aria-hidden="true"><span class="main">← le plus petit mouton de France</span></p>
       </div>
     </div>
   </section>
@@ -147,21 +149,33 @@ const polaroid = { width: 600, widths: [300, 450, 600], sizes: '(max-width: 760p
   .hero { padding: 32px 0 96px; }
   .hero .wrap { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: center; }
   .intro { font-size: 1.25rem; color: var(--doux); margin: 1.4rem 0 2rem; max-width: 38ch; }
-  .photos { position: relative; height: 580px; }
-  .photos .polaroid { position: absolute; width: 270px; }
-  .p1 { top: 0; right: 10px; transform: rotate(4deg); }
-  .p2 { bottom: 0; left: 0; transform: rotate(-5deg); }
-  .note { position: absolute; bottom: 40px; right: 0; transform: rotate(-6deg); max-width: 150px; }
+  /* Le bélier (paysage) passe devant la brebis : sa légende n'est jamais recouverte. */
+  .photos { position: relative; height: 640px; }
+  .photos .polaroid { position: absolute; }
+  .photos figcaption { font-size: 1.6rem; bottom: 8px; }
+  .p1 { z-index: 2; top: 0; right: 0; width: 330px; transform: rotate(3deg); }
+  .p1 img { aspect-ratio: 4 / 3; object-position: 70% 50%; }
+  .p2 { z-index: 1; top: 260px; left: 0; width: 240px; transform: rotate(-5deg); }
+  .note {
+    position: absolute; z-index: 3; right: 0; bottom: 96px; max-width: 170px; margin: 0;
+    padding: 0.5rem 0.8rem; background: var(--blanc-photo); transform: rotate(-4deg);
+    box-shadow: 0 8px 18px -8px rgb(43 33 24 / 0.45);
+  }
+  .note .main { display: block; margin: 0; font-size: 1.55rem; line-height: 1.05; color: var(--ocre); }
   @media (max-width: 860px) {
     .hero .wrap { grid-template-columns: 1fr; }
-    .photos { height: 480px; max-width: 460px; width: 100%; margin-inline: auto; }
-    .photos .polaroid { width: 215px; }
-    .note { bottom: 16px; }
+    .photos { height: 560px; max-width: 460px; width: 100%; margin-inline: auto; }
+    .p1 { width: 290px; }
+    .p2 { top: 220px; width: 210px; }
+    .note { bottom: 72px; }
   }
   @media (max-width: 400px) {
-    .photos { height: 430px; }
-    .photos .polaroid { width: 185px; }
-    .note { max-width: 110px; font-size: 1.35rem; }
+    .photos { height: 500px; }
+    .p1 { width: 250px; }
+    .p2 { top: 190px; width: 185px; }
+    .photos figcaption { font-size: 1.35rem; }
+    .note { max-width: 130px; bottom: 56px; }
+    .note .main { font-size: 1.3rem; }
   }
 
   .asso .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }

@@ -38,7 +38,7 @@ Tout ce qui manque s'affiche sur le site en **[à compléter : …]** surligné 
 
 ## Photos et vidéos
 
-- **Photos** : dans `src/assets/photos/`. Astro les redimensionne et les convertit en WebP à la compilation : le navigateur ne charge que la taille dont il a besoin. Pour en ajouter une : la déposer dans ce dossier, puis l'importer dans la page comme les autres.
+- **Photos** : dans `src/assets/photos/`. Toutes sont de l'association, sauf `belier-brun.jpg` (haut de l'accueil), une photo du domaine public trouvée sur [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Landwirtschaftliches_Hauptfest_Ouessant-Schaf.jpg) et créditée dans les mentions légales. Astro les redimensionne et les convertit en WebP à la compilation : le navigateur ne charge que la taille dont il a besoin. Pour en ajouter une : la déposer dans ce dossier, puis l'importer dans la page comme les autres.
 - **Vidéos** : les fichiers d'origine (filmés au téléphone) sont compressés par `npm run videos -- "<dossier des vidéos d'origine>"` dans `public/videos/` (480 px de large, sans son, 1,5 à 3 Mo), avec une image d'attente. La liste est en haut de `scripts/videos.mjs`. Elles ne se lancent que lorsqu'elles sont visibles, et jamais si le visiteur a demandé à réduire les animations.
 
 ## Structure
