@@ -1,4 +1,8 @@
-import { NavLink, Outlet } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { Navigate, NavLink, Outlet, useLocation, useNavigate } from 'react-router';
+import { ROLE_LABELS, type TeamUser } from '@shared/domain';
+import { api, errorText, useMe } from '@/api';
+import { ErrorBox, Spinner } from './ui';
 
 const NAV: { to: string; label: string; icon: string }[] = [
   { to: '/', label: 'Tableau de bord', icon: 'M3 12h7V3H3zM14 21h7v-9h-7zM14 3v5h7V3zM3 21h7v-5H3z' },
@@ -17,8 +21,41 @@ function NavIcon({ d }: { d: string }) {
   );
 }
 
-/** Menu à gauche sur ordinateur, en bas sur téléphone (le poste d'accueil est souvent une tablette). */
+/** Écrans de l'équipe : il faut être connecté, sinon direction la page de connexion (puis retour ici). */
 export function Layout() {
+  const { data: me, isPending, error } = useMe();
+  const location = useLocation();
+  if (isPending) return <Spinner />;
+  if (error) return <ErrorBox>{errorText(error)}</ErrorBox>;
+  if (!me.user) return <Navigate to={`/connexion?suite=${encodeURIComponent(location.pathname + location.search)}`} replace />;
+  return <Shell user={me.user} />;
+}
+
+function UserMenu({ user }: { user: TeamUser }) {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  async function logout() {
+    await api.post('/auth/logout', {}).catch(() => undefined);
+    queryClient.clear();
+    navigate('/connexion', { replace: true });
+  }
+  return (
+    <div className="flex flex-col gap-1 border-t border-line px-2 pt-4">
+      <p className="truncate text-sm font-medium" title={user.name}>
+        {user.name}
+      </p>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-xs text-muted">{ROLE_LABELS[user.role]}</p>
+        <button type="button" onClick={logout} className="-mr-2 rounded-lg px-2 py-1 text-xs text-muted hover:bg-grey-soft hover:text-ink">
+          Se déconnecter
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/** Menu à gauche sur ordinateur, en bas sur téléphone (le poste d'accueil est souvent une tablette). */
+function Shell({ user }: { user: TeamUser }) {
   return (
     <div className="min-h-dvh md:flex">
       <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col gap-6 border-r border-line bg-card px-4 py-6 md:flex">
@@ -49,6 +86,7 @@ export function Layout() {
           <br />
           Le lien à donner au public pour prendre rendez-vous.
         </a>
+        <UserMenu user={user} />
       </aside>
 
       <main className="mx-auto flex w-full max-w-6xl min-w-0 flex-col gap-6 px-4 pb-28 pt-6 md:px-8 md:pb-12 md:pt-8">

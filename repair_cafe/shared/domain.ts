@@ -118,6 +118,30 @@ export interface MembershipInput {
   paymentMethod: PaymentMethod | null;
 }
 
+// Comptes de l'équipe : les administrateurs gèrent les comptes et les réglages.
+
+export const ROLES = ['admin', 'member'] as const;
+export type Role = (typeof ROLES)[number];
+export const ROLE_LABELS: Record<Role, string> = { admin: 'Administrateur', member: 'Bénévole' };
+
+/** Longueur minimale d'un mot de passe choisi dans l'appli. */
+export const MIN_PASSWORD = 8;
+
+export interface TeamUser {
+  id: number;
+  username: string;
+  name: string;
+  role: Role;
+  active: boolean;
+  lastLoginAt: string | null;
+}
+
+export interface Me {
+  user: TeamUser | null;
+  /** Aucun compte n'existe encore : la page de connexion propose de créer le premier. */
+  needsSetup: boolean;
+}
+
 // Formes renvoyées par l'API.
 
 export interface Session {

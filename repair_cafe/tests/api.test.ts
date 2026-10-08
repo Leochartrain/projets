@@ -2,19 +2,27 @@ import assert from 'node:assert/strict';
 import { beforeEach, describe, test } from 'node:test';
 import { createApp, today } from '../server/app.ts';
 import { openDb } from '../server/db.ts';
+import { createUser } from '../server/auth.ts';
 import { seedDemo } from '../server/seed.ts';
-import { suggestedRate, type MembershipSettings, type PublicSession, type Repair, type SessionDetail, type Stats, type Visitor, type VisitorDetail } from '../shared/domain.ts';
+import { suggestedRate, type Me, type MembershipSettings, type TeamUser, type PublicSession, type Repair, type SessionDetail, type Stats, type Visitor, type VisitorDetail } from '../shared/domain.ts';
 
 let app: ReturnType<typeof createApp>;
+/** Cookie de session, comme un navigateur : envoyé à chaque appel, mis à jour par les réponses. */
+let cookie = '';
 
 async function call<T = unknown>(method: string, path: string, body?: unknown): Promise<{ status: number; data: T }> {
-  const response = await app.request(`/api${path}`, {
-    method,
-    headers: body ? { 'Content-Type': 'application/json' } : {},
-    body: body ? JSON.stringify(body) : undefined,
-  });
+  const headers: Record<string, string> = body ? { 'Content-Type': 'application/json' } : {};
+  if (cookie) headers.Cookie = cookie;
+  const response = await app.request(`/api${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const setCookie = response.headers.get('set-cookie');
+  if (setCookie) cookie = setCookie.split(';')[0]!.endsWith('=') ? '' : setCookie.split(';')[0]!;
   const text = await response.text();
   return { status: response.status, data: (text && response.headers.get('content-type')?.includes('json') ? JSON.parse(text) : text) as T };
+}
+
+async function login(username: string, password: string) {
+  cookie = '';
+  return call<TeamUser>('POST', '/auth/login', { username, password });
 }
 
 async function newSession(perSlot = 1) {
@@ -29,8 +37,79 @@ async function newVisitor() {
 
 const object = { category: 'petit-electromenager', object: 'Grille-pain', problem: 'Ne chauffe plus' };
 
-beforeEach(() => {
-  app = createApp(openDb(':memory:'));
+beforeEach(async () => {
+  const db = openDb(':memory:');
+  createUser(db, { username: 'admin', name: 'Admin', password: 'mot-de-passe', role: 'admin' });
+  app = createApp(db);
+  await login('admin', 'mot-de-passe');
+});
+
+describe('connexion de l’équipe', () => {
+  test('sans connexion, seules la réservation publique et la connexion répondent', async () => {
+    cookie = '';
+    assert.equal((await call('GET', '/stats')).status, 401);
+    assert.equal((await call('GET', '/visitors')).status, 401);
+    assert.equal((await call('GET', '/public/sessions')).status, 200);
+    assert.deepEqual((await call<Me>('GET', '/auth/me')).data, { user: null, needsSetup: false });
+  });
+
+  test('mauvais mot de passe refusé, puis blocage après 5 essais', async () => {
+    assert.equal((await login('admin', 'faux')).status, 401);
+    assert.equal((await login('inconnu', 'faux')).status, 401);
+    for (let i = 0; i < 4; i++) await login('admin', 'faux');
+    assert.equal((await login('admin', 'mot-de-passe')).status, 429);
+  });
+
+  test('déconnexion : le cookie ne vaut plus rien', async () => {
+    const before = cookie;
+    assert.equal((await call('POST', '/auth/logout')).status, 204);
+    cookie = before;
+    assert.equal((await call('GET', '/stats')).status, 401);
+  });
+
+  test('un bénévole ne gère ni l’équipe ni les réglages', async () => {
+    const created = await call<TeamUser>('POST', '/users', { username: 'fatou', name: 'Fatou', password: 'atelier2026', role: 'member' });
+    assert.equal(created.status, 201);
+    assert.equal((await login('fatou', 'atelier2026')).status, 200);
+    assert.equal((await call('GET', '/stats')).status, 200);
+    assert.equal((await call('GET', '/users')).status, 403);
+    assert.equal((await call('PUT', '/settings', { reducedCents: 0, standardCents: 0, reducedTowns: [] })).status, 403);
+  });
+
+  test('désactiver un compte ferme ses connexions ; le dernier administrateur reste', async () => {
+    const { data: fatou } = await call<TeamUser>('POST', '/users', { username: 'fatou', name: 'Fatou', password: 'atelier2026', role: 'member' });
+    const adminCookie = cookie;
+    await login('fatou', 'atelier2026');
+    const fatouCookie = cookie;
+    cookie = adminCookie;
+    await call('PATCH', `/users/${fatou.id}`, { active: false });
+    cookie = fatouCookie;
+    assert.equal((await call('GET', '/stats')).status, 401);
+    assert.equal((await login('fatou', 'atelier2026')).status, 403);
+
+    cookie = adminCookie;
+    const { data: me } = await call<Me>('GET', '/auth/me');
+    assert.equal((await call('PATCH', `/users/${me.user!.id}`, { role: 'member' })).status, 409);
+  });
+
+  test('changer son mot de passe', async () => {
+    assert.equal((await call('PUT', '/auth/password', { currentPassword: 'faux', newPassword: 'nouveau-mdp' })).status, 400);
+    assert.equal((await call('PUT', '/auth/password', { currentPassword: 'mot-de-passe', newPassword: 'court' })).status, 400);
+    assert.equal((await call('PUT', '/auth/password', { currentPassword: 'mot-de-passe', newPassword: 'nouveau-mdp' })).status, 204);
+    assert.equal((await call('GET', '/stats')).status, 200, 'reste connecté');
+    assert.equal((await login('admin', 'nouveau-mdp')).status, 200);
+  });
+
+  test('base vide : le premier compte se crée une seule fois, en administrateur', async () => {
+    app = createApp(openDb(':memory:'));
+    cookie = '';
+    assert.equal((await call<Me>('GET', '/auth/me')).data.needsSetup, true);
+    const { status, data } = await call<TeamUser>('POST', '/auth/setup', { username: 'chef', name: 'Chef', password: 'premier-compte' });
+    assert.equal(status, 201);
+    assert.equal(data.role, 'admin');
+    assert.equal((await call('GET', '/stats')).status, 200);
+    assert.equal((await call('POST', '/auth/setup', { username: 'autre', name: 'Autre', password: 'premier-compte' })).status, 409);
+  });
 });
 
 describe('séances et créneaux', () => {
@@ -177,11 +256,12 @@ test('les données d’exemple se chargent et donnent des statistiques', async (
   const db = openDb(':memory:');
   seedDemo(db);
   app = createApp(db);
+  assert.equal((await login('test', 'test')).status, 200, 'compte de test');
   const { data: stats } = await call<Stats>('GET', '/stats');
   assert.ok(stats.finished > 30);
   assert.ok(stats.repaired > stats.notRepairable);
   assert.equal(stats.nextSession?.date, today());
-  const csv = new Uint8Array(await (await app.request('/api/repairs/export.csv')).arrayBuffer());
+  const csv = new Uint8Array(await (await app.request('/api/repairs/export.csv', { headers: { Cookie: cookie } })).arrayBuffer());
   assert.deepEqual([...csv.slice(0, 3)], [0xef, 0xbb, 0xbf], 'BOM pour Excel');
   assert.match(new TextDecoder().decode(csv), /^N°;Séance;Catégorie/);
 });

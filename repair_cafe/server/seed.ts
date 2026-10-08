@@ -2,6 +2,7 @@
 // Les dates sont calculées à partir d'aujourd'hui pour que la démo reste vivante.
 import { slotsOf, suggestedRate, type CategoryId, type MembershipSettings, type Outcome, type PaymentMethod } from '../shared/domain.ts';
 import { saveSettings } from './app.ts';
+import { createUser } from './auth.ts';
 import { transaction, type Db } from './db.ts';
 
 const PLACE = 'Maison de quartier, 12 rue des Lilas';
@@ -95,6 +96,9 @@ const minutesAgo = (minutes: number) => new Date(Date.now() - minutes * 60_000).
 
 export function seedDemo(db: Db): void {
   transaction(db, () => {
+    // Compte de test (identifiant « test », mot de passe « test ») : à désactiver avant une vraie mise en service.
+    createUser(db, { username: 'test', name: 'Compte de test', password: 'test', role: 'admin' });
+
     const volunteerIds = VOLUNTEERS.map(([name, skills, active = true]) =>
       Number(
         db

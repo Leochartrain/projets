@@ -78,6 +78,25 @@ create table if not exists memberships (
   unique (visitor_id, year)
 );
 
+create table if not exists users (
+  id integer primary key,
+  username text not null unique collate nocase,
+  name text not null,
+  password_hash text not null,
+  role text not null default 'member',
+  active integer not null default 1,
+  last_login_at text,
+  created_at text not null default ${NOW}
+);
+
+-- Connexions ouvertes (on garde l'empreinte du jeton, jamais le jeton lui-même).
+create table if not exists auth_sessions (
+  token_hash text primary key,
+  user_id integer not null references users(id) on delete cascade,
+  expires_at text not null,
+  created_at text not null default ${NOW}
+);
+
 create table if not exists settings (
   key text primary key,
   value text not null

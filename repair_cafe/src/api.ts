@@ -1,7 +1,13 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import type { MembershipSettings, PublicSession, Repair, Session, SessionDetail, Stats, Visitor, VisitorDetail, Volunteer } from '@shared/domain';
+import type { Me, MembershipSettings, PublicSession, Repair, TeamUser, Session, SessionDetail, Stats, Visitor, VisitorDetail, Volunteer } from '@shared/domain';
 
-export class ApiError extends Error {}
+export class ApiError extends Error {
+  status: number;
+  constructor(message: string, status = 0) {
+    super(message);
+    this.status = status;
+  }
+}
 
 async function request<T>(path: string, init?: { method?: string; body?: unknown }): Promise<T> {
   let response: Response;
@@ -16,7 +22,7 @@ async function request<T>(path: string, init?: { method?: string; body?: unknown
   }
   if (response.status === 204) return undefined as T;
   const data = await response.json().catch(() => null);
-  if (!response.ok) throw new ApiError(data?.error ?? `Erreur ${response.status}`);
+  if (!response.ok) throw new ApiError(data?.error ?? `Erreur ${response.status}`, response.status);
   return data as T;
 }
 
@@ -30,6 +36,19 @@ export const api = {
 
 export function errorText(error: unknown): string {
   return error instanceof Error ? error.message : 'Une erreur inattendue s’est produite.';
+}
+
+// Connexion
+
+export const meKey = ['me'] as const;
+export const useMe = () => useQuery({ queryKey: meKey, queryFn: () => api.get<Me>('/auth/me'), staleTime: Infinity });
+export const useUsers = () => useQuery({ queryKey: ['users'], queryFn: () => api.get<TeamUser[]>('/users') });
+
+/** Le compte connecté (les écrans de l'équipe ne s'affichent qu'une fois connecté). */
+export function useCurrentUser(): TeamUser {
+  const { data } = useMe();
+  if (!data?.user) throw new Error('Pas de compte connecté');
+  return data.user;
 }
 
 // Lectures

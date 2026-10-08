@@ -15,6 +15,8 @@ npm run dev     # puis ouvrir http://localhost:5180
 
 Au premier lancement, la base `data/repair-cafe.db` est créée avec des données d'exemple : 7 bénévoles, 16 visiteurs, 3 séances passées, une séance aujourd'hui en cours et 2 à venir.
 
+**Connexion** : compte de test, identifiant `test`, mot de passe `test` (administrateur). À désactiver dans Réglages avant une vraie mise en service, après avoir créé de vrais comptes. Sur une base vide (`npm run db:vide`), la page de connexion propose de créer le premier compte administrateur.
+
 | Commande | Rôle |
 |---|---|
 | `npm run dev` | API (port 3001) et interface (port 5180), rechargées à chaque modification |
@@ -51,6 +53,11 @@ Au premier lancement, la base `data/repair-cafe.db` est créée avec des donnée
 
 **Bénévoles** : coordonnées, spécialités, actif ou non, nombre d'interventions et d'objets réparés.
 
+**Connexion de l'équipe** : tout l'espace de gestion demande d'être connecté ; seule la page de réservation reste publique.
+- Deux rôles : **administrateur** (gère les comptes et les réglages) et **bénévole** (accès à tout le reste).
+- Dans Réglages : changer son mot de passe ; pour les administrateurs, créer des comptes, changer un rôle, réinitialiser un mot de passe, désactiver un compte (ses connexions en cours sont fermées). Il reste toujours au moins un administrateur actif.
+- Mots de passe hachés (scrypt), session par cookie `httpOnly` valable 30 jours, 5 essais ratés pour un identifiant → 5 minutes d'attente.
+
 ### Le parcours d'un objet
 
 ```
@@ -72,6 +79,7 @@ Chaque étape est horodatée. Les résultats et les champs (catégorie, marque, 
 server/
 ├── index.ts     démarrage (API + interface compilée)
 ├── app.ts       routes de l'API (/api/…)
+├── auth.ts      connexion, comptes de l'équipe
 ├── db.ts        schéma SQLite
 ├── seed.ts      données d'exemple
 └── reset.ts     db:demo et db:vide
@@ -85,7 +93,7 @@ tests/api.test.ts
 
 ## Pas encore fait
 
-- **Connexion de l'équipe** : pour l'instant, quiconque accède à l'adresse voit tout. À ajouter avant de mettre l'appli en ligne (un mot de passe partagé suffirait pour commencer).
+- Mise en ligne : servir l'appli en HTTPS (le cookie de session passe alors en `Secure` automatiquement).
 - E-mails de confirmation et de rappel la veille du rendez-vous.
 - Annulation d'un rendez-vous par le visiteur lui-même (lien dans l'e-mail).
 - Envoi automatique au Repair Monitor (l'export CSV permet de le faire à la main).

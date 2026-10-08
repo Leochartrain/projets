@@ -27,6 +27,7 @@ import {
   type VisitorDetail,
   type Volunteer,
 } from '../shared/domain.ts';
+import { authRoutes, requireAdmin, requireAuth, type AuthEnv } from './auth.ts';
 import { transaction, type Db } from './db.ts';
 
 z.config(z.locales.fr());
@@ -328,13 +329,17 @@ const STEP_COLUMNS: Partial<Record<(typeof STATUSES)[number], 'arrived_at' | 'st
 // --- Application --------------------------------------------------------------
 
 export function createApp(db: Db) {
-  const app = new Hono().basePath('/api');
+  const app = new Hono<AuthEnv>().basePath('/api');
 
   app.onError((error, c) => {
     if (error instanceof HTTPException) return c.json({ error: error.message }, error.status);
     console.error(error);
     return c.json({ error: 'Erreur interne du serveur.' }, 500);
   });
+
+  // Tout ce qui suit demande d'être connecté, sauf /api/auth/… et /api/public/….
+  app.use('*', requireAuth(db));
+  authRoutes(app, db);
 
   // Tableau de bord
 
@@ -379,6 +384,7 @@ export function createApp(db: Db) {
   app.get('/settings', (c) => c.json(getSettings(db)));
 
   app.put('/settings', async (c) => {
+    requireAdmin(c);
     const input = parse(settingsFields, await body(c));
     // Une commune par ligne, sans doublon.
     const unique = new Map<string, string>();

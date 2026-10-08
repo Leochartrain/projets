@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router';
 import { Layout } from './components/Layout';
 import { BookingPage } from './pages/BookingPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { LoginPage } from './pages/LoginPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { RepairPage } from './pages/RepairPage';
 import { RepairsPage } from './pages/RepairsPage';
@@ -15,6 +16,7 @@ import { VolunteersPage } from './pages/VolunteersPage';
 export const router = createBrowserRouter([
   // Page publique, sans le menu de l'équipe.
   { path: '/reserver', Component: BookingPage },
+  { path: '/connexion', Component: LoginPage },
   {
     Component: Layout,
     children: [
