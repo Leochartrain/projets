@@ -1,9 +1,11 @@
 // Site de démonstration pour la prospection des boulangeries.
 // La boulangerie est fictive. Le nom et la ville se changent sans recompiler, dans l'adresse :
-//   https://boulangerie-demo.pages.dev/?nom=La%20Caisse%20à%20Pains&ville=La%20Ferté-Bernard
+//   https://boulangerie-demo.pages.dev/?nom=Nom%20de%20la%20boulangerie&ville=Sa%20ville
 
+// Nom par défaut volontairement neutre : il ne doit ressembler à aucune vraie boulangerie,
+// pour que la même démo puisse être montrée à tous les prospects.
 export const BOULANGERIE = {
-  name: 'Le Fournil du Marché',
+  name: 'Votre Boulangerie',
   city: 'votre ville',
   address: '1 place du Marché',
   phone: '02 00 00 00 00',

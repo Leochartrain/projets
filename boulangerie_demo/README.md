@@ -2,14 +2,14 @@
 
 Exemple de site pour une boulangerie, à montrer aux commerçants pendant la prospection : horaires avec l'indication « ouvert / fermé » en temps réel, spécialités, commande de gâteaux en ligne, plan d'accès.
 
-La boulangerie (« Le Fournil du Marché ») est **fictive**. Un bandeau en haut de page le dit toujours, et le site demande à ne pas être référencé par Google.
+La boulangerie (« Votre Boulangerie » par défaut) est **fictive**. Un bandeau en haut de page le dit toujours, et le site demande à ne pas être référencé par Google.
 
 ## Personnaliser pour un prospect
 
 Le nom et la ville se changent dans l'adresse, sans rien recompiler :
 
 ```
-https://boulangerie-demo.pages.dev/?nom=La%20Caisse%20à%20Pains&ville=La%20Ferté-Bernard
+https://boulangerie-demo.pages.dev/?nom=Nom%20de%20la%20boulangerie&ville=Sa%20ville
 ```
 
 Le commerçant voit « son » site. À n'envoyer qu'à la boulangerie concernée : c'est un exemple, pas son vrai site.
