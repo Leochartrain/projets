@@ -1,0 +1,59 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Bricolage Grotesque', var(--font-sans);
+
+  --color-paper: #f5f1e8;
+  --color-card: #fffdf8;
+  --color-ink: #1d2623;
+  --color-muted: #66706b;
+  --color-line: #e4ddcf;
+  --color-field: #cfc6b4;
+
+  --color-accent: #1f6f5c;
+  --color-accent-strong: #175546;
+  --color-accent-soft: #dbebe4;
+
+  --color-amber: #9a5b06;
+  --color-amber-soft: #fbe9c7;
+  --color-blue: #2b5c8a;
+  --color-blue-soft: #dde8f3;
+  --color-violet: #6146a3;
+  --color-violet-soft: #e8e1f6;
+  --color-danger: #a83a28;
+  --color-danger-soft: #f7dfd8;
+  --color-grey-soft: #ece8df;
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+  dialog::backdrop {
+    background: rgb(29 38 35 / 0.45);
+  }
+}
+
+@utility label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}

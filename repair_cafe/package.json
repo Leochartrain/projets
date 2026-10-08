@@ -1,0 +1,38 @@
+{
+  "name": "repair-cafe",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "dev": "concurrently -k -n api,web -c blue,green \"node --watch --disable-warning=ExperimentalWarning server/index.ts\" \"vite\"",
+    "build": "tsc -b && vite build",
+    "start": "node --disable-warning=ExperimentalWarning server/index.ts",
+    "typecheck": "tsc -b",
+    "test": "node --disable-warning=ExperimentalWarning --test \"tests/**/*.test.ts\"",
+    "db:demo": "node --disable-warning=ExperimentalWarning server/reset.ts --demo",
+    "db:vide": "node --disable-warning=ExperimentalWarning server/reset.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.4",
+    "@tanstack/react-query": "^5.104.1",
+    "hono": "^4.13.13",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "react-router": "^8.4.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.1.2",
+    "concurrently": "^10.0.5",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.3"
+  }
+}
