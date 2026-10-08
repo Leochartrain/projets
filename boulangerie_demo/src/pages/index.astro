@@ -1,0 +1,321 @@
+---
+import { Image } from 'astro:assets';
+import '@fontsource/young-serif/400.css';
+import '@fontsource/dm-sans/400.css';
+import '@fontsource/dm-sans/600.css';
+import { AUTHOR, BOULANGERIE, HOURS } from '../config';
+import painsArtisanaux from '../assets/photos/pains-artisanaux.jpg';
+import baguettes from '../assets/photos/baguettes.jpg';
+import croissant from '../assets/photos/croissant.jpg';
+import eclairs from '../assets/photos/eclairs.jpg';
+import etageres from '../assets/photos/etageres-pains.jpg';
+
+const hour = (h: number) => `${Math.floor(h)} h${h % 1 ? String(Math.round((h % 1) * 60)).padStart(2, '0') : ''}`;
+const slotsText = (slots: [number, number][]) => (slots.length ? slots.map(([a, b]) => `${hour(a)} – ${hour(b)}`).join(' · ') : 'Fermé');
+const { lat, lon } = BOULANGERIE.map;
+const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.006},${lat - 0.003},${lon + 0.006},${lat + 0.003}&layer=mapnik&marker=${lat},${lon}`;
+
+const specialites = [
+  { photo: baguettes, titre: 'Nos pains', texte: 'Baguettes de tradition, pains au levain et pains spéciaux, cuits plusieurs fois par jour.', alt: 'Baguettes et petits pains sur un plan de travail fariné' },
+  { photo: croissant, titre: 'Viennoiseries', texte: 'Croissants et pains au chocolat pur beurre, feuilletés chaque matin à la main.', alt: 'Un croissant doré pur beurre' },
+  { photo: eclairs, titre: 'Pâtisseries', texte: 'Éclairs, tartes de saison et entremets, à la part ou sur commande.', alt: 'Trois éclairs colorés sur une assiette' },
+];
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{BOULANGERIE.name} · Boulangerie-pâtisserie (site de démonstration)</title>
+    <meta name="description" content="Exemple de site pour une boulangerie : horaires, spécialités, commande de gâteaux en ligne, plan d'accès." />
+    <!-- Site d'exemple : il ne doit jamais apparaître dans Google. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#f6efe3" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥐</text></svg>" />
+  </head>
+  <body>
+    <div class="demo" role="note">
+      <strong>Site de démonstration</strong> : cette boulangerie est un exemple.
+      {AUTHOR.name ? <> Réalisé par {AUTHOR.name}{AUTHOR.contact && <> · {AUTHOR.contact}</>}.</> : ' Le vôtre pourrait ressembler à ça.'}
+    </div>
+
+    <header class="site">
+      <div class="wrap">
+        <a href="#" class="marque" data-nom>{BOULANGERIE.name}</a>
+        <nav aria-label="Navigation">
+          <a href="#horaires">Horaires</a>
+          <a href="#specialites">Spécialités</a>
+          <a href="#acces">Accès</a>
+          <a href="#commande" class="btn petit">Commander</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap">
+          <div class="texte">
+            <p class="statut" id="statut" aria-live="polite">Boulangerie · pâtisserie</p>
+            <h1 data-nom>{BOULANGERIE.name}</h1>
+            <p class="intro">Pains au levain, viennoiseries pur beurre et pâtisseries maison, au cœur de <span data-ville>{BOULANGERIE.city}</span>.</p>
+            <div class="actions">
+              <a class="btn" href="#commande">Commander un gâteau</a>
+              <a class="btn ghost" href="#acces">Nous trouver</a>
+            </div>
+          </div>
+          <div class="photo">
+            <Image src={painsArtisanaux} alt="Pains au levain et baguettes artisanales sur une table" widths={[480, 720, 1024]} sizes="(max-width: 860px) 100vw, 50vw" format="webp" loading="eager" />
+          </div>
+        </div>
+      </section>
+
+      <section id="horaires" class="horaires">
+        <div class="wrap grille">
+          <div>
+            <p class="surtitre">Horaires</p>
+            <h2>Quand passer nous voir</h2>
+            <p class="doux">Le pain sort du four à 7 h et à 16 h. Pour les grosses commandes, pensez à appeler la veille au <a href={`tel:${BOULANGERIE.phone.replaceAll(' ', '')}`}>{BOULANGERIE.phone}</a>.</p>
+          </div>
+          <table>
+            <tbody>
+              {HOURS.map((h, i) => (
+                <tr data-jour={i}>
+                  <th scope="row">{h.day}</th>
+                  <td class={h.slots.length ? '' : 'ferme'}>{slotsText(h.slots)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="specialites">
+        <div class="wrap">
+          <p class="surtitre">Nos spécialités</p>
+          <h2>Tout est fait ici, chaque jour</h2>
+          <div class="cartes">
+            {specialites.map((s) => (
+              <article class="carte">
+                <Image src={s.photo} alt={s.alt} widths={[360, 540, 720]} sizes="(max-width: 760px) 100vw, 33vw" format="webp" />
+                <div>
+                  <h3>{s.titre}</h3>
+                  <p class="doux">{s.texte}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="commande" class="commande">
+        <div class="wrap grille">
+          <div>
+            <p class="surtitre">Sur commande</p>
+            <h2>Un gâteau pour une fête ?</h2>
+            <p class="doux">Anniversaires, baptêmes, communions, fêtes de fin d'année : commandez en ligne, on vous rappelle pour confirmer. Retrait en boutique.</p>
+            <ul class="atouts">
+              <li>Commande 48 h à l'avance</li>
+              <li>Paiement au retrait</li>
+              <li>Galettes des rois et bûches à réserver dès décembre</li>
+            </ul>
+          </div>
+          <form id="form-commande" class="formulaire">
+            <div class="ligne">
+              <label>Votre nom<input name="nom" required autocomplete="name" /></label>
+              <label>Téléphone<input name="tel" type="tel" required autocomplete="tel" /></label>
+            </div>
+            <div class="ligne">
+              <label>Ce que vous souhaitez
+                <select name="produit">
+                  <option>Fraisier</option>
+                  <option>Framboisier</option>
+                  <option>Forêt-noire</option>
+                  <option>Pièce montée</option>
+                  <option>Bûche de Noël</option>
+                  <option>Autre (précisez)</option>
+                </select>
+              </label>
+              <label>Nombre de parts<input name="parts" type="number" min="4" max="200" value="8" required /></label>
+            </div>
+            <label>Date de retrait<input name="date" type="date" required /></label>
+            <label>Précisions <span class="facultatif">(facultatif)</span><textarea name="precisions" rows="3" placeholder="Inscription sur le gâteau, allergies…"></textarea></label>
+            <button class="btn" type="submit">Envoyer ma commande</button>
+            <p class="etat" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="savoir-faire">
+        <div class="wrap grille">
+          <Image src={etageres} alt="Pains de mie alignés sur les étagères en bois du fournil" widths={[480, 720, 1024]} sizes="(max-width: 860px) 100vw, 50vw" format="webp" />
+          <div>
+            <p class="surtitre">Notre maison</p>
+            <h2>Un artisan, un fournil, des farines de la région</h2>
+            <p class="doux">Ici, l'histoire de la boulangerie : depuis quand, qui pétrit, d'où viennent les farines, ce qui fait votre fierté. Quelques lignes suffisent pour donner envie de pousser la porte.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="acces" class="acces">
+        <div class="wrap grille">
+          <div>
+            <p class="surtitre">Accès</p>
+            <h2>Nous trouver</h2>
+            <p class="adresse">{BOULANGERIE.address}<br /><span data-ville>{BOULANGERIE.city}</span></p>
+            <p><a href={`tel:${BOULANGERIE.phone.replaceAll(' ', '')}`} class="btn ghost">Appeler · {BOULANGERIE.phone}</a></p>
+            <p class="doux">Stationnement facile sur la place, accès de plain-pied.</p>
+          </div>
+          <iframe title="Plan d'accès" src={mapSrc} loading="lazy"></iframe>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site">
+      <div class="wrap">
+        <span><span data-nom>{BOULANGERIE.name}</span> · boulangerie-pâtisserie artisanale</span>
+        <span class="doux">Exemple de site · photos libres de droits (CC0)</span>
+      </div>
+    </footer>
+
+    <script is:inline define:vars={{ HOURS }}>
+      // Personnalisation de la démo par l'adresse : ?nom=…&ville=…
+      const params = new URLSearchParams(location.search);
+      const nom = params.get('nom')?.trim().slice(0, 60);
+      const ville = params.get('ville')?.trim().slice(0, 60);
+      if (nom) {
+        document.querySelectorAll('[data-nom]').forEach((el) => (el.textContent = nom));
+        document.title = `${nom} · Boulangerie-pâtisserie (site de démonstration)`;
+      }
+      if (ville) document.querySelectorAll('[data-ville]').forEach((el) => (el.textContent = ville));
+
+      // Ouvert ou fermé en ce moment, d'après les horaires.
+      const now = new Date();
+      const today = (now.getDay() + 6) % 7; // lundi = 0
+      const h = now.getHours() + now.getMinutes() / 60;
+      const fmt = (x) => `${Math.floor(x)} h${x % 1 ? String(Math.round((x % 1) * 60)).padStart(2, '0') : ''}`;
+      document.querySelector(`[data-jour="${today}"]`)?.classList.add('aujourdhui');
+      const slot = HOURS[today].slots.find(([a, b]) => h >= a && h < b);
+      const next = HOURS[today].slots.find(([a]) => h < a);
+      const statut = document.getElementById('statut');
+      if (slot) {
+        statut.textContent = `Ouvert maintenant · jusqu'à ${fmt(slot[1])}`;
+        statut.classList.add('ouvert');
+      } else if (next) {
+        statut.textContent = `Fermé pour l'instant · ouvre à ${fmt(next[0])}`;
+      } else {
+        statut.textContent = 'Fermé pour aujourd’hui · à demain !';
+      }
+
+      // Formulaire de démonstration : rien n'est envoyé.
+      const form = document.getElementById('form-commande');
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        form.querySelector('.etat').textContent = 'Démonstration : sur le vrai site, votre commande arriverait par e-mail à la boulangerie, qui vous rappelle pour confirmer.';
+      });
+      const date = form.querySelector('input[type="date"]');
+      date.min = new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --creme: #f6efe3;
+    --farine: #fffaf2;
+    --croute: #8a4b1c;
+    --croute-fonce: #5e3110;
+    --dore: #d99a3d;
+    --texte: #2d2117;
+    --doux: #6e5c4a;
+    --trait: #e6d9c3;
+    --vert: #3f7a3a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--creme); color: var(--texte); font: 17px/1.6 'DM Sans', system-ui, sans-serif; }
+  img { display: block; max-width: 100%; height: auto; }
+  h1, h2, h3 { font-family: 'Young Serif', Georgia, serif; font-weight: 400; line-height: 1.12; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(2.6rem, 6vw, 4.4rem); color: var(--croute-fonce); }
+  h2 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); }
+  h3 { font-size: 1.4rem; }
+  p { margin: 0; }
+  a { color: var(--croute); }
+  :focus-visible { outline: 3px solid var(--dore); outline-offset: 3px; }
+  .wrap { width: min(1100px, 100% - 32px); margin-inline: auto; }
+  section { padding: 80px 0; }
+  .surtitre { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--croute); margin-bottom: 0.6rem; }
+  .doux { color: var(--doux); }
+  .grille { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  @media (max-width: 860px) { .grille { grid-template-columns: 1fr; gap: 32px; } section { padding: 56px 0; } }
+
+  .btn { display: inline-block; padding: 0.85rem 1.4rem; border: 0; border-radius: 999px; background: var(--croute); color: var(--farine); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; transition: background 0.2s; }
+  .btn:hover { background: var(--croute-fonce); }
+  .btn.ghost { background: transparent; color: var(--croute); box-shadow: inset 0 0 0 2px var(--croute); }
+  .btn.petit { padding: 0.5rem 1rem; }
+
+  .demo { background: var(--texte); color: var(--farine); text-align: center; font-size: 0.85rem; padding: 0.45rem 16px; }
+
+  header.site { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--creme) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--trait); }
+  header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 68px; }
+  .marque { font-family: 'Young Serif', serif; font-size: 1.3rem; color: var(--croute-fonce); text-decoration: none; }
+  nav { display: flex; align-items: center; gap: 1.4rem; }
+  nav a:not(.btn) { color: var(--doux); text-decoration: none; font-weight: 600; }
+  nav a:not(.btn):hover { color: var(--croute); }
+  @media (max-width: 760px) { nav a:not(.btn) { display: none; } .marque { font-size: 1.1rem; } }
+
+  .hero { padding: 48px 0 72px; }
+  .hero .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+  .statut { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 999px; background: var(--farine); border: 1px solid var(--trait); font-size: 0.9rem; font-weight: 600; color: var(--doux); margin-bottom: 1.2rem; }
+  .statut.ouvert { color: var(--vert); border-color: color-mix(in srgb, var(--vert) 35%, transparent); }
+  .statut.ouvert::before { content: '● '; }
+  .intro { font-size: 1.2rem; color: var(--doux); margin: 1.2rem 0 2rem; max-width: 36ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+  .hero .photo img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; border-radius: 200px 200px 24px 24px; box-shadow: 0 30px 60px -30px rgb(94 49 16 / 0.6); }
+  @media (max-width: 860px) {
+    .hero .wrap { grid-template-columns: 1fr; }
+    .hero .photo img { aspect-ratio: 4 / 3; border-radius: 160px 160px 20px 20px; }
+  }
+
+  .horaires { background: var(--farine); border-block: 1px solid var(--trait); }
+  .horaires h2 + p { margin-top: 1rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 1.05rem; }
+  th, td { padding: 0.7rem 0.4rem; border-bottom: 1px dashed var(--trait); text-align: left; }
+  th { font-weight: 600; }
+  td { text-align: right; color: var(--doux); }
+  td.ferme { color: #a3412d; }
+  tr.aujourdhui th, tr.aujourdhui td { color: var(--croute-fonce); font-weight: 600; background: color-mix(in srgb, var(--dore) 16%, transparent); }
+
+  .cartes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 40px; }
+  .carte { background: var(--farine); border: 1px solid var(--trait); border-radius: 20px; overflow: hidden; }
+  .carte img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .carte div { padding: 1.3rem; }
+  .carte p { margin-top: 0.5rem; }
+  @media (max-width: 860px) { .cartes { grid-template-columns: 1fr; } }
+
+  .commande { background: var(--croute-fonce); color: var(--farine); }
+  .commande h2 { color: var(--farine); }
+  .commande .surtitre { color: var(--dore); }
+  .commande .doux { color: #e9d7bf; margin-top: 1rem; }
+  .atouts { margin: 1.4rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+  .atouts li::before { content: '✓ '; color: var(--dore); font-weight: 600; }
+  .formulaire { background: var(--farine); color: var(--texte); border-radius: 20px; padding: 28px; display: grid; gap: 16px; }
+  .ligne { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 560px) { .ligne { grid-template-columns: 1fr; } .formulaire { padding: 20px; } }
+  label { display: flex; flex-direction: column; gap: 0.3rem; font-weight: 600; font-size: 0.92rem; }
+  .facultatif { font-weight: 400; color: var(--doux); }
+  input, select, textarea { font: inherit; font-weight: 400; padding: 0.65rem 0.8rem; border: 1px solid #d6c6aa; border-radius: 12px; background: #fff; width: 100%; color: var(--texte); }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--dore); outline-offset: 1px; }
+  .etat { font-weight: 600; color: var(--croute-fonce); }
+
+  .savoir-faire img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 24px; }
+  .savoir-faire h2 + p { margin-top: 1rem; }
+
+  .acces iframe { width: 100%; height: 340px; border: 0; border-radius: 20px; }
+  .adresse { font-size: 1.25rem; margin: 1rem 0 1.4rem; }
+  .acces p + p { margin-top: 1rem; }
+
+  footer.site { padding: 32px 0; border-top: 1px solid var(--trait); font-size: 0.9rem; }
+  footer.site .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.8rem; }
+
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>

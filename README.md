@@ -11,8 +11,9 @@ Mes petits projets, un dossier par projet.
 | [Carnet de famille](recettes/) | Recettes de famille partagées en groupes privés (React, Supabase), en cours. | `npm install` puis `npm run dev` dans `recettes/` (projet Supabase requis) |
 | [Repair Café](repair_cafe/) | Gestion d'un Repair Café : séances, rendez-vous en ligne, accueil, suivi des réparations, statistiques (React, Hono, SQLite). | `npm install` puis `npm run dev` dans `repair_cafe/` |
 | [Les Ouessants de Croset](ouessants_de_croset/) | Site vitrine d'une association d'éco-pâturage (moutons d'Ouessant, chèvres des fossés), en Astro. | `npm install` puis `npm run dev` dans `ouessants_de_croset/` |
+| [Boulangerie (démo)](boulangerie_demo/) | Site de démonstration pour prospecter les boulangeries : horaires « ouvert maintenant », commande de gâteaux, nom personnalisable dans l'adresse. | `npm install` puis `npm run dev` dans `boulangerie_demo/` |
 
-Les projets sont en HTML/JavaScript sans dépendance : il suffit d'ouvrir le fichier `index.html` dans un navigateur. Exceptions : FPS1, Pokémon, Carnet de famille, Repair Café et Les Ouessants de Croset, qui demandent Node.js (voir leur README).
+Les projets sont en HTML/JavaScript sans dépendance : il suffit d'ouvrir le fichier `index.html` dans un navigateur. Exceptions : FPS1, Pokémon, Carnet de famille, Repair Café, Les Ouessants de Croset et Boulangerie (démo), qui demandent Node.js (voir leur README).
 
 ## Ajouter un nouveau projet
 
