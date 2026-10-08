@@ -29,6 +29,6 @@ export const HOURS: { day: string; slots: [number, number][] }[] = [
 
 /** Qui a fait le site : affiché dans le bandeau « démonstration ». À compléter. */
 export const AUTHOR = {
-  name: null as string | null, // ex. 'Léo Dupont'
+  name: 'Léo Chartrain' as string | null,
   contact: null as string | null, // ex. '06 00 00 00 00' ou une adresse e-mail
 };
