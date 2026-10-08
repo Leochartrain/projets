@@ -1,0 +1,104 @@
+---
+import { getImage } from 'astro:assets';
+import { ASSO } from '../config';
+import logo from '../assets/logo.jpg';
+import shareImage from '../assets/photos/troupeau-tracteur.jpg';
+import Todo from '../components/Todo.astro';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description = `${ASSO.name} : ${ASSO.tagline.charAt(0).toLowerCase()}${ASSO.tagline.slice(1)}. Entretien écologique de vos espaces verts.` } = Astro.props;
+const fullTitle = title ? `${title} · ${ASSO.name}` : `${ASSO.name} · Éco-pâturage`;
+const favicon = await getImage({ src: logo, width: 96, height: 96, format: 'png' });
+// Aperçu quand on partage le lien (Facebook, WhatsApp…) : une image paysage, recadrée sur le troupeau.
+const share = await getImage({ src: shareImage, width: 1200, height: 630, fit: 'cover', position: 'bottom', format: 'jpg' });
+const path = Astro.url.pathname;
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href={favicon.src} type="image/png" />
+    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content={ASSO.name} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={new URL(share.src, Astro.site)} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#efe6d3" />
+  </head>
+  <body>
+    <a class="skip" href="#contenu">Aller au contenu</a>
+    <header class="site">
+      <div class="wrap">
+        <a class="marque" href="/" aria-label={`${ASSO.name}, accueil`}>
+          <img src={favicon.src} alt="" width="56" height="56" />
+          <span>{ASSO.name}</span>
+        </a>
+        <nav aria-label="Navigation principale">
+          <a href="/#association">L'association</a>
+          <a href="/#eco-paturage">L'éco-pâturage</a>
+          <a href="/#troupeau">Le troupeau</a>
+          <a href="/contact" class="btn" aria-current={path === '/contact' ? 'page' : undefined}>Nous contacter</a>
+        </nav>
+      </div>
+    </header>
+
+    <main id="contenu">
+      <slot />
+    </main>
+
+    <footer class="site">
+      <div class="wrap">
+        <div>
+          <p class="nom">{ASSO.name}</p>
+          <p class="doux">Association loi 1901 · {ASSO.tagline.charAt(0).toLowerCase()}{ASSO.tagline.slice(1)}</p>
+        </div>
+        <ul>
+          <li><Todo value={ASSO.phone} label="téléphone" /></li>
+          <li>{ASSO.email ? <a href={`mailto:${ASSO.email}`}>{ASSO.email}</a> : <Todo value={null} label="e-mail" />}</li>
+          {ASSO.social.facebook && <li><a href={ASSO.social.facebook} rel="me">Facebook</a></li>}
+          {ASSO.social.instagram && <li><a href={ASSO.social.instagram} rel="me">Instagram</a></li>}
+          <li><a href="/mentions-legales">Mentions légales</a></li>
+        </ul>
+      </div>
+    </footer>
+  </body>
+</html>
+
+<style>
+  .skip { position: absolute; left: -9999px; }
+  .skip:focus { left: 16px; top: 16px; z-index: 20; background: var(--blanc-photo); padding: 0.5rem 1rem; }
+
+  header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 18px 0; }
+  .marque { display: flex; align-items: center; gap: 0.8rem; text-decoration: none; font-family: Fraunces, serif; font-weight: 800; font-size: 1.2rem; line-height: 1.15; }
+  .marque img { width: 56px; height: 56px; border-radius: 50%; border: 2px solid var(--encre); flex-shrink: 0; }
+  nav { display: flex; align-items: center; gap: 1.5rem; }
+  nav a:not(.btn) { color: var(--doux); text-decoration: none; font-weight: 600; }
+  nav a:not(.btn):hover { color: var(--ocre); }
+  nav .btn { padding: 0.6rem 1.1rem; white-space: nowrap; }
+  /* Sur téléphone, seul le bouton de contact reste : la page d'accueil se lit en faisant défiler. */
+  @media (max-width: 860px) {
+    nav a:not(.btn) { display: none; }
+    .marque span { font-size: 1.05rem; }
+  }
+  @media (max-width: 420px) {
+    .marque { gap: 0.6rem; }
+    .marque img { width: 44px; height: 44px; }
+    .marque span { font-size: 0.98rem; }
+    nav .btn { padding: 0.5rem 0.75rem; font-size: 0.9rem; box-shadow: 3px 3px 0 var(--ocre); }
+  }
+
+  footer.site { padding: 40px 0 48px; border-top: 2px dashed var(--trait); }
+  footer.site .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.5rem; }
+  .nom { font-family: Fraunces, serif; font-weight: 800; font-size: 1.2rem; }
+  footer ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.4rem 1.4rem; align-items: center; color: var(--doux); }
+</style>

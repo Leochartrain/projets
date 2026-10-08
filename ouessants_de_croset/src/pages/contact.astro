@@ -1,0 +1,124 @@
+---
+import { Image } from 'astro:assets';
+import Todo from '../components/Todo.astro';
+import { ASSO, WEB3FORMS_KEY } from '../config';
+import Base from '../layouts/Base.astro';
+import brebisAgneau from '../assets/photos/brebis-agneau.jpg';
+---
+<Base title="Contact" description={`Contactez ${ASSO.name} pour un devis d'éco-pâturage, une visite du troupeau ou pour rejoindre l'association.`}>
+  <section class="contact">
+    <div class="wrap">
+      <div class="coord">
+        <p class="main">On en parle ?</p>
+        <h1>Nous contacter</h1>
+        <p class="doux">Un terrain à entretenir, une visite du troupeau, l'envie de rejoindre l'association ? Écrivez-nous, on vous répond rapidement.</p>
+        <dl>
+          <dt>Téléphone</dt>
+          <dd>{ASSO.phone ? <a href={`tel:${ASSO.phone.replaceAll(' ', '')}`}>{ASSO.phone}</a> : <Todo value={null} label="téléphone" />}</dd>
+          <dt>E-mail</dt>
+          <dd>{ASSO.email ? <a href={`mailto:${ASSO.email}`}>{ASSO.email}</a> : <Todo value={null} label="e-mail" />}</dd>
+          <dt>Secteur</dt>
+          <dd><Todo value={ASSO.area} label="commune ou secteur d'intervention" /></dd>
+        </dl>
+        <figure class="polaroid scotch">
+          <Image src={brebisAgneau} alt="Une brebis d'Ouessant et son agneau" width={520} widths={[260, 390, 520]} sizes="260px" format="webp" />
+          <figcaption>À bientôt !</figcaption>
+        </figure>
+      </div>
+
+      <form id="contact-form" class="carte" method="post" action="https://api.web3forms.com/submit" data-ready={WEB3FORMS_KEY ? 'oui' : undefined}>
+        <input type="hidden" name="access_key" value={WEB3FORMS_KEY ?? ''} />
+        <input type="hidden" name="subject" value={`Nouveau message depuis le site ${ASSO.name}`} />
+        <input type="hidden" name="from_name" value={`Site ${ASSO.name}`} />
+        <!-- Piège à robots : un humain ne voit pas ce champ et le laisse vide. -->
+        <input type="checkbox" name="botcheck" class="piege" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+        <div class="ligne">
+          <label>Nom<input name="nom" required autocomplete="name" maxlength="100" /></label>
+          <label>E-mail<input name="email" type="email" required autocomplete="email" maxlength="200" /></label>
+        </div>
+        <div class="ligne">
+          <label><span>Téléphone <span class="facultatif">(facultatif)</span></span><input name="telephone" type="tel" autocomplete="tel" maxlength="30" /></label>
+          <label>Votre demande
+            <select name="demande">
+              <option>Devis d'éco-pâturage</option>
+              <option>Visite du troupeau</option>
+              <option>Adhésion, bénévolat</option>
+              <option>Autre</option>
+            </select>
+          </label>
+        </div>
+        <div class="ligne">
+          <label><span>Commune du terrain <span class="facultatif">(facultatif)</span></span><input name="commune" autocomplete="address-level2" maxlength="100" /></label>
+          <label><span>Surface approximative <span class="facultatif">(facultatif)</span></span><input name="surface" placeholder="ex. 2 000 m²" maxlength="50" /></label>
+        </div>
+        <label>Message<textarea name="message" rows="5" required maxlength="5000"></textarea></label>
+        <p class="rgpd">Vos coordonnées servent uniquement à vous répondre. Elles ne sont ni conservées sur ce site ni transmises à d'autres. <a href="/mentions-legales#donnees">En savoir plus</a></p>
+        <div class="envoi">
+          <button class="btn" type="submit">Envoyer</button>
+          <p class="etat" role="status" aria-live="polite"></p>
+        </div>
+      </form>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('#contact-form')!;
+  const status = form.querySelector<HTMLParagraphElement>('.etat')!;
+  const button = form.querySelector<HTMLButtonElement>('button')!;
+
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    // Clé Web3Forms pas encore renseignée (src/config.ts) : on ne prétend pas avoir envoyé.
+    if (!form.dataset.ready) {
+      status.textContent = "Le formulaire n'est pas encore branché : écrivez-nous directement par e-mail ou par téléphone.";
+      return;
+    }
+    button.disabled = true;
+    status.textContent = 'Envoi en cours…';
+    try {
+      const response = await fetch(form.action, {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: new FormData(form),
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) throw new Error(result.message);
+      form.reset();
+      status.textContent = 'Merci ! Votre message est bien parti, on vous répond rapidement.';
+    } catch {
+      status.textContent = "L'envoi n'a pas marché. Réessayez dans un instant, ou écrivez-nous directement par e-mail.";
+    } finally {
+      button.disabled = false;
+    }
+  });
+</script>
+
+<style>
+  .contact { padding-top: 32px; }
+  .contact .wrap { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: 56px; align-items: start; }
+  .coord > p.doux { margin-top: 1rem; }
+  .coord dl { display: grid; grid-template-columns: auto 1fr; gap: 0.4rem 1rem; margin: 1.6rem 0 2.4rem; }
+  .coord dt { font-weight: 600; }
+  .coord dd { margin: 0; color: var(--doux); }
+  .coord .polaroid { width: 260px; transform: rotate(-3deg); margin-left: 12px; }
+  @media (max-width: 860px) {
+    .contact .wrap { grid-template-columns: 1fr; }
+    .coord .polaroid { display: none; }
+  }
+
+  .carte { background: var(--blanc-photo); padding: 28px; box-shadow: 0 14px 30px -14px rgb(43 33 24 / 0.4); display: grid; gap: 18px; }
+  @media (max-width: 520px) { .carte { padding: 20px; } }
+  .ligne { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  @media (max-width: 600px) { .ligne { grid-template-columns: 1fr; } }
+  label { display: flex; flex-direction: column; gap: 0.3rem; font-weight: 600; font-size: 0.95rem; }
+  .facultatif { font-weight: 400; color: var(--doux); }
+  input, select, textarea { font: inherit; font-weight: 400; color: var(--encre); padding: 0.55rem 0.2rem; border: 0; border-bottom: 2px solid var(--trait); border-radius: 0; background: transparent; width: 100%; }
+  input:focus, select:focus, textarea:focus { outline: none; border-bottom-color: var(--ocre); }
+  textarea { resize: vertical; }
+  .piege { position: absolute; left: -9999px; }
+  .rgpd { font-size: 0.85rem; color: var(--doux); }
+  .envoi { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.5rem; }
+  .etat { font-weight: 600; }
+</style>

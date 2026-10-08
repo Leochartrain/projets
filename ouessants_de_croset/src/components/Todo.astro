@@ -1,0 +1,9 @@
+---
+/** Affiche la valeur, ou « [à compléter : …] » surligné tant qu'elle manque dans src/config.ts. */
+interface Props {
+  value: string | number | null | undefined;
+  label: string;
+}
+const { value, label } = Astro.props;
+---
+{value !== null && value !== undefined ? <>{value}</> : <span class="todo">[à compléter : {label}]</span>}

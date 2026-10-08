@@ -1,0 +1,49 @@
+---
+import Todo from '../components/Todo.astro';
+import { ASSO, HOST } from '../config';
+import Base from '../layouts/Base.astro';
+---
+<Base title="Mentions légales">
+  <section class="legal">
+    <div class="wrap">
+      <h1>Mentions légales</h1>
+
+      <h2>Éditeur du site</h2>
+      <p>
+        {ASSO.name}, association loi 1901<br />
+        Siège : <Todo value={ASSO.address} label="adresse du siège" /><br />
+        Numéro RNA ou SIRET : <Todo value={ASSO.rna} label="numéro RNA ou SIRET" /><br />
+        Contact : {ASSO.email ? <a href={`mailto:${ASSO.email}`}>{ASSO.email}</a> : <Todo value={null} label="e-mail" />}
+      </p>
+      <p>Responsable de la publication : <Todo value={ASSO.publicationManager} label="nom du ou de la responsable" /></p>
+
+      <h2>Hébergement</h2>
+      <p>{HOST.name}, {HOST.address} (<a href={HOST.site}>{HOST.site.replace('https://', '')}</a>).</p>
+
+      <h2 id="donnees">Données personnelles</h2>
+      <p>
+        Les informations envoyées avec le formulaire de contact (nom, e-mail, téléphone, commune, message) servent uniquement à vous répondre.
+        Elles sont transmises par e-mail à l'association par le service <a href="https://web3forms.com">Web3Forms</a> et ne sont pas conservées sur ce site.
+        L'association les garde le temps d'échanger avec vous, et au plus trois ans après le dernier contact.
+      </p>
+      <p>
+        Vous pouvez demander à consulter, corriger ou supprimer vos données en écrivant à l'association.
+        En cas de difficulté, vous pouvez saisir la <a href="https://www.cnil.fr">CNIL</a>.
+      </p>
+
+      <h2>Cookies et statistiques</h2>
+      <p>Ce site ne dépose aucun cookie et n'utilise aucun outil de mesure d'audience ou de publicité. Les polices de caractères sont hébergées avec le site.</p>
+
+      <h2>Photos et vidéos</h2>
+      <p>Les photos et vidéos appartiennent à l'association. Merci de nous demander avant de les réutiliser.</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .legal { padding-top: 32px; }
+  .legal .wrap { max-width: 720px; }
+  h2 { font-size: 1.5rem; margin: 2.2rem 0 0.6rem; }
+  p { color: var(--doux); }
+  p + p { margin-top: 0.8rem; }
+</style>

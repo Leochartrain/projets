@@ -1,0 +1,79 @@
+/* Polices hébergées avec le site (aucun appel à Google, donc pas de transfert d'adresse IP). */
+@import '@fontsource/fraunces/600.css';
+@import '@fontsource/fraunces/800.css';
+@import '@fontsource/fraunces/600-italic.css';
+@import '@fontsource/caveat/600.css';
+@import '@fontsource/source-sans-3/400.css';
+@import '@fontsource/source-sans-3/600.css';
+
+:root {
+  --papier: #efe6d3;
+  --papier-clair: #f8f2e4;
+  --blanc-photo: #fffdf7;
+  --encre: #2b2118;
+  --doux: #6b5c49;
+  --ocre: #a95a17;
+  --mousse: #4f6b35;
+  --trait: #d8cbb0;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: 16px; }
+body {
+  margin: 0;
+  color: var(--encre);
+  font: 18px/1.65 'Source Sans 3', system-ui, sans-serif;
+  /* grain de papier léger, dessiné en CSS */
+  background: var(--papier) radial-gradient(rgb(120 90 50 / 0.07) 1px, transparent 1px) 0 0 / 6px 6px;
+  -webkit-font-smoothing: antialiased;
+}
+img, video { display: block; max-width: 100%; height: auto; }
+figure { margin: 0; }
+p { margin: 0; }
+a { color: inherit; }
+h1, h2, h3 { font-family: Fraunces, Georgia, serif; line-height: 1.1; margin: 0; text-wrap: balance; }
+h1 { font-size: clamp(2.4rem, 6.5vw, 4.4rem); font-weight: 800; }
+h2 { font-size: clamp(1.9rem, 4.5vw, 2.9rem); font-weight: 800; }
+h3 { font-size: 1.5rem; font-weight: 600; }
+em { font-style: italic; color: var(--ocre); }
+:focus-visible { outline: 3px solid var(--ocre); outline-offset: 3px; }
+
+.wrap { width: min(1080px, 100% - 32px); margin-inline: auto; }
+section { padding: 88px 0; }
+@media (max-width: 640px) { section { padding: 64px 0; } }
+.bande { background: var(--papier-clair); border-block: 2px dashed var(--trait); }
+
+/* Annotation manuscrite */
+.main { font-family: Caveat, cursive; font-size: 1.6rem; color: var(--ocre); line-height: 1.1; margin-bottom: 0.3rem; }
+.doux { color: var(--doux); }
+
+.btn {
+  display: inline-block;
+  padding: 0.85rem 1.5rem;
+  border: 0;
+  border-radius: 4px;
+  background: var(--encre);
+  color: var(--papier-clair);
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ocre);
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 var(--ocre); }
+.btn:disabled { opacity: 0.6; cursor: wait; transform: none; }
+
+/* Polaroïds */
+.polaroid { position: relative; background: var(--blanc-photo); padding: 12px 12px 48px; box-shadow: 0 14px 30px -12px rgb(43 33 24 / 0.45); }
+.polaroid img, .polaroid video { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; }
+.polaroid figcaption { position: absolute; left: 0; right: 0; bottom: 10px; text-align: center; font-family: Caveat, cursive; font-size: 1.4rem; line-height: 1.2; }
+.scotch::before { content: ''; position: absolute; z-index: 1; top: -14px; left: 50%; width: 90px; height: 28px; transform: translateX(-50%) rotate(-3deg); background: rgb(240 220 160 / 0.75); }
+
+/* Information que l'association doit encore fournir (voir src/config.ts). */
+.todo { background: #fff0b8; padding: 0 0.3em; border-radius: 3px; font-style: normal; }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .btn, .btn:hover { transition: none; transform: none; }
+}

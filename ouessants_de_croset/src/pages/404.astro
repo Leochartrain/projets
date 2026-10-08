@@ -1,0 +1,17 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Page introuvable">
+  <section>
+    <div class="wrap perdu">
+      <p class="main">Oups…</p>
+      <h1>Cette page s'est échappée du pré.</h1>
+      <p class="doux">L'adresse ne mène nulle part. Le troupeau, lui, vous attend sur la page d'accueil.</p>
+      <a class="btn" href="/">Retour à l'accueil</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .perdu { display: flex; flex-direction: column; align-items: flex-start; gap: 1.2rem; max-width: 640px; }
+</style>

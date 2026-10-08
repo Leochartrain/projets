@@ -1,0 +1,36 @@
+---
+/**
+ * Courte vidéo muette en boucle (compressée par `npm run videos`).
+ * Elle ne démarre que lorsqu'elle est visible, et jamais si le visiteur a demandé moins d'animations :
+ * il voit alors l'image d'attente.
+ */
+interface Props {
+  name: string;
+  label: string;
+}
+const { name, label } = Astro.props;
+---
+<video
+  class="clip"
+  src={`/videos/${name}.mp4`}
+  poster={`/videos/${name}.jpg`}
+  aria-label={label}
+  muted
+  loop
+  playsinline
+  preload="none"
+  width="480"
+  height="854"
+></video>
+
+<script>
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const observer = new IntersectionObserver((entries) => {
+    for (const { target, isIntersecting } of entries) {
+      const video = target as HTMLVideoElement;
+      if (isIntersecting && !reduce) void video.play().catch(() => undefined);
+      else video.pause();
+    }
+  });
+  document.querySelectorAll<HTMLVideoElement>('video.clip').forEach((video) => observer.observe(video));
+</script>

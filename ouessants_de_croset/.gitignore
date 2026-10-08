@@ -1,0 +1,5 @@
+node_modules/
+dist/
+.astro/
+# Maquettes de départ (copies lourdes des photos et vidéos) : la piste B est devenue le site.
+maquettes/

@@ -1,0 +1,215 @@
+---
+import { Image } from 'astro:assets';
+import Clip from '../components/Clip.astro';
+import Todo from '../components/Todo.astro';
+import { ASSO } from '../config';
+import Base from '../layouts/Base.astro';
+import boucRonces from '../assets/photos/bouc-ronces.jpg';
+import brebisAgneau from '../assets/photos/brebis-agneau.jpg';
+import givre from '../assets/photos/givre.jpg';
+import ratelierHiver from '../assets/photos/ratelier-hiver.jpg';
+import troupeauTracteur from '../assets/photos/troupeau-tracteur.jpg';
+
+// Largeurs générées pour chaque photo : le navigateur charge la plus petite qui suffit.
+// `width` plafonne l'image de secours, sinon générée à la taille d'origine (1 536 px).
+const polaroid = { width: 600, widths: [300, 450, 600], sizes: '(max-width: 760px) 260px, 300px', format: 'webp' } as const;
+---
+<Base>
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <p class="main">Éco-pâturage en famille</p>
+        <h1>Des moutons <em>d'Ouessant</em> et des chèvres <em>des fossés</em> pour entretenir vos terrains.</h1>
+        <p class="intro">Deux races anciennes, rustiques et menacées, qui tondent, débroussaillent et font revenir la vie dans les prairies. Sans bruit, sans carburant.</p>
+        <a class="btn" href="/contact">Parlez-nous de votre terrain</a>
+      </div>
+      <div class="photos">
+        <figure class="polaroid scotch p1">
+          <Clip name="descente-remorque" label="Le troupeau descend de la remorque à son arrivée sur un terrain" />
+          <figcaption>Arrivée sur un chantier</figcaption>
+        </figure>
+        <figure class="polaroid p2">
+          <Image src={brebisAgneau} alt="Brebis d'Ouessant brune et son agneau noir nouveau-né" {...polaroid} loading="eager" />
+          <figcaption>Né ce printemps !</figcaption>
+        </figure>
+        <p class="main note" aria-hidden="true">le plus petit mouton de France ↑</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="bande asso" id="association">
+    <div class="wrap">
+      <div>
+        <p class="main">Qui sommes-nous ?</p>
+        <h2>Une association pour faire vivre un patrimoine vivant.</h2>
+        <p class="doux">
+          <span class="todo">[à compléter : l'histoire de l'association, son lieu, ses valeurs]</span>
+          Le mouton d'Ouessant et la chèvre des fossés ont failli disparaître au XX<sup>e</sup> siècle. En les faisant pâturer, on les préserve et on entretient les espaces sans machine.
+        </p>
+        <ul class="carnet">
+          <li><strong><Todo value={ASSO.stats.ouessant} label="nombre" /></strong> moutons d'Ouessant</li>
+          <li><strong><Todo value={ASSO.stats.fosses} label="nombre" /></strong> chèvres des fossés</li>
+          <li><strong><Todo value={ASSO.stats.sites} label="nombre" /></strong> terrains entretenus</li>
+        </ul>
+      </div>
+      <figure class="polaroid scotch asso-photo">
+        <Image src={troupeauTracteur} alt="Moutons d'Ouessant et une chèvre broutant près d'un vieux tracteur rouge" width={760} widths={[380, 570, 760]} sizes="(max-width: 860px) 90vw, 380px" format="webp" />
+        <figcaption>Le troupeau au printemps</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="eco-paturage">
+    <div class="wrap">
+      <p class="main">Pourquoi l'éco-pâturage ?</p>
+      <h2>Plus de vie, moins de bruit.</h2>
+      <p class="doux chapo">Les animaux remplacent la tondeuse et la débroussailleuse. Ils choisissent ce qu'ils mangent, là où la machine coupe tout à la même hauteur : la prairie se diversifie au fil des saisons.</p>
+      <div class="pourquoi">
+        <article><h3>Biodiversité</h3><p class="doux">Fleurs, insectes et oiseaux reviennent dans une prairie pâturée.</p></article>
+        <article><h3>Silence</h3><p class="doux">Ni moteur ni débroussailleuse : le voisinage apprécie.</p></article>
+        <article><h3>Zéro carburant</h3><p class="doux">Pas d'essence, pas de produit chimique, pas de déchets verts à évacuer.</p></article>
+        <article><h3>Terrains difficiles</h3><p class="doux">Talus, pentes et ronciers, là où la machine passe mal.</p></article>
+      </div>
+
+      <h3 class="etapes-titre">Comment ça se passe</h3>
+      <ol class="etapes">
+        <li><strong>On vient voir</strong> votre terrain et on évalue la surface et la végétation.</li>
+        <li><strong>On installe</strong> une clôture et un point d'eau.</li>
+        <li><strong>Le troupeau arrive</strong> pour la durée convenue.</li>
+        <li><strong>On passe régulièrement</strong> vérifier les animaux et les déplacer.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="bande" id="troupeau">
+    <div class="wrap">
+      <p class="main">Le troupeau</p>
+      <h2>Deux races, deux métiers.</h2>
+
+      <div class="fiche">
+        <figure class="polaroid">
+          <Image src={ratelierHiver} alt="Moutons d'Ouessant au râtelier à foin en hiver" {...polaroid} />
+          <figcaption>Les tondeuses</figcaption>
+        </figure>
+        <div>
+          <h3>Le mouton d'Ouessant</h3>
+          <p class="doux">Venu de l'île d'Ouessant, au bout du Finistère, c'est la plus petite race de mouton de France. Très rustique, il vit dehors toute l'année et se contente d'une herbe pauvre : idéal pour les pelouses et les prairies.</p>
+          <dl>
+            <dt>Taille</dt><dd>46 à 49 cm au garrot</dd>
+            <dt>Laine</dt><dd>noire ou brune, parfois blanche</dd>
+            <dt>Spécialité</dt><dd>l'herbe</dd>
+          </dl>
+        </div>
+      </div>
+
+      <div class="fiche inverse">
+        <div>
+          <h3>La chèvre des fossés</h3>
+          <p class="doux">Autrefois attachée au piquet le long des talus et des chemins de Bretagne et de Normandie, d'où son nom. Presque disparue dans les années 1980, elle a été reconnue comme race en 2005. Une débroussailleuse à quatre pattes.</p>
+          <dl>
+            <dt>Statut</dt><dd>race menacée</dd>
+            <dt>Poil</dt><dd>souvent long, toutes les couleurs</dd>
+            <dt>Spécialité</dt><dd>les ronces et les broussailles</dd>
+          </dl>
+        </div>
+        <figure class="polaroid">
+          <Image src={boucRonces} alt="Bouc des fossés à longs poils noirs et blancs au milieu des ronces" {...polaroid} />
+          <figcaption>Le débroussailleur</figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap album">
+      <p class="main">Au fil des saisons</p>
+      <h2>L'album du troupeau.</h2>
+      <div class="mur">
+        <figure class="polaroid"><Image src={givre} alt="Le troupeau dans une prairie givrée" {...polaroid} /><figcaption>Matin de givre</figcaption></figure>
+        <figure class="polaroid"><Clip name="belier-parc-urbain" label="Un bélier d'Ouessant broute dans un parc en ville" /><figcaption>En mission en ville</figcaption></figure>
+        <figure class="polaroid"><Image src={ratelierHiver} alt="Moutons autour du râtelier à foin" {...polaroid} /><figcaption>Le foin d'hiver</figcaption></figure>
+        <figure class="polaroid"><Image src={brebisAgneau} alt="Une brebis et son agneau" {...polaroid} /><figcaption>Premiers pas</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="bande appel">
+    <div class="wrap">
+      <p class="main">On en parle ?</p>
+      <h2>Un terrain à entretenir, une question, une visite ?</h2>
+      <p class="doux">Mairie, entreprise ou particulier : décrivez-nous votre terrain, on vous répond rapidement.</p>
+      <a class="btn" href="/contact">Nous contacter</a>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { padding: 32px 0 96px; }
+  .hero .wrap { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: center; }
+  .intro { font-size: 1.25rem; color: var(--doux); margin: 1.4rem 0 2rem; max-width: 38ch; }
+  .photos { position: relative; height: 580px; }
+  .photos .polaroid { position: absolute; width: 270px; }
+  .p1 { top: 0; right: 10px; transform: rotate(4deg); }
+  .p2 { bottom: 0; left: 0; transform: rotate(-5deg); }
+  .note { position: absolute; bottom: 40px; right: 0; transform: rotate(-6deg); max-width: 150px; }
+  @media (max-width: 860px) {
+    .hero .wrap { grid-template-columns: 1fr; }
+    .photos { height: 480px; max-width: 460px; width: 100%; margin-inline: auto; }
+    .photos .polaroid { width: 215px; }
+    .note { bottom: 16px; }
+  }
+  @media (max-width: 400px) {
+    .photos { height: 430px; }
+    .photos .polaroid { width: 185px; }
+    .note { max-width: 110px; font-size: 1.35rem; }
+  }
+
+  .asso .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+  .asso p.doux { margin-top: 1rem; }
+  .asso-photo { max-width: 380px; justify-self: center; transform: rotate(2deg); }
+  .carnet { list-style: none; margin: 1.6rem 0 0; padding: 0; border-left: 3px solid var(--ocre); }
+  .carnet li { padding: 0.4rem 0 0.4rem 1rem; }
+  .carnet strong { font-family: Fraunces, serif; font-size: 1.6rem; margin-right: 0.3rem; }
+  @media (max-width: 860px) { .asso .wrap { grid-template-columns: 1fr; gap: 48px; } }
+
+  .chapo { max-width: 60ch; margin-top: 1rem; font-size: 1.1rem; }
+  .pourquoi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; margin-top: 40px; }
+  .pourquoi article { border-top: 3px solid var(--encre); padding-top: 1rem; }
+  .pourquoi p { margin-top: 0.4rem; font-size: 1rem; }
+  .etapes-titre { margin-top: 56px; }
+  .etapes { list-style: none; counter-reset: etape; margin: 1.2rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 28px; }
+  .etapes li { counter-increment: etape; font-size: 1rem; color: var(--doux); }
+  .etapes li::before { content: counter(etape); display: block; font-family: Caveat, cursive; font-size: 2.4rem; line-height: 1; color: var(--ocre); }
+  .etapes strong { color: var(--encre); }
+  @media (max-width: 860px) { .pourquoi, .etapes { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 520px) { .pourquoi, .etapes { grid-template-columns: 1fr; } }
+
+  .fiche { display: grid; grid-template-columns: 300px 1fr; gap: 48px; align-items: center; margin-top: 56px; }
+  .fiche.inverse { grid-template-columns: 1fr 300px; }
+  .fiche .polaroid { transform: rotate(-3deg); }
+  .fiche.inverse .polaroid { transform: rotate(3deg); }
+  .fiche p { margin-top: 0.8rem; }
+  .fiche dl { display: grid; grid-template-columns: auto 1fr; gap: 0.3rem 1rem; margin: 1rem 0 0; }
+  .fiche dt { font-weight: 600; }
+  .fiche dd { margin: 0; color: var(--doux); }
+  @media (max-width: 760px) {
+    .fiche, .fiche.inverse { grid-template-columns: 1fr; justify-items: center; gap: 32px; }
+    .fiche.inverse .polaroid { order: -1; }
+    .fiche .polaroid { width: 260px; }
+  }
+
+  .album { text-align: center; }
+  .mur { display: flex; flex-wrap: wrap; justify-content: center; gap: 28px; margin-top: 40px; }
+  .mur .polaroid { width: 230px; }
+  .mur .polaroid:nth-child(odd) { transform: rotate(-3deg); }
+  .mur .polaroid:nth-child(even) { transform: rotate(2.5deg) translateY(14px); }
+  @media (max-width: 560px) {
+    .mur { gap: 20px 14px; }
+    .mur .polaroid { width: calc(50% - 7px); padding: 8px 8px 38px; }
+    .mur .polaroid figcaption { font-size: 1.15rem; bottom: 8px; }
+  }
+
+  .appel .wrap { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1rem; }
+  .appel h2 { max-width: 20ch; }
+  .appel .btn { margin-top: 0.5rem; }
+</style>
