@@ -149,13 +149,17 @@ const polaroid = { width: 600, widths: [300, 450, 600], sizes: '(max-width: 760p
   .hero { padding: 32px 0 96px; }
   .hero .wrap { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 48px; align-items: center; }
   .intro { font-size: 1.25rem; color: var(--doux); margin: 1.4rem 0 2rem; max-width: 38ch; }
-  /* Le bélier (paysage) passe devant la brebis : sa légende n'est jamais recouverte. */
+  /* Le bélier (paysage) est décalé vers la droite ; la brebis passe par-dessus son coin bas gauche,
+     sans toucher à sa légende. */
+  .hero { overflow-x: clip; }
   .photos { position: relative; height: 640px; }
   .photos .polaroid { position: absolute; }
   .photos figcaption { font-size: 1.6rem; bottom: 8px; }
-  .p1 { z-index: 2; top: 0; right: 0; width: 330px; transform: rotate(3deg); }
+  .p1 { z-index: 1; top: 0; right: -48px; width: 330px; transform: rotate(3deg); }
   .p1 img { aspect-ratio: 4 / 3; object-position: 70% 50%; }
-  .p2 { z-index: 1; top: 260px; left: 0; width: 240px; transform: rotate(-5deg); }
+  /* Légende calée à droite : la brebis recouvre le coin gauche. */
+  .p1 figcaption { text-align: right; padding-right: 20px; }
+  .p2 { z-index: 2; top: 240px; left: 0; width: 240px; transform: rotate(-5deg); }
   .note {
     position: absolute; z-index: 3; right: 0; bottom: 96px; max-width: 170px; margin: 0;
     padding: 0.5rem 0.8rem; background: var(--blanc-photo); transform: rotate(-4deg);
@@ -165,14 +169,14 @@ const polaroid = { width: 600, widths: [300, 450, 600], sizes: '(max-width: 760p
   @media (max-width: 860px) {
     .hero .wrap { grid-template-columns: 1fr; }
     .photos { height: 560px; max-width: 460px; width: 100%; margin-inline: auto; }
-    .p1 { width: 290px; }
-    .p2 { top: 220px; width: 210px; }
+    .p1 { width: 290px; right: -16px; }
+    .p2 { top: 200px; width: 210px; }
     .note { bottom: 72px; }
   }
   @media (max-width: 400px) {
     .photos { height: 500px; }
-    .p1 { width: 250px; }
-    .p2 { top: 190px; width: 185px; }
+    .p1 { width: 250px; right: -8px; }
+    .p2 { top: 172px; width: 185px; }
     .photos figcaption { font-size: 1.35rem; }
     .note { max-width: 130px; bottom: 56px; }
     .note .main { font-size: 1.3rem; }
