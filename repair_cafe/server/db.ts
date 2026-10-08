@@ -67,6 +67,22 @@ create table if not exists repairs (
   created_at text not null default ${NOW}
 );
 
+create table if not exists memberships (
+  id integer primary key,
+  visitor_id integer not null references visitors(id),
+  year integer not null,
+  rate text not null,
+  amount_cents integer not null,
+  payment_method text,
+  paid_at text not null default ${NOW},
+  unique (visitor_id, year)
+);
+
+create table if not exists settings (
+  key text primary key,
+  value text not null
+);
+
 create index if not exists repairs_session on repairs(session_id);
 create index if not exists repairs_visitor on repairs(visitor_id);
 create index if not exists repairs_volunteer on repairs(volunteer_id);
@@ -76,7 +92,14 @@ create index if not exists repairs_volunteer on repairs(volunteer_id);
 export function openDb(path: string): Db {
   const db = new DatabaseSync(path);
   db.exec(SCHEMA);
+  migrate(db);
   return db;
+}
+
+/** Colonnes ajoutées après la première version : on les crée sur les bases existantes. */
+function migrate(db: Db): void {
+  const has = (table: string, column: string) => (db.prepare(`select name from pragma_table_info('${table}')`).all() as { name: string }[]).some((c) => c.name === column);
+  if (!has('visitors', 'city')) db.exec('alter table visitors add column city text');
 }
 
 /** Exécute `fn` dans une transaction : tout ou rien. */

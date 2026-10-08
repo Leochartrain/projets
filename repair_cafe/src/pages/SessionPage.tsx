@@ -174,11 +174,20 @@ export function SessionPage() {
 
 function RepairLabel({ repair }: { repair: Repair }) {
   return (
-    <Link to={`/reparations/${repair.id}`} className="min-w-0 hover:underline">
-      <span className="font-medium">{repair.object}</span>
-      <span className="text-muted"> · {repair.visitorName}</span>
-    </Link>
+    <div className="flex min-w-0 flex-col items-start gap-1">
+      <Link to={`/reparations/${repair.id}`} className="min-w-0 hover:underline">
+        <span className="font-medium">{repair.object}</span>
+        <span className="text-muted"> · {repair.visitorName}</span>
+      </Link>
+      {repair.status === 'booked' && <NotMember repair={repair} />}
+    </div>
   );
+}
+
+/** Rappel à l'accueil : l'adhésion de l'année n'est pas réglée. */
+function NotMember({ repair }: { repair: Repair }) {
+  if (repair.visitorIsMember) return null;
+  return <span className="inline-flex self-start rounded-full bg-amber-soft px-2 py-0.5 text-xs font-semibold text-amber">Adhésion {new Date().getFullYear()} à régler</span>;
 }
 
 function Column({ title, count, empty, children }: { title: string; count: number; empty: string; children: ReactNode }) {
@@ -205,6 +214,7 @@ function WorkshopCard({ repair, meta, children }: { repair: Repair; meta: string
           {categoryLabel(repair.category)} · {repair.visitorName} · {repair.problem}
         </p>
         {meta && <p className="text-xs text-muted">{meta}</p>}
+        {repair.status === 'waiting' && <NotMember repair={repair} />}
       </div>
       {children}
     </div>

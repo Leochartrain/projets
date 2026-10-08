@@ -1,13 +1,35 @@
 import { useState, type FormEvent } from 'react';
-import { CHARTER, type BookingConfirmation } from '@shared/domain';
-import { api, errorText, usePublicSessions, useSave } from '@/api';
+import { CHARTER, rateAmount, suggestedRate, type BookingConfirmation, type MembershipSettings } from '@shared/domain';
+import { api, errorText, usePublicMembership, usePublicSessions, useSave } from '@/api';
+import { currentYear } from '@/components/membership';
 import { emptyObject, emptyVisitor, objectPayload, ObjectFields, VisitorFields } from '@/components/forms';
 import { Button, Card, EmptyState, ErrorBox, Spinner } from '@/components/ui';
-import { hour, longDate } from '@/format';
+import { euros, hour, longDate } from '@/format';
+
+/** Les tarifs de l'adhésion, et celui qui s'applique dès que la commune est saisie. */
+function MembershipNotice({ settings, city }: { settings: MembershipSettings; city: string }) {
+  const rate = suggestedRate(city, settings);
+  const towns = settings.reducedTowns;
+  return (
+    <div className="flex flex-col gap-1 rounded-xl bg-blue-soft px-4 py-3 text-sm text-blue">
+      <p>
+        <strong>Adhésion {currentYear()} obligatoire</strong>, à régler sur place si tu n'es pas encore adhérent cette année :{' '}
+        {euros(settings.reducedCents)}
+        {towns.length > 0 && ` pour les habitants de ${towns.length > 1 ? `${towns.slice(0, -1).join(', ')} et ${towns.at(-1)}` : towns[0]}`}, {euros(settings.standardCents)} sinon.
+      </p>
+      {rate && (
+        <p className="font-semibold">
+          Pour {city.trim()} : {euros(rateAmount(rate, settings))}.
+        </p>
+      )}
+    </div>
+  );
+}
 
 /** Page publique : choisir une séance et un créneau, décrire l'objet, accepter la charte. */
 export function BookingPage() {
   const { data: sessions, isPending, error } = usePublicSessions();
+  const { data: membership } = usePublicMembership();
   const [sessionId, setSessionId] = useState<number | null>(null);
   const [slotTime, setSlotTime] = useState<string | null>(null);
   const [object, setObject] = useState(emptyObject);
@@ -46,7 +68,10 @@ export function BookingPage() {
               <br />
               {done.place}
             </p>
-            <p className="text-sm text-muted">Pense à apporter l’objet, son chargeur ou ses accessoires, et si tu en as, la pièce de rechange. Rendez-vous n° {done.repairId}.</p>
+            <p className="text-sm text-muted">
+              Pense à apporter l’objet, son chargeur ou ses accessoires, et si tu en as, la pièce de rechange. Si tu n’as pas encore adhéré cette année, prévois de quoi régler
+              l’adhésion. Rendez-vous n° {done.repairId}.
+            </p>
             <Button
               variant="secondary"
               onClick={() => {
@@ -129,6 +154,7 @@ export function BookingPage() {
                   <h2 className="text-lg">3. Tes coordonnées</h2>
                   <p className="-mt-2 text-sm text-muted">Un e-mail ou un téléphone, pour te prévenir en cas de changement.</p>
                   <VisitorFields value={visitor} onChange={setVisitor} />
+                  {membership && <MembershipNotice settings={membership} city={visitor.city} />}
                 </Card>
 
                 <Card className="flex flex-col gap-4">

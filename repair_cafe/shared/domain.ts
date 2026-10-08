@@ -61,6 +61,63 @@ export function slotsOf(session: { startTime: string; endTime: string; slotMinut
   return slots;
 }
 
+// Adhésion annuelle : obligatoire pour faire réparer un objet, valable pour l'année civile.
+// Tarif réduit pour les habitants de certaines communes (liste réglable), tarif normal sinon.
+
+export const RATES = ['reduced', 'standard', 'free'] as const;
+export type Rate = (typeof RATES)[number];
+export const RATE_LABELS: Record<Rate, string> = { reduced: 'Tarif réduit', standard: 'Tarif normal', free: 'Offerte' };
+
+export const PAYMENT_METHODS = ['cash', 'check', 'card', 'transfer'] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+export const PAYMENT_LABELS: Record<PaymentMethod, string> = { cash: 'Espèces', check: 'Chèque', card: 'Carte', transfer: 'Virement' };
+
+export interface MembershipSettings {
+  reducedCents: number;
+  standardCents: number;
+  /** Communes dont les habitants paient le tarif réduit. */
+  reducedTowns: string[];
+}
+
+export const DEFAULT_MEMBERSHIP: MembershipSettings = { reducedCents: 800, standardCents: 5000, reducedTowns: [] };
+
+/** « Saint-Jacques-de-la-Lande », « st jacques de la lande » → « saintjacquesdelalande ». */
+export function townKey(town: string): string {
+  return town
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+    .replace(/\bste?\b/g, (m) => (m === 'st' ? 'saint' : 'sainte'))
+    .replace(/[^a-z0-9]/g, '');
+}
+
+/** Tarif d'après la commune ; null si la commune n'est pas encore connue. */
+export function suggestedRate(city: string | null, settings: MembershipSettings): Exclude<Rate, 'free'> | null {
+  if (!city?.trim()) return null;
+  const key = townKey(city);
+  return settings.reducedTowns.some((town) => townKey(town) === key) ? 'reduced' : 'standard';
+}
+
+export function rateAmount(rate: Rate, settings: MembershipSettings): number {
+  return rate === 'reduced' ? settings.reducedCents : rate === 'standard' ? settings.standardCents : 0;
+}
+
+export interface Membership {
+  id: number;
+  visitorId: number;
+  year: number;
+  rate: Rate;
+  amountCents: number;
+  paymentMethod: PaymentMethod | null;
+  paidAt: string;
+}
+
+export interface MembershipInput {
+  rate: Rate;
+  amountCents: number;
+  paymentMethod: PaymentMethod | null;
+}
+
 // Formes renvoyées par l'API.
 
 export interface Session {
@@ -83,6 +140,9 @@ export interface Repair {
   visitorId: number;
   visitorName: string;
   visitorPhone: string | null;
+  visitorCity: string | null;
+  /** Adhésion de l'année en cours réglée. */
+  visitorIsMember: boolean;
   sessionId: number | null;
   sessionDate: string | null;
   slotTime: string | null;
@@ -118,16 +178,20 @@ export interface Visitor {
   phone: string | null;
   email: string | null;
   postalCode: string | null;
+  city: string | null;
   notes: string | null;
   charterAcceptedAt: string | null;
   anonymized: boolean;
   createdAt: string;
   repairCount: number;
   lastVisit: string | null;
+  /** Adhésion de l'année en cours, si elle est réglée. */
+  membership: Membership | null;
 }
 
 export interface VisitorDetail extends Visitor {
   repairs: Repair[];
+  memberships: Membership[];
 }
 
 export interface Volunteer {
@@ -152,6 +216,9 @@ export interface Stats {
   visitors: number;
   volunteers: number;
   donationsCents: number;
+  /** Adhésions de l'année en cours. */
+  members: number;
+  membershipsCents: number;
   byCategory: { category: CategoryId; finished: number; repaired: number }[];
   nextSession: Session | null;
   recent: Repair[];
@@ -178,6 +245,7 @@ export const CHARTER = [
   "Les réparateurs font de leur mieux mais n'ont pas d'obligation de résultat : ils peuvent refuser une réparation qu'ils jugent dangereuse ou impossible.",
   "Tu répares avec le bénévole : l'idée est d'apprendre, pas de déposer l'objet.",
   "Le Repair Café et ses bénévoles ne sont pas responsables des dommages causés à l'objet ni des conséquences d'une réparation ratée.",
+  "L'adhésion à l'association, valable pour l'année civile, est obligatoire pour faire réparer un objet. Elle se règle à l'accueil.",
   "Les pièces neuves éventuelles sont à ta charge. Les objets non récupérés en fin de séance ne sont pas gardés.",
   "Tes coordonnées servent uniquement à te recontacter pour ce rendez-vous ou cette réparation. Tu peux demander leur suppression à tout moment.",
 ];

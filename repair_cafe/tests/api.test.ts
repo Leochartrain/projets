@@ -3,7 +3,7 @@ import { beforeEach, describe, test } from 'node:test';
 import { createApp, today } from '../server/app.ts';
 import { openDb } from '../server/db.ts';
 import { seedDemo } from '../server/seed.ts';
-import type { PublicSession, Repair, SessionDetail, Stats, VisitorDetail } from '../shared/domain.ts';
+import { suggestedRate, type MembershipSettings, type PublicSession, type Repair, type SessionDetail, type Stats, type Visitor, type VisitorDetail } from '../shared/domain.ts';
 
 let app: ReturnType<typeof createApp>;
 
@@ -124,6 +124,52 @@ describe('visiteurs', () => {
     await newVisitor();
     assert.equal((await call<unknown[]>('GET', '/visitors?q=hopp')).data.length, 1);
     assert.equal((await call<unknown[]>('GET', '/visitors?q=0612 34')).data.length, 1);
+  });
+});
+
+describe('adhésion', () => {
+  test('le tarif dépend de la commune, sans tenir compte des accents ni de « St »', () => {
+    const settings = { reducedCents: 800, standardCents: 5000, reducedTowns: ['Saint-Jacques-de-la-Lande', 'Cesson-Sévigné'] };
+    assert.equal(suggestedRate('st jacques de la lande', settings), 'reduced');
+    assert.equal(suggestedRate('CESSON SEVIGNE', settings), 'reduced');
+    assert.equal(suggestedRate('Pacé', settings), 'standard');
+    assert.equal(suggestedRate('', settings), null);
+  });
+
+  test('réglée à la création, une seule par an, visible sur les réparations', async () => {
+    const { data: visitor } = await call<Visitor>('POST', '/visitors', {
+      firstName: 'Ada',
+      lastName: 'Lovelace',
+      city: 'Rennes',
+      membership: { rate: 'reduced', amountCents: 800, paymentMethod: 'cash' },
+    });
+    assert.equal(visitor.membership?.amountCents, 800);
+    assert.equal(visitor.membership?.year, new Date().getFullYear());
+
+    const again = await call('POST', `/visitors/${visitor.id}/memberships`, { rate: 'standard', amountCents: 5000, paymentMethod: null });
+    assert.equal(again.status, 409);
+
+    const { data: repair } = await call<Repair>('POST', '/repairs', { ...object, visitorId: visitor.id });
+    assert.equal(repair.visitorIsMember, true);
+    const { data: stats } = await call<Stats>('GET', '/stats');
+    assert.equal(stats.members, 1);
+    assert.equal(stats.membershipsCents, 800);
+  });
+
+  test('un visiteur sans adhésion est signalé, puis la règle à l’accueil', async () => {
+    const visitorId = await newVisitor();
+    const { data: repair } = await call<Repair>('POST', '/repairs', { ...object, visitorId });
+    assert.equal(repair.visitorIsMember, false);
+    assert.equal((await call('POST', `/visitors/${visitorId}/memberships`, { rate: 'standard', amountCents: 5000, paymentMethod: 'check' })).status, 201);
+    assert.equal((await call<Repair>('GET', `/repairs/${repair.id}`)).data.visitorIsMember, true);
+    const { data: detail } = await call<VisitorDetail>('GET', `/visitors/${visitorId}`);
+    assert.equal(detail.memberships.length, 1);
+  });
+
+  test('les réglages se modifient et sont publics pour la réservation', async () => {
+    const { data } = await call<MembershipSettings>('PUT', '/settings', { reducedCents: 1000, standardCents: 4000, reducedTowns: ['Rennes', 'rennes', 'Bruz'] });
+    assert.deepEqual(data.reducedTowns, ['Bruz', 'Rennes']);
+    assert.equal((await call<MembershipSettings>('GET', '/public/membership')).data.reducedCents, 1000);
   });
 });
 

@@ -1,8 +1,9 @@
 import { useState, type FormEvent } from 'react';
 import { OUTCOMES, OUTCOME_HINTS, OUTCOME_LABELS, categoryLabel, type Outcome, type Repair, type Visitor } from '@shared/domain';
-import { api, errorText, useSave, useUpdateRepair, useVisitors, useVolunteers } from '@/api';
+import { api, errorText, useSave, useSettings, useUpdateRepair, useVisitors, useVolunteers } from '@/api';
 import { hour, parseDecimal } from '@/format';
 import { emptyObject, emptyVisitor, objectPayload, ObjectFields, VisitorFields, type ObjectDraft, type VisitorDraft } from './forms';
+import { currentYear, emptyMembership, MembershipBadge, MembershipFields, membershipPayload, type MembershipDraft } from './membership';
 import { Button, ErrorBox, Modal, SearchInput, SelectField, TextArea, TextField } from './ui';
 
 /**
@@ -16,10 +17,22 @@ export function NewRepairModal({ open, onClose, sessionId, slotTime }: { open: b
   const [draft, setDraft] = useState<VisitorDraft>(emptyVisitor);
   const [charter, setCharter] = useState(true);
   const [object, setObject] = useState<ObjectDraft>(emptyObject);
+  const [membership, setMembership] = useState<MembershipDraft>(emptyMembership);
+  // Commune d'un visiteur déjà connu qui n'en a pas encore (fiches d'avant l'adhésion).
+  const [visitorCity, setVisitorCity] = useState('');
   const { data: visitors } = useVisitors(search);
+  const { data: settings } = useSettings();
+  const city = visitor ? (visitor.city ?? visitorCity) : draft.city;
 
   const save = useSave(async () => {
-    const visitorId = visitor?.id ?? (await api.post<Visitor>('/visitors', { ...draft, charterAccepted: charter })).id;
+    const payload = membershipPayload(membership, city, settings);
+    let visitorId = visitor?.id;
+    if (visitorId === undefined) {
+      visitorId = (await api.post<Visitor>('/visitors', { ...draft, charterAccepted: charter, membership: payload })).id;
+    } else if (!visitor?.membership && payload) {
+      if (!visitor?.city && visitorCity.trim()) await api.patch(`/visitors/${visitorId}`, { city: visitorCity });
+      await api.post(`/visitors/${visitorId}/memberships`, payload);
+    }
     return api.post<Repair>('/repairs', { ...objectPayload(object), visitorId, sessionId, slotTime });
   });
 
@@ -29,6 +42,8 @@ export function NewRepairModal({ open, onClose, sessionId, slotTime }: { open: b
     setCreating(false);
     setDraft(emptyVisitor);
     setObject(emptyObject);
+    setMembership(emptyMembership);
+    setVisitorCity('');
     save.reset();
     onClose();
   }
@@ -53,11 +68,14 @@ export function NewRepairModal({ open, onClose, sessionId, slotTime }: { open: b
                 <p className="font-medium">
                   {visitor.firstName} {visitor.lastName}
                 </p>
-                <p className="text-sm text-muted">{[visitor.phone, visitor.email].filter(Boolean).join(' · ') || 'Pas de coordonnées'}</p>
+                <p className="text-sm text-muted">{[visitor.phone, visitor.email, visitor.city].filter(Boolean).join(' · ') || 'Pas de coordonnées'}</p>
               </div>
-              <Button variant="ghost" size="sm" onClick={() => setVisitor(null)}>
-                Changer
-              </Button>
+              <div className="flex items-center gap-2">
+                <MembershipBadge visitor={visitor} />
+                <Button variant="ghost" size="sm" onClick={() => setVisitor(null)}>
+                  Changer
+                </Button>
+              </div>
             </div>
           ) : creating ? (
             <div className="flex flex-col gap-4">
@@ -66,6 +84,7 @@ export function NewRepairModal({ open, onClose, sessionId, slotTime }: { open: b
                 <input type="checkbox" className="mt-0.5 size-4 accent-accent" checked={charter} onChange={(e) => setCharter(e.target.checked)} />
                 La charte du Repair Café a été lue et acceptée.
               </label>
+              <MembershipFields city={draft.city} value={membership} onChange={setMembership} />
               <Button variant="ghost" size="sm" className="self-start" onClick={() => setCreating(false)}>
                 ← Chercher un visiteur existant
               </Button>
@@ -111,6 +130,13 @@ export function NewRepairModal({ open, onClose, sessionId, slotTime }: { open: b
             </div>
           )}
         </section>
+
+        {visitor && !visitor.membership && !visitor.anonymized && (
+          <section className="flex flex-col gap-3">
+            {!visitor.city && <TextField label="Commune du visiteur" hint="Elle fixe le tarif de l'adhésion." value={visitorCity} onChange={(e) => setVisitorCity(e.target.value)} />}
+            <MembershipFields city={city} value={membership} onChange={setMembership} />
+          </section>
+        )}
 
         {hasVisitor && (
           <section className="flex flex-col gap-3">
@@ -168,30 +194,52 @@ export function StartRepairModal({ repair, onClose }: { repair: Repair | null; o
   return repair ? <StartRepair key={repair.id} repair={repair} onClose={onClose} /> : null;
 }
 
+/** Avant la réparation, on vérifie l'adhésion de l'année : sinon on l'encaisse ici. */
 function StartRepair({ repair, onClose }: { repair: Repair; onClose: () => void }) {
   const [volunteerId, setVolunteerId] = useState(repair.volunteerId ? String(repair.volunteerId) : '');
+  const [membership, setMembership] = useState<MembershipDraft>(emptyMembership);
+  const [city, setCity] = useState(repair.visitorCity ?? '');
+  const { data: settings } = useSettings();
   const update = useUpdateRepair();
+  const pay = useSave(async () => {
+    const payload = membershipPayload(membership, city, settings);
+    if (!payload) return;
+    if (!repair.visitorCity && city.trim()) await api.patch(`/visitors/${repair.visitorId}`, { city });
+    await api.post(`/visitors/${repair.visitorId}/memberships`, payload);
+  });
 
   async function submit(event: FormEvent) {
     event.preventDefault();
+    if (!repair.visitorIsMember) await pay.mutateAsync(undefined);
     await update.mutateAsync({ id: repair.id, status: 'in_progress', volunteerId: Number(volunteerId) });
     onClose();
   }
 
+  const error = pay.error ?? update.error;
+
   return (
-    <Modal open onClose={onClose} title={`Prendre en charge : ${repair.object}`}>
+    <Modal open onClose={onClose} title={`Prendre en charge : ${repair.object}`} wide={!repair.visitorIsMember}>
       <form onSubmit={submit} className="flex flex-col gap-4">
         <p className="text-sm text-muted">
           {repair.visitorName} · {repair.problem}
         </p>
         <VolunteerSelect repair={repair} value={volunteerId} onChange={setVolunteerId} />
-        {update.error && <ErrorBox>{errorText(update.error)}</ErrorBox>}
+        {!repair.visitorIsMember && (
+          <>
+            <p className="rounded-lg bg-amber-soft px-4 py-3 text-sm text-amber">
+              {repair.visitorName} n'a pas encore réglé son adhésion {currentYear()}, obligatoire pour faire réparer un objet.
+            </p>
+            {!repair.visitorCity && <TextField label="Commune du visiteur" value={city} onChange={(e) => setCity(e.target.value)} />}
+            <MembershipFields city={city} value={membership} onChange={setMembership} />
+          </>
+        )}
+        {error && <ErrorBox>{errorText(error)}</ErrorBox>}
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>
             Annuler
           </Button>
-          <Button type="submit" disabled={update.isPending || !volunteerId}>
-            Commencer la réparation
+          <Button type="submit" disabled={update.isPending || pay.isPending || !volunteerId}>
+            {repair.visitorIsMember || !membership.paid ? 'Commencer la réparation' : 'Encaisser et commencer'}
           </Button>
         </div>
       </form>

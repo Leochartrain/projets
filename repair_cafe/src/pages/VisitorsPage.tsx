@@ -1,8 +1,9 @@
 import { useDeferredValue, useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
 import type { Visitor } from '@shared/domain';
-import { api, errorText, useSave, useVisitors } from '@/api';
+import { api, errorText, useSave, useSettings, useVisitors } from '@/api';
 import { emptyVisitor, VisitorFields } from '@/components/forms';
+import { emptyMembership, MembershipBadge, MembershipFields, membershipPayload } from '@/components/membership';
 import { Button, Card, EmptyState, ErrorBox, Modal, PageHeader, SearchInput, Spinner } from '@/components/ui';
 import { plural, shortDate } from '@/format';
 
@@ -25,6 +26,7 @@ export function VisitorsPage() {
               <tr>
                 <th className="px-5 py-3 font-semibold">Nom</th>
                 <th className="px-3 py-3 font-semibold">Contact</th>
+                <th className="px-3 py-3 font-semibold">Adhésion</th>
                 <th className="px-3 py-3 font-semibold">Objets</th>
                 <th className="px-5 py-3 font-semibold">Dernière visite</th>
               </tr>
@@ -38,6 +40,9 @@ export function VisitorsPage() {
                     </Link>
                   </td>
                   <td className="px-3 py-3 text-muted">{[v.phone, v.email].filter(Boolean).join(' · ') || '—'}</td>
+                  <td className="px-3 py-3">
+                    <MembershipBadge visitor={v} />
+                  </td>
                   <td className="px-3 py-3 tabular-nums">{v.repairCount}</td>
                   <td className="px-5 py-3 whitespace-nowrap">{v.lastVisit ? shortDate(v.lastVisit) : '—'}</td>
                 </tr>
@@ -55,8 +60,10 @@ export function VisitorsPage() {
 function NewVisitorModal({ onClose }: { onClose: () => void }) {
   const [draft, setDraft] = useState(emptyVisitor);
   const [charter, setCharter] = useState(false);
+  const [membership, setMembership] = useState(emptyMembership);
+  const { data: settings } = useSettings();
   const navigate = useNavigate();
-  const save = useSave(() => api.post<Visitor>('/visitors', { ...draft, charterAccepted: charter }));
+  const save = useSave(() => api.post<Visitor>('/visitors', { ...draft, charterAccepted: charter, membership: membershipPayload(membership, draft.city, settings) }));
 
   async function submit(event: FormEvent) {
     event.preventDefault();
@@ -72,6 +79,7 @@ function NewVisitorModal({ onClose }: { onClose: () => void }) {
           <input type="checkbox" className="mt-0.5 size-4 accent-accent" checked={charter} onChange={(e) => setCharter(e.target.checked)} />
           La charte du Repair Café a été lue et acceptée.
         </label>
+        <MembershipFields city={draft.city} value={membership} onChange={setMembership} />
         {save.error && <ErrorBox>{errorText(save.error)}</ErrorBox>}
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={onClose}>

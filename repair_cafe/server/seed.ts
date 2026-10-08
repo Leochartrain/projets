@@ -1,9 +1,24 @@
 // Données d'exemple : bénévoles, visiteurs, trois séances passées, celle du jour et deux à venir.
 // Les dates sont calculées à partir d'aujourd'hui pour que la démo reste vivante.
-import { slotsOf, type CategoryId, type Outcome } from '../shared/domain.ts';
+import { slotsOf, suggestedRate, type CategoryId, type MembershipSettings, type Outcome, type PaymentMethod } from '../shared/domain.ts';
+import { saveSettings } from './app.ts';
 import { transaction, type Db } from './db.ts';
 
 const PLACE = 'Maison de quartier, 12 rue des Lilas';
+
+/** Exemple : à remplacer par les vraies communes dans les réglages. */
+const SETTINGS: MembershipSettings = { reducedCents: 800, standardCents: 5000, reducedTowns: ['Cesson-Sévigné', 'Rennes', 'Saint-Jacques-de-la-Lande'] };
+
+const CITIES: Record<string, string> = {
+  '35000': 'Rennes',
+  '35200': 'Rennes',
+  '35700': 'Rennes',
+  '35510': 'Cesson-Sévigné',
+  '35740': 'Pacé',
+  '35136': 'Saint-Jacques-de-la-Lande',
+  '35650': 'Le Rheu',
+  '35310': 'Mordelles',
+};
 
 const VOLUNTEERS: [name: string, skills: CategoryId[], active?: boolean][] = [
   ['Michel Garnier', ['petit-electromenager', 'electronique']],
@@ -91,17 +106,34 @@ export function seedDemo(db: Db): void {
     const visitorIds = VISITORS.map(([first, last, postalCode], index) =>
       Number(
         db
-          .prepare('insert into visitors (first_name, last_name, phone, email, postal_code, charter_accepted_at) values (?, ?, ?, ?, ?, ?)')
+          .prepare('insert into visitors (first_name, last_name, phone, email, postal_code, city, charter_accepted_at) values (?, ?, ?, ?, ?, ?, ?)')
           .run(
             first,
             last,
             index % 3 === 2 ? null : `06 ${String(11 + index * 7).slice(-2)} ${String(23 + index * 3).slice(-2)} 45 ${String(60 + index).slice(-2)}`,
             index % 3 === 1 ? null : `${first.toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu, '')}.${last.toLowerCase().replace(/\s/g, '')}@exemple.fr`,
             postalCode,
+            CITIES[postalCode] ?? null,
             new Date().toISOString(),
           ).lastInsertRowid,
       ),
     );
+
+    // Adhésions de l'année : quelques visiteurs ne l'ont pas encore réglée (alerte à l'accueil).
+    saveSettings(db, SETTINGS);
+    const methods: PaymentMethod[] = ['cash', 'check', 'card', 'cash'];
+    VISITORS.forEach(([, , postalCode], index) => {
+      if (index % 5 === 4) return;
+      const rate = suggestedRate(CITIES[postalCode] ?? null, SETTINGS) ?? 'standard';
+      db.prepare('insert into memberships (visitor_id, year, rate, amount_cents, payment_method, paid_at) values (?, ?, ?, ?, ?, ?)').run(
+        visitorIds[index]!,
+        new Date().getFullYear(),
+        rate,
+        rate === 'reduced' ? SETTINGS.reducedCents : SETTINGS.standardCents,
+        methods[index % methods.length]!,
+        new Date(Date.now() - (60 - index * 3) * 86_400_000).toISOString(),
+      );
+    });
 
     const session = (days: number, notes: string | null = null) => {
       const date = addDays(days);

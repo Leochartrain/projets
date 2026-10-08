@@ -61,9 +61,10 @@ export interface VisitorDraft {
   phone: string;
   email: string;
   postalCode: string;
+  city: string;
 }
 
-export const emptyVisitor: VisitorDraft = { firstName: '', lastName: '', phone: '', email: '', postalCode: '' };
+export const emptyVisitor: VisitorDraft = { firstName: '', lastName: '', phone: '', email: '', postalCode: '', city: '' };
 
 export function VisitorFields({ value, onChange }: { value: VisitorDraft; onChange: (value: VisitorDraft) => void }) {
   const set = (patch: Partial<VisitorDraft>) => onChange({ ...value, ...patch });
@@ -73,7 +74,8 @@ export function VisitorFields({ value, onChange }: { value: VisitorDraft; onChan
       <TextField label="Nom" required autoComplete="family-name" maxLength={60} value={value.lastName} onChange={(e) => set({ lastName: e.target.value })} />
       <TextField label="Téléphone" type="tel" autoComplete="tel" maxLength={30} value={value.phone} onChange={(e) => set({ phone: e.target.value })} />
       <TextField label="E-mail" type="email" autoComplete="email" maxLength={200} value={value.email} onChange={(e) => set({ email: e.target.value })} />
-      <TextField label="Code postal" autoComplete="postal-code" inputMode="numeric" maxLength={10} hint="Pour savoir d'où viennent les visiteurs." value={value.postalCode} onChange={(e) => set({ postalCode: e.target.value })} />
+      <TextField label="Code postal" autoComplete="postal-code" inputMode="numeric" maxLength={10} value={value.postalCode} onChange={(e) => set({ postalCode: e.target.value })} />
+      <TextField label="Commune" required autoComplete="address-level2" maxLength={80} hint="Elle fixe le tarif de l'adhésion." value={value.city} onChange={(e) => set({ city: e.target.value })} />
     </div>
   );
 }

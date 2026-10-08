@@ -4,10 +4,16 @@ import type { SQLInputValue } from 'node:sqlite';
 import { z } from 'zod';
 import {
   CATEGORY_IDS,
+  DEFAULT_MEMBERSHIP,
   OUTCOMES,
+  PAYMENT_METHODS,
+  RATES,
   STATUSES,
+  type Membership,
+  type MembershipSettings,
   categoryLabel,
   slotsOf,
+  townKey,
   weightOf,
   OUTCOME_LABELS,
   STATUS_LABELS,
@@ -30,6 +36,9 @@ type Row = Record<string, SQLInputValue>;
 /** Date du jour au format AAAA-MM-JJ, dans le fuseau du serveur (celui du Repair Café). */
 export const today = () => new Date().toLocaleDateString('sv-SE');
 const nowIso = () => new Date().toISOString();
+/** L'adhésion vaut pour l'année civile. */
+export const thisYear = () => new Date().getFullYear();
+const YEAR_SQL = "cast(strftime('%Y', 'now', 'localtime') as integer)";
 
 // --- Validation ---------------------------------------------------------------
 
@@ -117,6 +126,8 @@ function update(db: Db, table: string, rowId: number, row: Row): void {
 
 const REPAIR_SELECT = `
   select r.id, r.visitor_id as visitorId, v.first_name || ' ' || v.last_name as visitorName, v.phone as visitorPhone,
+    v.city as visitorCity,
+    exists (select 1 from memberships m where m.visitor_id = r.visitor_id and m.year = ${YEAR_SQL}) as visitorIsMember,
     r.session_id as sessionId, s.date as sessionDate, r.slot_time as slotTime, r.category, r.object, r.brand, r.model,
     r.age_years as ageYears, r.problem, r.weight_kg as weightKg, r.status, r.volunteer_id as volunteerId,
     vo.name as volunteerName, r.outcome, r.diagnosis, r.notes, r.donation_cents as donationCents,
@@ -135,11 +146,18 @@ const SESSION_SELECT = `
 
 const VISITOR_SELECT = `
   select v.id, v.first_name as firstName, v.last_name as lastName, v.phone, v.email, v.postal_code as postalCode,
-    v.notes, v.charter_accepted_at as charterAcceptedAt, v.anonymized, v.created_at as createdAt,
+    v.city, v.notes, v.charter_accepted_at as charterAcceptedAt, v.anonymized, v.created_at as createdAt,
     (select count(*) from repairs r where r.visitor_id = v.id) as repairCount,
     (select max(s.date) from repairs r join sessions s on s.id = r.session_id
-       where r.visitor_id = v.id and r.status in ('waiting', 'in_progress', 'done')) as lastVisit
-  from visitors v`;
+       where r.visitor_id = v.id and r.status in ('waiting', 'in_progress', 'done')) as lastVisit,
+    m.id as m_id, m.year as m_year, m.rate as m_rate, m.amount_cents as m_amountCents,
+    m.payment_method as m_paymentMethod, m.paid_at as m_paidAt
+  from visitors v
+  left join memberships m on m.visitor_id = v.id and m.year = ${YEAR_SQL}`;
+
+const MEMBERSHIP_SELECT = `
+  select id, visitor_id as visitorId, year, rate, amount_cents as amountCents, payment_method as paymentMethod, paid_at as paidAt
+  from memberships`;
 
 const VOLUNTEER_SELECT = `
   select vo.id, vo.name, vo.phone, vo.email, vo.skills, vo.active,
@@ -152,7 +170,30 @@ function toSession(row: Record<string, unknown>): Session {
   return { ...session, capacity: slotsOf(session).length * session.perSlot };
 }
 
-const toVisitor = (row: Record<string, unknown>): Visitor => ({ ...(row as unknown as Visitor), anonymized: Boolean(row.anonymized) });
+function toVisitor(row: Record<string, unknown>): Visitor {
+  const visitor: Record<string, unknown> = {};
+  const membership: Record<string, unknown> = { visitorId: row.id };
+  for (const [key, value] of Object.entries(row)) {
+    if (key.startsWith('m_')) membership[key.slice(2)] = value;
+    else visitor[key] = value;
+  }
+  return {
+    ...(visitor as unknown as Visitor),
+    anonymized: Boolean(row.anonymized),
+    membership: row.m_id ? (membership as unknown as Membership) : null,
+  };
+}
+
+const toRepair = (row: Record<string, unknown>): Repair => ({ ...(row as unknown as Repair), visitorIsMember: Boolean(row.visitorIsMember) });
+
+function getSettings(db: Db): MembershipSettings {
+  const row = db.prepare(`select value from settings where key = 'membership'`).get() as { value: string } | undefined;
+  return { ...DEFAULT_MEMBERSHIP, ...(row ? JSON.parse(row.value) : {}) };
+}
+
+export function saveSettings(db: Db, settings: MembershipSettings): void {
+  db.prepare(`insert into settings (key, value) values ('membership', ?) on conflict (key) do update set value = excluded.value`).run(JSON.stringify(settings));
+}
 
 const toVolunteer = (row: Record<string, unknown>): Volunteer => ({
   ...(row as unknown as Volunteer),
@@ -161,7 +202,8 @@ const toVolunteer = (row: Record<string, unknown>): Volunteer => ({
 });
 
 function getRepair(db: Db, repairId: number): Repair {
-  return (db.prepare(`${REPAIR_SELECT} where r.id = ?`).get(repairId) as unknown as Repair | undefined) ?? notFound('Réparation');
+  const row = db.prepare(`${REPAIR_SELECT} where r.id = ?`).get(repairId);
+  return row ? toRepair(row) : notFound('Réparation');
 }
 
 function getSession(db: Db, sessionId: number): Session {
@@ -192,10 +234,30 @@ const visitorFields = {
   phone: optional(30),
   email,
   postalCode: optional(10),
+  city: optional(80),
   notes: optional(2000),
   charterAccepted: z.boolean().optional(),
 };
-const VISITOR_COLUMNS = { firstName: 'first_name', lastName: 'last_name', phone: 'phone', email: 'email', postalCode: 'postal_code', notes: 'notes' };
+const VISITOR_COLUMNS = { firstName: 'first_name', lastName: 'last_name', phone: 'phone', email: 'email', postalCode: 'postal_code', city: 'city', notes: 'notes' };
+
+const membershipFields = z.object({
+  rate: z.enum(RATES),
+  amountCents: z.number().int().min(0).max(1_000_000),
+  paymentMethod: z.enum(PAYMENT_METHODS).nullable(),
+});
+
+const settingsFields = z.object({
+  reducedCents: z.number().int().min(0).max(1_000_000),
+  standardCents: z.number().int().min(0).max(1_000_000),
+  reducedTowns: z.array(z.string().trim().min(1).max(80)).max(500),
+});
+
+/** Enregistre l'adhésion de l'année en cours (une seule par visiteur et par an). */
+function addMembership(db: Db, visitorId: number, input: z.output<typeof membershipFields>): void {
+  const existing = db.prepare('select id from memberships where visitor_id = ? and year = ?').get(visitorId, thisYear());
+  if (existing) throw new HTTPException(409, { message: `L'adhésion ${thisYear()} est déjà réglée.` });
+  insert(db, 'memberships', { visitor_id: visitorId, year: thisYear(), rate: input.rate, amount_cents: input.amountCents, payment_method: input.paymentMethod, paid_at: nowIso() });
+}
 
 const sessionFields = {
   date,
@@ -303,11 +365,27 @@ export function createApp(db: Db) {
       visitors: count(`select count(*) as n from visitors`),
       volunteers: count(`select count(*) as n from volunteers where active = 1`),
       donationsCents: done.reduce((sum, r) => sum + (r.donationCents ?? 0), 0),
+      members: count(`select count(*) as n from memberships where year = ${YEAR_SQL}`),
+      membershipsCents: count(`select sum(amount_cents) as n from memberships where year = ${YEAR_SQL}`),
       byCategory: [...byCategory].map(([category, v]) => ({ category: category as Stats['byCategory'][number]['category'], ...v })).sort((a, b) => b.finished - a.finished),
       nextSession: next ? toSession(next) : null,
-      recent: db.prepare(`${REPAIR_SELECT} where r.status = 'done' order by r.ended_at desc limit 6`).all() as unknown as Repair[],
+      recent: db.prepare(`${REPAIR_SELECT} where r.status = 'done' order by r.ended_at desc limit 6`).all().map(toRepair),
     };
     return c.json(stats);
+  });
+
+  // Réglages de l'adhésion
+
+  app.get('/settings', (c) => c.json(getSettings(db)));
+
+  app.put('/settings', async (c) => {
+    const input = parse(settingsFields, await body(c));
+    // Une commune par ligne, sans doublon.
+    const unique = new Map<string, string>();
+    for (const town of input.reducedTowns) if (!unique.has(townKey(town))) unique.set(townKey(town), town);
+    const towns = [...unique.values()].sort((a, b) => a.localeCompare(b, 'fr'));
+    saveSettings(db, { ...input, reducedTowns: towns });
+    return c.json(getSettings(db));
   });
 
   // Séances
@@ -316,7 +394,7 @@ export function createApp(db: Db) {
 
   app.get('/sessions/:id', (c) => {
     const session = getSession(db, idParam(c));
-    const repairs = db.prepare(`${REPAIR_SELECT} where r.session_id = ? order by r.slot_time is null, r.slot_time, r.id`).all(session.id) as unknown as Repair[];
+    const repairs = db.prepare(`${REPAIR_SELECT} where r.session_id = ? order by r.slot_time is null, r.slot_time, r.id`).all(session.id).map(toRepair);
     const detail: SessionDetail = { ...session, slots: slotsOf(session), repairs };
     return c.json(detail);
   });
@@ -359,15 +437,36 @@ export function createApp(db: Db) {
   app.get('/visitors/:id', (c) => {
     const row = db.prepare(`${VISITOR_SELECT} where v.id = ?`).get(idParam(c)) ?? notFound('Visiteur');
     const visitor = toVisitor(row);
-    const repairs = db.prepare(`${REPAIR_SELECT} where r.visitor_id = ? order by coalesce(s.date, r.created_at) desc, r.id desc`).all(visitor.id) as unknown as Repair[];
-    const detail: VisitorDetail = { ...visitor, repairs };
+    const repairs = db.prepare(`${REPAIR_SELECT} where r.visitor_id = ? order by coalesce(s.date, r.created_at) desc, r.id desc`).all(visitor.id).map(toRepair);
+    const memberships = db.prepare(`${MEMBERSHIP_SELECT} where visitor_id = ? order by year desc`).all(visitor.id) as unknown as Membership[];
+    const detail: VisitorDetail = { ...visitor, repairs, memberships };
     return c.json(detail);
   });
 
+  /** Création d'une fiche, avec l'adhésion de l'année si elle est réglée tout de suite. */
   app.post('/visitors', async (c) => {
-    const input = parse(z.object(visitorFields), await body(c));
-    const visitorId = insert(db, 'visitors', { ...columns(input, VISITOR_COLUMNS), charter_accepted_at: input.charterAccepted ? nowIso() : null });
+    const input = parse(z.object({ ...visitorFields, membership: membershipFields.nullable().optional() }), await body(c));
+    const visitorId = transaction(db, () => {
+      const newId = insert(db, 'visitors', { ...columns(input, VISITOR_COLUMNS), charter_accepted_at: input.charterAccepted ? nowIso() : null });
+      if (input.membership) addMembership(db, newId, input.membership);
+      return newId;
+    });
     return c.json(toVisitor(db.prepare(`${VISITOR_SELECT} where v.id = ?`).get(visitorId)!), 201);
+  });
+
+  app.post('/visitors/:id/memberships', async (c) => {
+    const visitorId = idParam(c);
+    db.prepare('select id from visitors where id = ? and anonymized = 0').get(visitorId) ?? notFound('Visiteur');
+    addMembership(db, visitorId, parse(membershipFields, await body(c)));
+    return c.json(toVisitor(db.prepare(`${VISITOR_SELECT} where v.id = ?`).get(visitorId)!), 201);
+  });
+
+  /** Pour corriger une erreur de saisie. */
+  app.delete('/memberships/:id', (c) => {
+    const membershipId = idParam(c);
+    db.prepare('select id from memberships where id = ?').get(membershipId) ?? notFound('Adhésion');
+    db.prepare('delete from memberships where id = ?').run(membershipId);
+    return c.body(null, 204);
   });
 
   app.patch('/visitors/:id', async (c) => {
@@ -432,11 +531,11 @@ export function createApp(db: Db) {
       params.q = `%${q}%`;
     }
     const where = filters.length ? `where ${filters.join(' and ')}` : '';
-    return c.json(db.prepare(`${REPAIR_SELECT} ${where} order by coalesce(s.date, substr(r.created_at, 1, 10)) desc, r.id desc limit 500`).all(params));
+    return c.json(db.prepare(`${REPAIR_SELECT} ${where} order by coalesce(s.date, substr(r.created_at, 1, 10)) desc, r.id desc limit 500`).all(params).map(toRepair));
   });
 
   app.get('/repairs/export.csv', (c) => {
-    const repairs = db.prepare(`${REPAIR_SELECT} order by s.date, r.id`).all() as unknown as Repair[];
+    const repairs = db.prepare(`${REPAIR_SELECT} order by s.date, r.id`).all().map(toRepair);
     const header = ['N°', 'Séance', 'Catégorie', 'Objet', 'Marque', 'Modèle', 'Âge (ans)', 'Panne', 'Étape', 'Résultat', 'Diagnostic', 'Réparateur', 'Poids (kg)', 'Participation (€)'];
     const cell = (value: unknown) => {
       const text = value === null || value === undefined ? '' : String(value);
@@ -532,6 +631,9 @@ export function createApp(db: Db) {
     return c.json(result);
   });
 
+  /** Tarifs de l'adhésion, affichés sur la page de réservation. */
+  app.get('/public/membership', (c) => c.json(getSettings(db)));
+
   app.post('/public/bookings', async (c) => {
     const input = parse(
       z.object({
@@ -542,6 +644,7 @@ export function createApp(db: Db) {
         phone: visitorFields.phone,
         email: visitorFields.email,
         postalCode: visitorFields.postalCode,
+        city: visitorFields.city,
         ...objectFields,
         charter: z.literal(true, { error: 'il faut accepter la charte pour réserver' }),
       }),
@@ -552,7 +655,10 @@ export function createApp(db: Db) {
       const session = checkSlot(db, input.sessionId, input.slotTime);
       if (session.date < today()) throw new HTTPException(400, { message: 'Cette séance est passée.' });
       const visitorId = findVisitor(db, input.email ?? null, input.phone ?? null) ?? insert(db, 'visitors', { ...columns(input, VISITOR_COLUMNS) });
-      update(db, 'visitors', visitorId, { charter_accepted_at: nowIso(), ...columns({ phone: input.phone ?? undefined, email: input.email ?? undefined, postalCode: input.postalCode ?? undefined }, VISITOR_COLUMNS) });
+      update(db, 'visitors', visitorId, {
+        charter_accepted_at: nowIso(),
+        ...columns({ phone: input.phone ?? undefined, email: input.email ?? undefined, postalCode: input.postalCode ?? undefined, city: input.city ?? undefined }, VISITOR_COLUMNS),
+      });
       const repairId = insert(db, 'repairs', {
         ...columns(input, REPAIR_COLUMNS),
         visitor_id: visitorId,

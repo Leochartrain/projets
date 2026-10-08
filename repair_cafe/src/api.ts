@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
-import type { PublicSession, Repair, Session, SessionDetail, Stats, Visitor, VisitorDetail, Volunteer } from '@shared/domain';
+import type { MembershipSettings, PublicSession, Repair, Session, SessionDetail, Stats, Visitor, VisitorDetail, Volunteer } from '@shared/domain';
 
 export class ApiError extends Error {}
 
@@ -24,6 +24,7 @@ export const api = {
   get: <T>(path: string) => request<T>(path),
   post: <T>(path: string, body: unknown) => request<T>(path, { method: 'POST', body }),
   patch: <T>(path: string, body: unknown) => request<T>(path, { method: 'PATCH', body }),
+  put: <T>(path: string, body: unknown) => request<T>(path, { method: 'PUT', body }),
   delete: (path: string) => request<void>(path, { method: 'DELETE' }),
 };
 
@@ -43,7 +44,9 @@ export const useVisitors = (q: string) =>
 export const useVisitor = (id: number) => useQuery({ queryKey: ['visitors', 'detail', id], queryFn: () => api.get<VisitorDetail>(`/visitors/${id}`) });
 export const useVolunteers = () => useQuery({ queryKey: ['volunteers'], queryFn: () => api.get<Volunteer[]>('/volunteers') });
 export const useRepair = (id: number) => useQuery({ queryKey: ['repairs', id], queryFn: () => api.get<Repair>(`/repairs/${id}`) });
-export const usePublicSessions = () => useQuery({ queryKey: ['public-sessions'], queryFn: () => api.get<PublicSession[]>('/public/sessions') });
+export const useSettings = () => useQuery({ queryKey: ['settings'], queryFn: () => api.get<MembershipSettings>('/settings') });
+export const usePublicMembership = () => useQuery({ queryKey: ['public-membership'], queryFn: () => api.get<MembershipSettings>('/public/membership') });
+export const usePublicSessions =() => useQuery({ queryKey: ['public-sessions'], queryFn: () => api.get<PublicSession[]>('/public/sessions') });
 
 export function useRepairs(filters: Record<string, string>) {
   const params = new URLSearchParams(Object.entries(filters).filter(([, v]) => v));

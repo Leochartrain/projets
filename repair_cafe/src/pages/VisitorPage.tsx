@@ -1,10 +1,11 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useParams } from 'react-router';
-import { categoryLabel, type Visitor, type VisitorDetail } from '@shared/domain';
+import { PAYMENT_LABELS, RATE_LABELS, categoryLabel, type Visitor, type VisitorDetail } from '@shared/domain';
 import { api, errorText, useSave, useVisitor } from '@/api';
 import { VisitorFields, type VisitorDraft } from '@/components/forms';
+import { currentYear, MembershipBadge, PayMembershipModal } from '@/components/membership';
 import { Button, Card, EmptyState, ErrorBox, PageHeader, RepairBadge, Spinner, TextArea } from '@/components/ui';
-import { shortDate } from '@/format';
+import { euros, shortDate } from '@/format';
 
 export function VisitorPage() {
   const id = Number(useParams().id);
@@ -21,7 +22,10 @@ function VisitorSheet({ visitor }: { visitor: VisitorDetail }) {
     phone: visitor.phone ?? '',
     email: visitor.email ?? '',
     postalCode: visitor.postalCode ?? '',
+    city: visitor.city ?? '',
   });
+  const [paying, setPaying] = useState(false);
+  const removeMembership = useSave((membershipId: number) => api.delete(`/memberships/${membershipId}`));
   const [notes, setNotes] = useState(visitor.notes ?? '');
   const [saved, setSaved] = useState(false);
   const [confirmErase, setConfirmErase] = useState(false);
@@ -61,6 +65,46 @@ function VisitorSheet({ visitor }: { visitor: VisitorDetail }) {
                   </Button>
                 </div>
               </form>
+            </Card>
+          )}
+
+          {!visitor.anonymized && (
+            <Card className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className="text-lg">Adhésion</h2>
+                <MembershipBadge visitor={visitor} />
+              </div>
+              {visitor.membership ? (
+                <p className="text-sm">
+                  {currentYear()} réglée le <strong>{shortDate(visitor.membership.paidAt)}</strong> : {euros(visitor.membership.amountCents)} ({RATE_LABELS[visitor.membership.rate].toLowerCase()}
+                  {visitor.membership.paymentMethod && `, ${PAYMENT_LABELS[visitor.membership.paymentMethod].toLowerCase()}`}).
+                </p>
+              ) : (
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-sm text-amber">Adhésion {currentYear()} pas encore réglée : obligatoire pour faire réparer un objet.</p>
+                  <Button size="sm" onClick={() => setPaying(true)}>
+                    Encaisser l'adhésion
+                  </Button>
+                </div>
+              )}
+              {visitor.memberships.length > 0 && (
+                <ul className="flex flex-col divide-y divide-line text-sm">
+                  {visitor.memberships.map((m) => (
+                    <li key={m.id} className="flex items-center justify-between gap-2 py-2">
+                      <span>
+                        <strong>{m.year}</strong> · {euros(m.amountCents)} · {RATE_LABELS[m.rate]}
+                        {m.paymentMethod && ` · ${PAYMENT_LABELS[m.paymentMethod]}`}
+                      </span>
+                      {m.year === currentYear() && (
+                        <Button size="sm" variant="ghost" title="Annuler cette adhésion (erreur de saisie)" disabled={removeMembership.isPending} onClick={() => removeMembership.mutate(m.id)}>
+                          Annuler
+                        </Button>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {removeMembership.error && <ErrorBox>{errorText(removeMembership.error)}</ErrorBox>}
             </Card>
           )}
 
@@ -126,6 +170,7 @@ function VisitorSheet({ visitor }: { visitor: VisitorDetail }) {
           )}
         </Card>
       </div>
+      {paying && <PayMembershipModal visitorId={visitor.id} visitorName={`${visitor.firstName} ${visitor.lastName}`} city={visitor.city} onClose={() => setPaying(false)} />}
     </>
   );
 }

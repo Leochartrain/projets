@@ -41,7 +41,13 @@ Au premier lancement, la base `data/repair-cafe.db` est créée avec des donnée
 
 **Réparations** : toutes les fiches, avec recherche et filtres (étape, catégorie, résultat), et export CSV (point-virgule, s'ouvre directement dans Excel).
 
-**Visiteurs** : fiche, historique des objets apportés, charte signée ou non. Le bouton « Effacer ses données » applique le droit à l'effacement (RGPD) : nom et coordonnées supprimés, réparations gardées anonymement pour les statistiques.
+**Adhésion annuelle** : obligatoire pour faire réparer un objet, valable pour l'année civile. Tarif réduit (8 € par défaut) pour les habitants de certaines communes, tarif normal (50 €) pour les autres ; il y a aussi « Offerte ». Les montants et la liste des communes se règlent dans **Réglages** (la liste des données d'exemple est fictive). Le tarif est proposé d'après la commune du visiteur et reste modifiable.
+- À la création d'un visiteur (accueil ou page Visiteurs) : on encaisse l'adhésion dans la foulée, ou on la laisse « à régler ».
+- À l'accueil, une pastille « Adhésion à régler » signale les visiteurs qui ne l'ont pas encore payée cette année, et « Prendre en charge » propose de l'encaisser avant de commencer.
+- Sur la page de réservation, les tarifs sont affichés (avec celui qui correspond à la commune saisie) ; l'adhésion se règle sur place.
+- Tableau de bord : nombre d'adhérents et montant des adhésions de l'année.
+
+**Visiteurs** : fiche (avec la commune), adhésion de l'année et historique, objets apportés, charte signée ou non. Le bouton « Effacer ses données » applique le droit à l'effacement (RGPD) : nom et coordonnées supprimés, réparations gardées anonymement pour les statistiques.
 
 **Bénévoles** : coordonnées, spécialités, actif ou non, nombre d'interventions et d'objets réparés.
 

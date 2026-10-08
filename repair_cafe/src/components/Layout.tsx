@@ -6,6 +6,7 @@ const NAV: { to: string; label: string; icon: string }[] = [
   { to: '/reparations', label: 'Réparations', icon: 'M14.7 6.3a4 4 0 0 0-5.4 5.2L4 16.8V20h3.2l5.3-5.3a4 4 0 0 0 5.2-5.4l-2.6 2.6-2.4-.6-.6-2.4z' },
   { to: '/visiteurs', label: 'Visiteurs', icon: 'M16 19v-1a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v1M9.5 10a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zM21 19v-1a4 4 0 0 0-3-3.9M15.5 3.1a3.5 3.5 0 0 1 0 6.8' },
   { to: '/benevoles', label: 'Bénévoles', icon: 'M12 21s-7-4.4-9.3-9A5 5 0 0 1 12 6.5 5 5 0 0 1 21.3 12C19 16.6 12 21 12 21z' },
+  { to: '/reglages', label: 'Réglages', icon: 'M4 6h10M18 6h2M4 12h4M12 12h8M4 18h12M20 18h0M16 4v4M10 10v4M18 16v4' },
 ];
 
 function NavIcon({ d }: { d: string }) {
@@ -54,7 +55,7 @@ export function Layout() {
         <Outlet />
       </main>
 
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-line bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t border-line bg-card pb-[env(safe-area-inset-bottom)] md:hidden">
         {NAV.map((item) => (
           <NavLink
             key={item.to}

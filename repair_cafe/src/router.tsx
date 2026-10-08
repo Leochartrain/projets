@@ -7,6 +7,7 @@ import { RepairPage } from './pages/RepairPage';
 import { RepairsPage } from './pages/RepairsPage';
 import { SessionPage } from './pages/SessionPage';
 import { SessionsPage } from './pages/SessionsPage';
+import { SettingsPage } from './pages/SettingsPage';
 import { VisitorPage } from './pages/VisitorPage';
 import { VisitorsPage } from './pages/VisitorsPage';
 import { VolunteersPage } from './pages/VolunteersPage';
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { path: 'visiteurs', Component: VisitorsPage },
       { path: 'visiteurs/:id', Component: VisitorPage },
       { path: 'benevoles', Component: VolunteersPage },
+      { path: 'reglages', Component: SettingsPage },
       { path: '*', Component: NotFoundPage },
     ],
   },

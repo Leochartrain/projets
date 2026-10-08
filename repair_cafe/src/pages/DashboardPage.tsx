@@ -26,8 +26,8 @@ export function DashboardPage() {
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="Objets réparés" tone="accent" value={stats.repaired} detail={`${rate} % des ${plural(stats.finished, 'objet examiné', 'objets examinés')}`} />
         <Stat label="Déchets évités" value={kilos(stats.kgSaved)} detail="poids des objets réparés" />
-        <Stat label="Visiteurs" value={stats.visitors} detail={plural(stats.volunteers, 'bénévole actif', 'bénévoles actifs')} />
-        <Stat label="Participations" value={euros(stats.donationsCents)} detail="dons libres collectés" />
+        <Stat label={`Adhérents ${new Date().getFullYear()}`} value={stats.members} detail={`${euros(stats.membershipsCents)} d'adhésions · ${plural(stats.visitors, 'visiteur')} au total`} />
+        <Stat label="Participations" value={euros(stats.donationsCents)} detail={`dons libres · ${plural(stats.volunteers, 'bénévole actif', 'bénévoles actifs')}`} />
       </div>
 
       <div className="grid items-start gap-6 lg:grid-cols-2">
