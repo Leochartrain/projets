@@ -1,6 +1,6 @@
 ---
 import { getImage } from 'astro:assets';
-import { ASSO } from '../config';
+import { ASSO, MISSING } from '../config';
 import logo from '../assets/logo.jpg';
 import shareImage from '../assets/photos/troupeau-tracteur.jpg';
 import Todo from '../components/Todo.astro';
@@ -34,6 +34,8 @@ const path = Astro.url.pathname;
     <meta property="og:image" content={new URL(share.src, Astro.site)} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="theme-color" content="#efe6d3" />
+    {/* Site pas encore complet (voir MISSING dans src/config.ts) : pas de référencement. */}
+    {MISSING.length > 0 && <meta name="robots" content="noindex, nofollow" />}
   </head>
   <body>
     <a class="skip" href="#contenu">Aller au contenu</a>

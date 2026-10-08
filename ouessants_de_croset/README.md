@@ -19,11 +19,12 @@ npm run preview    # sert dist/ sur http://localhost:4321
 
 Tout ce qui manque s'affiche sur le site en **[à compléter : …]** surligné en jaune.
 
-1. **`src/config.ts`** : téléphone, e-mail, secteur, adresse du siège, numéro RNA ou SIRET, responsable de la publication, chiffres du troupeau, réseaux sociaux.
-2. **Texte de présentation** de l'association : dans `src/pages/index.astro`, section « Qui sommes-nous ? ».
-3. **Formulaire de contact** : créer une clé gratuite sur [web3forms.com](https://web3forms.com) avec l'e-mail de l'association (250 messages par mois offerts), puis la mettre dans `WEB3FORMS_KEY` (`src/config.ts`). Sans clé, le formulaire invite à écrire par e-mail ou à téléphoner.
-4. **Logo** : `src/assets/logo.jpg` ne fait que 150 × 150 px ; le remplacer par l'original.
-5. **Adresse du site** : une fois le nom de domaine acheté, la mettre dans `site` (`astro.config.mjs`) ; elle sert aux aperçus de partage sur les réseaux.
+Tant qu'il manque une information, le site demande à Google et aux autres moteurs de **ne pas le référencer** (balise `noindex` sur toutes les pages). Le blocage se lève tout seul au déploiement suivant, une fois tout rempli. La liste de ce qui manque est `MISSING`, dans `src/config.ts`.
+
+1. **`src/config.ts`** : téléphone, e-mail, secteur, texte de présentation (`about`), adresse du siège, numéro RNA ou SIRET, responsable de la publication, chiffres du troupeau, réseaux sociaux (facultatifs).
+2. **Formulaire de contact** : créer une clé gratuite sur [web3forms.com](https://web3forms.com) avec l'e-mail de l'association (250 messages par mois offerts), puis la mettre dans `WEB3FORMS_KEY` (`src/config.ts`). Sans clé, le formulaire invite à écrire par e-mail ou à téléphoner.
+3. **Logo** : `src/assets/logo.jpg` ne fait que 150 × 150 px ; le remplacer par l'original.
+4. **Adresse du site** : une fois le nom de domaine acheté, la mettre dans `site` (`astro.config.mjs`) ; elle sert aux aperçus de partage sur les réseaux.
 
 ## Mettre en ligne (Cloudflare Pages, gratuit)
 
