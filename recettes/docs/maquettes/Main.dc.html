@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Accueil</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&amp;family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#23507f;text-decoration:none}a:hover{color:#163a5e}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #f6f7f2; color: #1d2733; font-family: Literata, Georgia, serif; display: flex; flex-direction: column; position: relative; overflow: hidden">
+  <div style="padding: 56px 20px 12px; display: flex; align-items: center; justify-content: space-between">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <span style="font: 500 11px/1.2 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #5b6672">Bonjour Bertrand</span>
+      <h1 style="margin: 0; font: 700 28px/1.1 'Familjen Grotesk', system-ui, sans-serif">Carnet de famille</h1>
+    </div>
+    <a href="Groupe.dc.html" aria-label="Mes groupes" style="width: 44px; height: 44px; border-radius: 50%; background: #23507f; color: #ffffff; display: flex; align-items: center; justify-content: center; font: 700 16px/1 'Familjen Grotesk', sans-serif">B</a>
+  </div>
+
+  <div style="padding: 0 20px 12px">
+    <label for="recherche" style="display: flex; align-items: center; gap: 10px; height: 46px; padding: 0 14px; border: 1px solid #d3d9cd; border-radius: 12px; background: #ffffff">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b6672" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
+      <input id="recherche" placeholder="Une recette, un ingrédient, une personne…" style="border: 0; outline: 0; flex: 1; font: 400 15px/1 Literata, serif; background: transparent; color: #1d2733">
+    </label>
+  </div>
+
+  <div style="padding: 4px 20px 14px; display: flex; gap: 8px; overflow: hidden">
+    <span style="flex: none; padding: 9px 14px; border-radius: 99px; background: #1d2733; color: #ffffff; font: 500 14px/1 'Familjen Grotesk', sans-serif">Tout</span>
+    <a href="Groupe.dc.html" style="flex: none; padding: 9px 14px; border-radius: 99px; background: #e3ecf6; color: #23507f; font: 500 14px/1 'Familjen Grotesk', sans-serif">Famille Richard</a>
+    <span style="flex: none; padding: 9px 14px; border-radius: 99px; background: #e3ecf6; color: #23507f; font: 500 14px/1 'Familjen Grotesk', sans-serif">Les potes du lycée</span>
+    <span style="flex: none; padding: 9px 14px; border-radius: 99px; background: #eceee7; color: #5b6672; font: 500 14px/1 'Familjen Grotesk', sans-serif">Mes brouillons</span>
+  </div>
+
+  <div style="flex: 1; padding: 0 20px 110px; display: flex; flex-direction: column; gap: 14px; overflow: hidden">
+    <span style="font: 500 11px/1.2 'IBM Plex Mono', monospace; letter-spacing: 0.08em; text-transform: uppercase; color: #5b6672">Ajoutées récemment</span>
+
+    <a href="Recette.dc.html" style="display: flex; flex-direction: column; background: #ffffff; border: 1px solid #dde2d6; border-radius: 16px; overflow: hidden; color: #1d2733">
+      <div style="height: 150px; background: #c99a63; display: flex; align-items: flex-end; padding: 12px; box-sizing: border-box">
+        <span style="font: 500 11px/1 'IBM Plex Mono', monospace; color: #ffffff; background: rgba(29,39,51,0.55); padding: 5px 8px; border-radius: 6px">[Photo des cookies]</span>
+      </div>
+      <div style="padding: 14px; display: flex; flex-direction: column; gap: 6px">
+        <span style="font: 700 19px/1.2 'Familjen Grotesk', sans-serif">Les cookies de Bertrand</span>
+        <span style="font: 400 14px/1.4 Literata, serif; color: #5b6672">Transmis par Mamie Jeanne · Famille Richard</span>
+        <span style="font: 500 12px/1 'IBM Plex Mono', monospace; color: #3f6d34">★ 4,8 · 6 avis · 25 min</span>
+      </div>
+    </a>
+
+    <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px">
+      <div style="display: flex; flex-direction: column; background: #ffffff; border: 1px solid #dde2d6; border-radius: 14px; overflow: hidden">
+        <div style="height: 92px; background: #8a9e6b"></div>
+        <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 4px">
+          <span style="font: 700 15px/1.2 'Familjen Grotesk', sans-serif">Blanquette de tata Sophie</span>
+          <span style="font: 500 11px/1 'IBM Plex Mono', monospace; color: #5b6672">★ 4,5 · 2 h</span>
+        </div>
+      </div>
+      <div style="display: flex; flex-direction: column; background: #ffffff; border: 1px solid #dde2d6; border-radius: 14px; overflow: hidden">
+        <div style="height: 92px; background: #b8604a"></div>
+        <div style="padding: 10px 12px; display: flex; flex-direction: column; gap: 4px">
+          <span style="font: 700 15px/1.2 'Familjen Grotesk', sans-serif">Tarte tatin de Julien</span>
+          <span style="font: 500 11px/1 'IBM Plex Mono', monospace; color: #5b6672">Les potes · 1 h 10</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a href="Ajouter.dc.html" style="position: absolute; right: 20px; bottom: 96px; height: 56px; padding: 0 22px; border-radius: 28px; background: #23507f; color: #ffffff; display: flex; align-items: center; gap: 10px; font: 700 16px/1 'Familjen Grotesk', sans-serif; box-shadow: 0 6px 18px rgba(35,80,127,0.35)">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"></path></svg>
+    Ajouter
+  </a>
+
+  <nav style="position: absolute; left: 0; right: 0; bottom: 0; height: 80px; background: #ffffff; border-top: 1px solid #dde2d6; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding-bottom: 14px; box-sizing: border-box">
+    <span style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #23507f; font: 500 12px/1 'Familjen Grotesk', sans-serif">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11l8-7 8 7v9H4z"></path></svg>Accueil</span>
+    <a href="Groupe.dc.html" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #5b6672; font: 500 12px/1 'Familjen Grotesk', sans-serif">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"></circle><circle cx="17" cy="9" r="2.5"></circle><path d="M3 19c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5M15 14.5c2.8 0 5 1.8 5 4.5"></path></svg>Groupes</a>
+    <span style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: #5b6672; font: 500 12px/1 'Familjen Grotesk', sans-serif">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>Favoris</span>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>

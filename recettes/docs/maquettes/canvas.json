@@ -1,0 +1,96 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Ajouter.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 28,
+      "title": "Ajouter une recette",
+      "w": 390,
+      "x": 1410,
+      "y": 0
+    },
+    "Cuisine.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 28,
+      "title": "Mode cuisine",
+      "w": 390,
+      "x": 940,
+      "y": 0
+    },
+    "Groupe.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 28,
+      "title": "Groupe",
+      "w": 390,
+      "x": 2350,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 28,
+      "title": "Accueil",
+      "w": 390,
+      "x": 0,
+      "y": 0
+    },
+    "Recette.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 28,
+      "title": "Recette",
+      "w": 390,
+      "x": 470,
+      "y": 0
+    },
+    "Relecture.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "radius": 28,
+      "title": "Relecture du scan",
+      "w": 390,
+      "x": 1880,
+      "y": 0
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-10-06T10:45:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {
+    "parcours": {
+      "fill": "blue",
+      "size": 24,
+      "text": "Parcours cliquable (bouton Play) : Accueil → Recette → Mode cuisine. Le bouton + de l'accueil mène à Ajouter → Relecture du scan → Groupe. Les photos sont des emplacements : l'appli affichera les vraies photos des plats et des fiches.",
+      "w": 520,
+      "x": 0,
+      "y": 900
+    },
+    "titre": {
+      "kind": "title1",
+      "maxW": 2740,
+      "text": "Carnet de famille · écrans de la V1",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Recette.dc.html",
+    "Cuisine.dc.html",
+    "Ajouter.dc.html",
+    "Relecture.dc.html",
+    "Groupe.dc.html"
+  ],
+  "pages": [],
+  "title": "Maquettes Carnet de famille"
+}

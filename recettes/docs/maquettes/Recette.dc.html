@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Recette</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&amp;family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap">
+<style>
+body{margin:0}
+a{color:#23507f;text-decoration:none}a:hover{color:#163a5e}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #f6f7f2; color: #1d2733; font-family: Literata, Georgia, serif; display: flex; flex-direction: column; position: relative; overflow: hidden">
+  <div style="height: 250px; background: #c99a63; position: relative; flex: none">
+    <a href="Main.dc.html" aria-label="Retour" style="position: absolute; top: 52px; left: 16px; width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1d2733" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"></path></svg>
+    </a>
+    <button aria-label="Ajouter aux favoris" style="position: absolute; top: 52px; right: 16px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(255,255,255,0.92); display: flex; align-items: center; justify-content: center">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#b8604a" stroke-width="2.2" stroke-linecap="round"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"></path></svg>
+    </button>
+    <span style="position: absolute; left: 16px; bottom: 16px; font: 500 11px/1 'IBM Plex Mono', monospace; color: #ffffff; background: rgba(29,39,51,0.55); padding: 5px 8px; border-radius: 6px">[Photo des cookies]</span>
+  </div>
+
+  <div style="flex: 1; padding: 20px 20px 100px; display: flex; flex-direction: column; gap: 16px; overflow: hidden">
+    <div style="display: flex; flex-direction: column; gap: 6px">
+      <h1 style="margin: 0; font: 700 26px/1.15 'Familjen Grotesk', system-ui, sans-serif">Les cookies de Bertrand</h1>
+      <span style="font: 400 15px/1.4 Literata, serif; color: #5b6672">Transmis par Mamie Jeanne</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+      <div style="background: #ffffff; border: 1px solid #dde2d6; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 4px">
+        <span style="font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #5b6672">Pour</span>
+        <span style="font: 700 16px/1 'Familjen Grotesk', sans-serif">20 cookies</span>
+      </div>
+      <div style="background: #ffffff; border: 1px solid #dde2d6; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 4px">
+        <span style="font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #5b6672">Prépa</span>
+        <span style="font: 700 16px/1 'Familjen Grotesk', sans-serif">15 min</span>
+      </div>
+      <div style="background: #ffffff; border: 1px solid #dde2d6; border-radius: 12px; padding: 10px; display: flex; flex-direction: column; gap: 4px">
+        <span style="font: 500 10px/1 'IBM Plex Mono', monospace; letter-spacing: 0.06em; text-transform: uppercase; color: #5b6672">Cuisson</span>
+        <span style="font: 700 16px/1 'Familjen Grotesk', sans-serif">10 min</span>
+      </div>
+    </div>
+
+    <div style="display: flex; gap: 6px; background: #e8ebe3; border-radius: 12px; padding: 4px">
+      <button style="flex: 1; height: 38px; border: 0; border-radius: 9px; background: #ffffff; font: 600 14px/1 'Familjen Grotesk', sans-serif; color: #1d2733">Ingrédients</button>
+      <button style="flex: 1; height: 38px; border: 0; border-radius: 9px; background: transparent; font: 500 14px/1 'Familjen Grotesk', sans-serif; color: #5b6672">Étapes</button>
+      <button style="flex: 1; height: 38px; border: 0; border-radius: 9px; background: transparent; font: 500 14px/1 'Familjen Grotesk', sans-serif; color: #5b6672">Fiche d'origine</button>
+    </div>
+
+    <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; font-size: 16px">
+      <li style="display: flex; gap: 12px"><span style="width: 64px; flex: none; font: 500 14px/1.5 'IBM Plex Mono', monospace; color: #5b6672">200 g</span>chocolat noir</li>
+      <li style="display: flex; gap: 12px"><span style="width: 64px; flex: none; font: 500 14px/1.5 'IBM Plex Mono', monospace; color: #5b6672">125 g</span>beurre demi-sel mou</li>
+      <li style="display: flex; gap: 12px"><span style="width: 64px; flex: none; font: 500 14px/1.5 'IBM Plex Mono', monospace; color: #5b6672">150 g</span>cassonade</li>
+      <li style="display: flex; gap: 12px"><span style="width: 64px; flex: none; font: 500 14px/1.5 'IBM Plex Mono', monospace; color: #5b6672">1</span>œuf</li>
+      <li style="display: flex; gap: 12px"><span style="width: 64px; flex: none; font: 500 14px/1.5 'IBM Plex Mono', monospace; color: #5b6672">250 g</span>farine</li>
+    </ul>
+
+    <div style="background: #e3ecf6; border-radius: 14px; padding: 14px; display: flex; gap: 12px; align-items: center">
+      <div style="width: 54px; height: 68px; flex: none; background: #fbf8ef; border: 1px solid #c9d6e4; border-radius: 4px; transform: rotate(-3deg)"></div>
+      <div style="display: flex; flex-direction: column; gap: 4px">
+        <span style="font: italic 400 15px/1.4 Literata, serif; color: #23507f">« Ne pas trop cuire, ils durcissent en refroidissant. »</span>
+        <span style="font: 500 11px/1 'IBM Plex Mono', monospace; color: #5b6672">Fiche de Mamie Jeanne</span>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; justify-content: space-between">
+      <span style="font: 600 15px/1 'Familjen Grotesk', sans-serif">★ 4,8 <span style="font-weight: 500; color: #5b6672">· 6 avis dans Famille Richard</span></span>
+      <span style="font: 500 14px/1 'Familjen Grotesk', sans-serif; color: #23507f">Voir</span>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 20px 30px; background: #f6f7f2; border-top: 1px solid #dde2d6; display: flex">
+    <a href="Cuisine.dc.html" style="flex: 1; height: 54px; border-radius: 14px; background: #23507f; color: #ffffff; display: flex; align-items: center; justify-content: center; gap: 10px; font: 700 17px/1 'Familjen Grotesk', sans-serif">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 5v14l11-7z"></path></svg>
+      Cuisiner
+    </a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {};
+  }
+}
+</script>
+</body>
+</html>
