@@ -26,3 +26,6 @@ mystic_woods/*.url
 FPS1/RetroWeaponPack_V1.zip
 FPS1/.retro/
 FPS1/public/assets/
+
+# Images de travail pour les sites (non versionnées)
+/IMAGES POUR SITE WEB/
