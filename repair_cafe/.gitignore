@@ -1,5 +1,0 @@
-node_modules/
-dist/
-*.tsbuildinfo
-# La base SQLite : données des visiteurs, à ne jamais commiter.
-data/
