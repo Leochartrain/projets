@@ -1,0 +1,28 @@
+{
+  "name": "bille-24h",
+  "private": true,
+  "description": "Teaser motion design des 24 Heures de la Bille (Saint-Mars-de-Locquenay)",
+  "scripts": {
+    "predev": "node scripts/sons.mjs",
+    "dev": "remotion studio --port 5210",
+    "prerender": "node scripts/sons.mjs",
+    "render": "remotion render Teaser out/teaser-vertical.mp4",
+    "still": "remotion still",
+    "sons": "node scripts/sons.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "@remotion/google-fonts": "4.0.536",
+    "@remotion/noise": "4.0.536",
+    "@remotion/paths": "4.0.536",
+    "@remotion/shapes": "4.0.536",
+    "@remotion/transitions": "4.0.536",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}

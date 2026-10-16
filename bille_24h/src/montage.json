@@ -1,0 +1,13 @@
+{
+  "fps": 30,
+  "scenes": [
+    {"id": "ouverture", "duree": 195, "transition": null},
+    {"id": "titre", "duree": 120, "transition": null},
+    {"id": "piste", "duree": 210, "transition": {"type": "balayage", "duree": 10}},
+    {"id": "chiffres", "duree": 180, "transition": {"type": "balayage", "duree": 10}},
+    {"id": "photos", "duree": 210, "transition": {"type": "damier", "duree": 14}},
+    {"id": "nuit", "duree": 210, "transition": {"type": "balayage", "duree": 10}},
+    {"id": "dates", "duree": 120, "transition": {"type": "damier", "duree": 14}},
+    {"id": "fin", "duree": 150, "transition": {"type": "balayage", "duree": 10}}
+  ]
+}
