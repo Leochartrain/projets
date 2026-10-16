@@ -13,7 +13,7 @@ import {Piste} from './scenes/Piste';
 import {Titre} from './scenes/Titre';
 import {balayage, damier} from './transitions';
 import {FPS, TEMPS} from './theme';
-import {enImages} from './temps';
+import {enImages, useImage} from './temps';
 
 const composants: Record<string, React.FC> = {
 	ouverture: Ouverture,
@@ -47,9 +47,9 @@ const bruitages: {scene: string; a: number; son: string; volume?: number}[] = [
 	{scene: 'piste', a: 0, son: 'souffle'},
 	{scene: 'piste', a: 70, son: 'tir', volume: 0.5},
 	{scene: 'chiffres', a: 0, son: 'souffle'},
-	...[0, 1, 2, 3].map((i) => ({scene: 'chiffres', a: 12 + i * 2 * TEMPS, son: 'bip'})),
-	{scene: 'chiffres', a: 12 + 8 * TEMPS, son: 'impact', volume: 0.6},
-	...[0, 1, 2].map((i) => ({scene: 'photos', a: i * 4 * TEMPS, son: 'declic'})),
+	...[0, 1, 2, 3].map((i) => ({scene: 'chiffres', a: 6 + i * 2 * TEMPS, son: 'impact', volume: 0.45})),
+	{scene: 'chiffres', a: 6 + 8 * TEMPS, son: 'impact', volume: 0.6},
+	...[0, 1, 2, 3].map((i) => ({scene: 'photos', a: i * 3 * TEMPS, son: 'declic'})),
 	{scene: 'nuit', a: 0, son: 'souffle'},
 	{scene: 'dates', a: 0, son: 'souffle'},
 	...[0, 8, 16].map((d) => ({scene: 'dates', a: TEMPS + d, son: 'impact', volume: 0.55})),
@@ -57,8 +57,22 @@ const bruitages: {scene: string; a: number; son: string; volume?: number}[] = [
 	{scene: 'fin', a: 4, son: 'impact'},
 ];
 
+// Pulsation sur la musique : la caméra « cogne » légèrement sur chaque temps après le titre,
+// plus fort sur le premier temps de chaque mesure.
+const Pulsation: React.FC<{children: React.ReactNode}> = ({children}) => {
+	const frame = useImage();
+	const depuis = frame - debuts.titre;
+	if (depuis < 0 || frame > debuts.fin + 60) return <AbsoluteFill>{children}</AbsoluteFill>;
+	const temps = Math.floor(depuis / TEMPS);
+	const phase = depuis - temps * TEMPS;
+	const force = temps % 4 === 0 ? 0.022 : 0.009;
+	const coup = 1 + force * Math.exp(-phase * 0.38);
+	return <AbsoluteFill style={{transform: `scale(${coup})`}}>{children}</AbsoluteFill>;
+};
+
 export const Teaser: React.FC = () => (
 	<AbsoluteFill style={{background: '#000'}}>
+		<Pulsation>
 		<TransitionSeries>
 			{montage.scenes.flatMap((s) => {
 				const Scene = composants[s.id];
@@ -80,6 +94,7 @@ export const Teaser: React.FC = () => (
 				return elements;
 			})}
 		</TransitionSeries>
+		</Pulsation>
 		<Pellicule />
 
 		<Audio src={staticFile('sons/musique.wav')} volume={0.85} />

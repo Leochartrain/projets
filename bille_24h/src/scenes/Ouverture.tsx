@@ -1,15 +1,14 @@
 import React from 'react';
 import {AbsoluteFill, Easing, interpolate, random} from 'remotion';
 import {FPS_BASE, useImage} from '../temps';
-import {Bille} from '../components/Bille';
+import {Bille3D} from '../three/Bille3D';
+import {Gerbe3D} from '../three/Gerbe3D';
+import {Plateau3D} from '../three/Plateau3D';
 import {Revele} from '../components/Revele';
-import {Sable} from '../components/Sable';
 import {couleurs, polices} from '../theme';
 
 // Image du tir : pile à 14:30:00, l'heure du départ de la manche 1.
 const TIR = 90;
-const BILLE_X = 540;
-const BILLE_Y = 1240;
 
 const grandTitre: React.CSSProperties = {
 	fontFamily: polices.titre,
@@ -51,56 +50,47 @@ const Poussieres: React.FC = () => {
 	);
 };
 
-// Gerbe de sable soulevée par le tir.
-const Gerbe: React.FC = () => {
-	const frame = useImage();
-	const t = frame - TIR;
-	if (t < 0 || t > 50) return null;
+// Plan 3D : la bille sur le sable, le travelling, puis le tir vers le fond.
+const PlanOuverture: React.FC<{frame: number}> = ({frame}) => {
+	const tir = frame - TIR;
+	const apres = Math.max(0, tir);
+	const tremble = interpolate(frame, [60, TIR], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const z = -(0.32 * apres + 0.006 * apres * apres);
+	const saut = tir > 0 ? Math.abs(Math.sin(apres * 0.45)) * 0.12 * Math.exp(-apres * 0.06) : 0;
+	const x = tir < 0 ? Math.sin(frame * 2.1) * 0.012 * tremble : 0;
+
+	const camZ = interpolate(frame, [0, TIR], [5.8, 4.9], {extrapolateRight: 'clamp', easing: Easing.inOut(Easing.sin)});
+	const pousse = interpolate(tir, [0, 10, 105], [0, 0.35, 0.6], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.cubic)});
+	const secousse = tir >= 0 && tir < 14 ? (1 - tir / 14) * 0.035 : 0;
+	const sx = (random(`cx${Math.floor(frame * 2)}`) - 0.5) * secousse;
+	const sy = (random(`cy${Math.floor(frame * 2)}`) - 0.5) * secousse;
+	const camX = interpolate(frame, [0, 195], [1.25, 0.55]);
+	const distance = Math.hypot(camX, 0.5, camZ - pousse);
+
 	return (
-		<AbsoluteFill>
-			{new Array(70).fill(0).map((_, i) => {
-				const angle = -Math.PI / 2 + (random(`ga${i}`) - 0.5) * 2.2;
-				const vitesse = 14 + random(`gv${i}`) * 26;
-				const x = BILLE_X + Math.cos(angle) * vitesse * t;
-				const y = BILLE_Y + 190 + Math.sin(angle) * vitesse * t + 0.9 * t * t;
-				const taille = 3 + random(`gt${i}`) * 9;
-				return (
-					<div
-						key={i}
-						style={{
-							position: 'absolute',
-							left: x,
-							top: y,
-							width: taille,
-							height: taille,
-							borderRadius: '40%',
-							background: i % 3 === 0 ? couleurs.sableFonce : couleurs.sableClair,
-							opacity: interpolate(t, [0, 35, 50], [1, 0.9, 0]),
-						}}
-					/>
-				);
-			})}
-		</AbsoluteFill>
+		<Plateau3D
+			camera={{position: [camX + sx, 0.95 + sy, camZ - pousse], cible: [0.05, 0.86, 0], fov: 34}}
+			mise_au_point={distance}
+			ouverture={0.009}
+		>
+			<Bille3D
+				couleur={couleurs.orange}
+				rayon={0.5}
+				position={[x, 0.47 + saut, z]}
+				roulis={tir < 0 ? frame * 0.02 : frame * 0.02 - z / 0.5}
+				axe={tir < 0 ? [0.3, 1, 0.2] : [1, 0, 0]}
+			/>
+			<Bille3D couleur={couleurs.bleu} rayon={0.5} position={[-1.5, 0.47, -3.2]} roulis={1} />
+			<Bille3D couleur={couleurs.jaune} rayon={0.5} position={[1.5, 0.47, -5.5]} roulis={2} />
+			<Bille3D couleur={couleurs.vert} rayon={0.5} position={[-0.6, 0.47, -8]} roulis={3} />
+			<Bille3D couleur={couleurs.rouge} rayon={0.5} position={[2.3, 0.47, -2.2]} roulis={4} />
+			<Gerbe3D t={tir} origine={[0, 0.03, 0.35]} />
+		</Plateau3D>
 	);
 };
 
 export const Ouverture: React.FC = () => {
 	const frame = useImage();
-
-	const avance = interpolate(frame, [0, 195], [1, 1.1]);
-	const secousse = frame >= TIR && frame < TIR + 12 ? (random(`s${frame}`) - 0.5) * 30 * (1 - (frame - TIR) / 12) : 0;
-
-	// Avant le tir : la bille tourne doucement puis tremble. Après : elle file au loin.
-	const tremble = interpolate(frame, [60, TIR], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-	const envol = interpolate(frame, [TIR, TIR + 16], [0, 1], {
-		extrapolateLeft: 'clamp',
-		extrapolateRight: 'clamp',
-		easing: Easing.in(Easing.cubic),
-	});
-	const billeX = BILLE_X + (frame < TIR ? Math.sin(frame * 2.1) * 4 * tremble : envol * 60);
-	const billeY = BILLE_Y - envol * 1700;
-	const billeEchelle = interpolate(frame, [0, TIR], [0.92, 1], {extrapolateRight: 'clamp'}) * (1 - envol * 0.7);
-	const rotation = frame < TIR ? frame * 1.5 : frame * 1.5 + (frame - TIR) * 40;
 
 	const flash = frame < TIR ? 0 : interpolate(frame, [TIR, TIR + 8], [0.55, 0], {extrapolateRight: 'clamp'});
 
@@ -110,39 +100,8 @@ export const Ouverture: React.FC = () => {
 
 	return (
 		<AbsoluteFill style={{background: couleurs.nuit, overflow: 'hidden'}}>
-			<AbsoluteFill style={{transform: `scale(${avance}) translate(${secousse}px, ${secousse * 0.6}px)`}}>
-				<Sable lumiere={{x: 50, y: 66, rayon: 62}} />
-				<Poussieres />
-
-				{/* traînée lumineuse de la bille lancée */}
-				{envol > 0 && envol < 1 ? (
-					<div
-						style={{
-							position: 'absolute',
-							left: billeX - 90 * billeEchelle,
-							top: billeY,
-							width: 180 * billeEchelle,
-							height: 900 * envol,
-							background: `linear-gradient(to bottom, ${couleurs.orange}88, rgba(255,106,19,0))`,
-							filter: 'blur(18px)',
-							borderRadius: '50%',
-						}}
-					/>
-				) : null}
-
-				<div
-					style={{
-						position: 'absolute',
-						left: billeX - 230,
-						top: billeY - 230,
-						transform: `scale(${billeEchelle})`,
-						filter: envol > 0 ? `blur(${envol * 6}px)` : undefined,
-					}}
-				>
-					<Bille taille={460} couleur={couleurs.orange} rotation={rotation} ombre={envol < 0.15} />
-				</div>
-				<Gerbe />
-			</AbsoluteFill>
+			<PlanOuverture frame={frame} />
+			<Poussieres />
 
 			<AbsoluteFill style={{background: '#fff', opacity: flash}} />
 

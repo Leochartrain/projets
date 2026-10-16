@@ -37,6 +37,9 @@ Pour la version finale, demander au comité les originaux en haute définition e
 - `src/scenes/` : les 8 scènes (voir `docs/storyboard.md`).
 - `src/components/` : bille en verre, sable, damier, voiture miniature, texte animé, grain pellicule.
 - `src/transitions.tsx` : transitions maison (damier, balayage).
+- `src/three/` : les plans 3D (three.js via `@remotion/three`) : bille en verre physique, sable en relief,
+  piste sur tables, gerbe de sable, « objectif » (profondeur de champ + halo, effets de three.js branchés à la main,
+  car `@react-three/postprocessing` rend une image noire dans Remotion). Rendu avec `gl: angle`.
 - Montage calé sur 120 BPM : un temps = 15 images (`TEMPS` dans `src/theme.ts`).
 - Rendu à 60 i/s, mais toutes les animations sont écrites en images à 30 i/s : `useImage()`
   (`src/temps.ts`) donne l’image courante dans cette unité, et `enImages()` convertit les durées.

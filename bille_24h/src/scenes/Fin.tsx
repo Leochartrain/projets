@@ -1,9 +1,9 @@
 import React from 'react';
 import {AbsoluteFill, Img, interpolate, spring, staticFile} from 'remotion';
 import {FPS_BASE, useImage} from '../temps';
-import {Bille} from '../components/Bille';
 import {Revele} from '../components/Revele';
-import {Sable} from '../components/Sable';
+import {Bille3D} from '../three/Bille3D';
+import {Plateau3D} from '../three/Plateau3D';
 import {billes, couleurs, polices, TEMPS} from '../theme';
 
 export const DUREE_FIN = 10 * TEMPS;
@@ -17,27 +17,24 @@ export const Fin: React.FC = () => {
 
 	return (
 		<AbsoluteFill style={{background: couleurs.nuit, overflow: 'hidden'}}>
-			<Sable lumiere={{x: 50, y: 32, rayon: 75}} />
-
-			{/* billes qui gravitent autour de la mascotte */}
-			{billes.map((c, i) => {
-				const a = (i / billes.length) * Math.PI * 2 + frame / 40;
-				const r = 400 + Math.sin(frame / 18 + i) * 20;
-				const s = spring({frame: frame - 10 - i * 3, fps, config: {damping: 14}});
-				return (
-					<div
-						key={c}
-						style={{
-							position: 'absolute',
-							left: 540 + Math.cos(a) * r * s - 40,
-							top: 600 + Math.sin(a) * r * 0.55 * s - 40,
-							zIndex: Math.sin(a) > 0 ? 2 : 0,
-						}}
-					>
-						<Bille taille={80} couleur={c} rotation={frame * 10 + i * 50} ombre={false} />
-					</div>
-				);
-			})}
+			{/* les cinq billes tournent en rond sur le sable, comme un tour d'honneur */}
+			<Plateau3D camera={{position: [0, 9, 3.6], cible: [0, 0, 1.3], fov: 30}} mise_au_point={9.4} ouverture={0.003} halo={0.55} exposition={0.95}>
+				{billes.map((c, i) => {
+					const arrivee = spring({frame: frame - 6 - i * 3, fps, config: {damping: 16}});
+					const angle = (i / billes.length) * Math.PI * 2 + frame / 45;
+					const r = 1.05 * arrivee + 6 * (1 - arrivee);
+					return (
+						<Bille3D
+							key={c}
+							couleur={c}
+							rayon={0.2}
+							position={[Math.cos(angle) * r, 0.19, Math.sin(angle) * r]}
+							roulis={(angle * r) / 0.2}
+							axe={[Math.cos(angle), 0, Math.sin(angle)]}
+						/>
+					);
+				})}
+			</Plateau3D>
 
 			<div
 				style={{

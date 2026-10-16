@@ -239,31 +239,89 @@ const sons = {tic, clic: () => verre(1.35), tir, souffle: () => souffle(), impac
 mkdirSync(DOSSIER, {recursive: true});
 for (const [nom, f] of Object.entries(sons)) ecrireWav(`${nom}.wav`, normaliser(f(), 0.85));
 
+
 // --- musique : 120 BPM, la mineur ---------------------------------------------
+// Deux bus : la batterie, et tout le reste (basse, accords, arpège) qui « pompe »
+// sous la grosse caisse (sidechain), comme dans la musique électro de pub.
 const TEMPS = 0.5;
 const DROP = debuts.titre;
 const FIN = debuts.fin;
-const g = tampon(DUREE + 1);
-const d = tampon(DUREE + 1);
-const mono = (b, a, gain, pan = 0) => {
-	ajouter(g, b, a, gain * (1 - Math.max(0, pan)));
-	ajouter(d, b, a, gain * (1 + Math.min(0, pan)));
+const fin = DUREE - 0.4;
+const longueur = Math.ceil((DUREE + 1) * SR);
+const bat = [new Float32Array(longueur), new Float32Array(longueur)];
+const mus = [new Float32Array(longueur), new Float32Array(longueur)];
+const poser = (bus, b, a, gain, pan = 0) => {
+	ajouter(bus[0], b, a, gain * (1 - Math.max(0, pan)));
+	ajouter(bus[1], b, a, gain * (1 + Math.min(0, pan)));
 };
 
-// Intro : nappe grave qui monte + montée de bruit avant le titre.
-{
-	const nappe = tampon(DROP + 0.2);
-	for (let i = 0; i < nappe.length; i++) {
-		const t = i / SR;
-		const v = (2 * ((t * midi(33)) % 1) - 1) + (2 * ((t * midi(45.07)) % 1) - 1) * 0.5;
-		nappe[i] = v * (t / DROP) ** 1.5 * 0.35;
+// Cymbale crash : bruit aigu à longue décroissance.
+const crash = () => {
+	const b = tampon(2.2);
+	for (let i = 0; i < b.length; i++) b[i] = bruit() * Math.exp(-(i / SR) * 2.2);
+	return reverbe(passeHaut(b, 5000), 0.3, 1.2);
+};
+// Souffle inversé : monte jusqu'à l'instant donné (avant une transition).
+const aspiration = (duree) => {
+	const b = tampon(duree);
+	for (let i = 0; i < b.length; i++) {
+		const t = i / SR / duree;
+		b[i] = bruit() * t ** 3;
 	}
-	mono(passeBas(nappe, (t) => 120 + 900 * (t / DROP) ** 2, 2), 0, 1);
-	const montee = souffle(2.4, 0.98);
-	mono(montee, DROP - 2.4, 0.5);
-	// Battement de cœur sur les temps de l'intro.
-	const k = kick();
-	for (let t = 0; t < DROP - 0.01; t += TEMPS * 2) mono(passeBas(k, 300), t, 0.45);
+	return passeBas(b, (t) => 600 + 9000 * (t / duree) ** 2, 1.4);
+};
+// Chute de sub-basse sous les grands impacts.
+const chuteSub = () => {
+	const b = tampon(1.4);
+	let ph = 0;
+	for (let i = 0; i < b.length; i++) {
+		const t = i / SR;
+		ph += (2 * Math.PI * (70 * Math.exp(-t * 1.6) + 28)) / SR;
+		b[i] = Math.sin(ph) * Math.exp(-t * 2.2);
+	}
+	return b;
+};
+// Pluck : note courte et brillante pour l'arpège.
+const pluck = (note) => {
+	const b = tampon(0.4);
+	const f = midi(note);
+	for (let i = 0; i < b.length; i++) {
+		const t = i / SR;
+		const saw = 2 * ((t * f) % 1) - 1;
+		const sq = Math.sign(Math.sin(2 * Math.PI * f * 1.003 * t));
+		b[i] = (saw * 0.6 + sq * 0.4) * Math.exp(-t * 9);
+	}
+	return passeBas(b, (t) => 600 + 5000 * Math.exp(-t * 14), 1.8);
+};
+// Nappe tenue : saw désaccordées, filtre qui respire lentement.
+const nappe = (notes, duree) => {
+	const b = tampon(duree + 1);
+	for (const n of notes)
+		for (const des of [-0.12, 0.05, 0.14]) {
+			const f = midi(n + des);
+			let ph = alea();
+			for (let i = 0; i < b.length; i++) {
+				const t = i / SR;
+				ph = (ph + f / SR) % 1;
+				const env = Math.min(1, t / 0.4) * (t < duree ? 1 : Math.exp(-(t - duree) * 4));
+				b[i] += (2 * ph - 1) * env * 0.05;
+			}
+		}
+	return reverbe(passeBas(b, (t) => 700 + 500 * Math.sin(t * 1.3), 0.9), 0.4, 1.3);
+};
+
+// Intro : nappe grave qui monte, battement de cœur, montée de bruit avant le titre.
+{
+	const n = tampon(DROP + 0.2);
+	for (let i = 0; i < n.length; i++) {
+		const t = i / SR;
+		const v = 2 * ((t * midi(33)) % 1) - 1 + (2 * ((t * midi(45.07)) % 1) - 1) * 0.5;
+		n[i] = v * (t / DROP) ** 1.5 * 0.35;
+	}
+	poser(mus, passeBas(n, (t) => 120 + 900 * (t / DROP) ** 2, 2), 0, 1);
+	poser(bat, aspiration(2.6), DROP - 2.6, 0.55);
+	const k = passeBas(kick(), 300);
+	for (let t = 0; t < DROP - 0.01; t += TEMPS * 2) poser(bat, k, t, 0.45);
 }
 
 const grille = [
@@ -272,45 +330,85 @@ const grille = [
 	[48, 52, 55], // do
 	[55, 59, 62], // sol
 ];
-const notesBasse = [45, 45, 41, 43];
+const notesBasse = [45, 41, 36, 43];
 const k = kick();
 const cl = clap();
 const hf = charleston(false);
 const ho = charleston(true);
-const fin = DUREE - 0.4;
+const coupsDeGrosseCaisse = [];
+// Pause d'une mesure avant les dates : la musique retient son souffle.
+const enPause = (t) => t >= debuts.dates - 2 && t < debuts.dates;
+// L'arpège arrive à la scène de la nuit, pour faire évoluer le morceau.
+const arpege = debuts.nuit;
 
 for (let t = DROP, n = 0; t < fin; t += TEMPS, n++) {
 	const mesure = Math.floor(n / 4);
-	const tempsDansMesure = n % 4;
-	// Respiration d'une mesure (sans grosse caisse) avant les dates.
-	const pause = t >= debuts.dates - 2 && t < debuts.dates;
-	if (!pause) mono(k, t, 0.95);
-	if (tempsDansMesure % 2 === 1) mono(cl, t, 0.4, 0.1);
-	mono(ho, t + TEMPS / 2, 0.16, -0.3);
-	for (let s = 0; s < 4; s++) mono(hf, t + (s * TEMPS) / 4, s % 2 ? 0.08 : 0.12, 0.35);
+	const temps = n % 4;
+	const pause = enPause(t);
+	if (!pause) {
+		poser(bat, k, t, 0.95);
+		coupsDeGrosseCaisse.push(t);
+	}
+	if (temps % 2 === 1) poser(bat, cl, t, pause ? 0.25 : 0.42, 0.1);
+	if (!pause) poser(bat, ho, t + TEMPS / 2, 0.15, -0.3);
+	for (let s = 0; s < 4; s++) poser(bat, hf, t + (s * TEMPS) / 4, s % 2 ? 0.07 : 0.11, 0.35);
 	const racine = notesBasse[mesure % 4];
-	mono(basse(racine - 12 + (tempsDansMesure === 3 ? 12 : 0), TEMPS * 0.45), t + TEMPS / 2, 0.42);
-	if (tempsDansMesure === 0 && t < FIN + 1) {
-		const a = accord(grille[mesure % 4], TEMPS * 0.4);
-		mono(a, t, 0.5, -0.2);
-		mono(a, t + TEMPS * 1.5, 0.3, 0.25);
+	for (const d of [0.5, 0.75]) poser(mus, basse(racine - 12 + (temps === 3 && d === 0.75 ? 12 : 0), TEMPS * 0.22), t + TEMPS * d, 0.5);
+	if (temps === 0) {
+		poser(mus, accord(grille[mesure % 4], TEMPS * 0.35), t, 0.42, -0.2);
+		poser(mus, accord(grille[mesure % 4], TEMPS * 0.2), t + TEMPS * 1.5, 0.26, 0.25);
+		if (t >= arpege) poser(mus, nappe(grille[mesure % 4].map((x) => x - 12), TEMPS * 4), t, 0.6);
+	}
+	if (t >= arpege && !pause) {
+		const accordCourant = grille[mesure % 4];
+		for (let s = 0; s < 4; s++) {
+			const note = accordCourant[(n * 4 + s) % 3] + 12 + (s === 3 ? 12 : 0);
+			poser(mus, pluck(note), t + (s * TEMPS) / 4, 0.16, s % 2 ? 0.45 : -0.45);
+		}
 	}
 }
-// Impacts musicaux sur les grands moments.
-for (const id of ['titre', 'dates', 'fin']) mono(impact(), debuts[id] + (id === 'fin' ? 4 / 30 : 0), 0.5);
-// Accord final tenu.
-mono(accord([45, 57, 60, 64, 69], 2.2), FIN + 1, 0.7);
 
-// Mastering : fondu final, saturation douce, normalisation.
-for (let i = 0; i < g.length; i++) {
+// Ponctuation : aspiration avant chaque transition, crash et sub sur les moments forts.
+for (const s of montage.scenes) {
+	const a = debuts[s.id];
+	if (s.transition && a > DROP) poser(bat, aspiration(0.9), a - 0.9 + (s.transition.duree / montage.fps) * 0.5, 0.35);
+}
+for (const id of ['titre', 'chiffres', 'nuit', 'dates', 'fin']) {
+	const a = debuts[id] + (id === 'fin' ? 4 / 30 : 0);
+	poser(bat, crash(), a, 0.32);
+	poser(mus, chuteSub(), a, id === 'titre' || id === 'dates' ? 0.9 : 0.55);
+	poser(bat, impact(), a, id === 'titre' || id === 'dates' ? 0.5 : 0.3);
+}
+// Accord final tenu.
+poser(mus, nappe([45, 57, 60, 64, 69], 2.4), FIN + 1, 1.4);
+poser(mus, accord([45, 57, 60, 64, 69], 2.2), FIN + 1, 0.6);
+
+// Sidechain : le bus musical s'efface à chaque coup de grosse caisse puis revient.
+{
+	let prochain = 0;
+	let dernier = -10;
+	for (let i = 0; i < longueur; i++) {
+		const t = i / SR;
+		while (prochain < coupsDeGrosseCaisse.length && coupsDeGrosseCaisse[prochain] <= t) dernier = coupsDeGrosseCaisse[prochain++];
+		const ecart = t - dernier;
+		const gain = 1 - 0.62 * Math.exp(-ecart * 11);
+		mus[0][i] *= gain;
+		mus[1][i] *= gain;
+	}
+}
+
+// Mastering : somme, fondu final, saturation douce, normalisation.
+const g = new Float32Array(longueur);
+const d = new Float32Array(longueur);
+for (let i = 0; i < longueur; i++) {
 	const t = i / SR;
 	const fondu = Math.min(1, Math.max(0, (DUREE - t) / 1.2));
-	g[i] = Math.tanh(g[i] * 1.3) * fondu;
-	d[i] = Math.tanh(d[i] * 1.3) * fondu;
+	g[i] = Math.tanh((bat[0][i] + mus[0][i]) * 1.25) * fondu;
+	d[i] = Math.tanh((bat[1][i] + mus[1][i]) * 1.25) * fondu;
 }
 let crete = 0;
-for (let i = 0; i < g.length; i++) crete = Math.max(crete, Math.abs(g[i]), Math.abs(d[i]));
-for (let i = 0; i < g.length; i++) {
+for (let i = 0; i < longueur; i++) crete = Math.max(crete, Math.abs(g[i]), Math.abs(d[i]));
+for (let i = 0; i < longueur; i++) {
 	g[i] *= 0.89 / crete;
 	d[i] *= 0.89 / crete;
 }

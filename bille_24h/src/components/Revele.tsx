@@ -66,6 +66,8 @@ export const Revele: React.FC<Props> = ({
 									style={{
 										display: 'inline-block',
 										transform: `translateY(${y}%) rotate(${(1 - p) * 6}deg)`,
+										// flou de mouvement pendant la montée
+										filter: p < 0.98 || sortieP > 0 ? `blur(${Math.max(1 - p, sortieP) * 10}px)` : undefined,
 										whiteSpace: 'pre',
 									}}
 								>

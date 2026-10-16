@@ -7,10 +7,11 @@ import {couleurs, polices, TEMPS} from '../theme';
 // Photos du Comité des Fêtes (dossier public/club, non versionné).
 const plans = [
 	{fichier: 'club/joueur-45.jpg', legende: 'CONCENTRATION MAXIMALE', dossard: '45', origine: '55% 60%', de: 1.08, a: 1.22},
+	{fichier: 'club/joueur-5.jpg', legende: 'LE GESTE PARFAIT', dossard: '5', origine: '30% 70%', de: 1.3, a: 1.12},
 	{fichier: 'club/pont-dunlop.jpg', legende: 'LE PASSAGE DU PONT', dossard: '20', origine: '45% 50%', de: 1.35, a: 1.15},
 	{fichier: 'club/vue-ensemble.jpg', legende: 'TOUT LE VILLAGE EST LÀ', dossard: '72', origine: '50% 62%', de: 1.25, a: 1.1},
 ];
-const DUREE_PLAN = 4 * TEMPS;
+const DUREE_PLAN = 3 * TEMPS;
 
 const Coins: React.FC = () => {
 	const t = 70;

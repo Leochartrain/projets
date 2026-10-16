@@ -5,3 +5,4 @@ Config.setJpegQuality(95);
 Config.setCodec('h264');
 Config.setCrf(16);
 Config.setOverwriteOutput(true);
+Config.setChromiumOpenGlRenderer('angle');
