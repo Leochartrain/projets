@@ -1,5 +1,6 @@
 import React from 'react';
-import {AbsoluteFill, Easing, interpolate, random, useCurrentFrame} from 'remotion';
+import {AbsoluteFill, Easing, interpolate, random} from 'remotion';
+import {FPS_BASE, useImage} from '../temps';
 import {Bille} from '../components/Bille';
 import {Revele} from '../components/Revele';
 import {Sable} from '../components/Sable';
@@ -20,7 +21,7 @@ const grandTitre: React.CSSProperties = {
 };
 
 const Poussieres: React.FC = () => {
-	const frame = useCurrentFrame();
+	const frame = useImage();
 	return (
 		<AbsoluteFill>
 			{new Array(26).fill(0).map((_, i) => {
@@ -52,7 +53,7 @@ const Poussieres: React.FC = () => {
 
 // Gerbe de sable soulevée par le tir.
 const Gerbe: React.FC = () => {
-	const frame = useCurrentFrame();
+	const frame = useImage();
 	const t = frame - TIR;
 	if (t < 0 || t > 50) return null;
 	return (
@@ -84,7 +85,7 @@ const Gerbe: React.FC = () => {
 };
 
 export const Ouverture: React.FC = () => {
-	const frame = useCurrentFrame();
+	const frame = useImage();
 
 	const avance = interpolate(frame, [0, 195], [1, 1.1]);
 	const secousse = frame >= TIR && frame < TIR + 12 ? (random(`s${frame}`) - 0.5) * 30 * (1 - (frame - TIR) / 12) : 0;

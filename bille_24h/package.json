@@ -3,12 +3,13 @@
   "private": true,
   "description": "Teaser motion design des 24 Heures de la Bille (Saint-Mars-de-Locquenay)",
   "scripts": {
-    "predev": "node scripts/sons.mjs",
+    "predev": "node scripts/sons.mjs && node scripts/textures.mjs",
     "dev": "remotion studio --port 5210",
-    "prerender": "node scripts/sons.mjs",
+    "prerender": "node scripts/sons.mjs && node scripts/textures.mjs",
     "render": "remotion render Teaser out/teaser-vertical.mp4",
     "still": "remotion still",
-    "sons": "node scripts/sons.mjs"
+    "sons": "node scripts/sons.mjs",
+    "textures": "node scripts/textures.mjs"
   },
   "dependencies": {
     "@remotion/cli": "4.0.536",

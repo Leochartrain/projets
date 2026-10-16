@@ -1,10 +1,11 @@
 import React from 'react';
-import {AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Easing, interpolate, spring, staticFile} from 'remotion';
+import {FPS_BASE, useImage} from '../temps';
 import {getLength, getPointAtLength, getTangentAtLength} from '@remotion/paths';
 import {Bille} from '../components/Bille';
 import {Damier} from '../components/Damier';
 import {Revele} from '../components/Revele';
-import {CouchesSable, FiltresSable} from '../components/Sable';
+import {TEXTURE_SABLE} from '../components/Sable';
 import {Voiture} from '../components/Voiture';
 import {couleurs, polices} from '../theme';
 
@@ -45,8 +46,8 @@ const Etiquette: React.FC<{x: number; y: number; debut: number; texte: string; v
 	texte,
 	vers,
 }) => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 	const p = spring({frame: frame - debut, fps, config: {damping: 200}});
 	const longueurTrait = 80 * p;
 	const sens = vers === 'droite' ? 1 : -1;
@@ -86,8 +87,8 @@ const Etiquette: React.FC<{x: number; y: number; debut: number; texte: string; v
 };
 
 export const Piste: React.FC = () => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 
 	const trace = interpolate(frame, [4, 70], [0, 1], {
 		extrapolateLeft: 'clamp',
@@ -122,7 +123,6 @@ export const Piste: React.FC = () => {
 			<AbsoluteFill style={{transform: `translate(${camX}px, ${camY}px) scale(${zoom})`, transformOrigin: '540px 1100px'}}>
 				<svg width={1080} height={1920} viewBox="0 0 1080 1920" style={{position: 'absolute'}}>
 					<defs>
-						<FiltresSable id="piste" />
 						<mask id="masquePiste">
 							<path d={TRACE} fill="none" stroke="#fff" strokeWidth={98} strokeDasharray={dash} />
 						</mask>
@@ -143,7 +143,7 @@ export const Piste: React.FC = () => {
 					<path d={TRACE} fill="none" stroke={couleurs.bois} strokeWidth={128} strokeDasharray={dash} />
 					<path d={TRACE} fill="none" stroke="#8A5A2E" strokeWidth={112} strokeDasharray={dash} />
 					<g mask="url(#masquePiste)">
-						<CouchesSable id="piste" largeur={1080} hauteur={1920} />
+						<image href={staticFile(TEXTURE_SABLE)} width={1080} height={1920} />
 					</g>
 					{/* traînée de la bille dans le sable */}
 					<path
@@ -218,7 +218,12 @@ export const Piste: React.FC = () => {
 										opacity: k === 0 ? 1 : 0.32 * (1 - k / 10),
 									}}
 								>
-									<Bille taille={taille} couleur={couleurs.orange} rotation={frame * 25} ombre={k === 0} />
+									{k === 0 ? (
+										<Bille taille={taille} couleur={couleurs.orange} rotation={frame * 25} />
+									) : (
+										// Images fantômes : un simple disque suffit, bien plus léger qu'une bille complète.
+										<div style={{width: taille, height: taille, borderRadius: '50%', background: couleurs.orange}} />
+									)}
 								</div>
 							);
 						})

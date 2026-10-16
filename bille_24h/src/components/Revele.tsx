@@ -1,5 +1,6 @@
 import React from 'react';
-import {interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {interpolate, spring} from 'remotion';
+import {FPS_BASE, useImage} from '../temps';
 
 type Props = {
 	texte: string;
@@ -25,8 +26,8 @@ export const Revele: React.FC<Props> = ({
 	style,
 	accents = {},
 }) => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 	const mots = texte.split(' ');
 	let index = 0;
 

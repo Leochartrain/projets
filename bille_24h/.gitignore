@@ -3,5 +3,6 @@ out/
 # Photos et logo du Comité des Fêtes : propriété du club, non versionnés.
 # Les récupérer sur 24heuresdelabille-sarthe.com (voir README).
 public/club/
-# Sons générés par scripts/sons.mjs (npm run sons, lancé avant dev et render)
+# Sons et textures générés par scripts/sons.mjs et scripts/textures.mjs (lancés avant dev et render)
 public/sons/
+public/textures/

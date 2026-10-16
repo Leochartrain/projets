@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill} from 'remotion';
+import {AbsoluteFill, Img, staticFile} from 'remotion';
 import {couleurs} from '../theme';
 
 // Filtres SVG qui transforment un bruit fractal en grains de sable (sombres et clairs).
@@ -48,19 +48,26 @@ export const CouchesSable: React.FC<{id: string; largeur: number | string; haute
 type Props = {
 	// Position du projecteur (en % de l'écran) ; null = éclairage uniforme.
 	lumiere?: {x: number; y: number; rayon: number} | null;
-	echelle?: number;
 	style?: React.CSSProperties;
 };
 
+// Texture calculée par les filtres SVG : sert uniquement à fabriquer public/textures/sable.png
+// (scripts/textures.mjs). Le film utilise l'image, bien plus rapide à afficher.
+export const SableBrut: React.FC = () => (
+	<svg width="100%" height="100%">
+		<defs>
+			<FiltresSable id="plateau" />
+		</defs>
+		<CouchesSable id="plateau" largeur="100%" hauteur="100%" />
+	</svg>
+);
+
+export const TEXTURE_SABLE = 'textures/sable.png';
+
 // Plateau de sable mouillé plein écran, éclairé comme la piste la nuit.
-export const Sable: React.FC<Props> = ({lumiere = {x: 50, y: 60, rayon: 70}, echelle = 1, style}) => (
+export const Sable: React.FC<Props> = ({lumiere = {x: 50, y: 60, rayon: 70}, style}) => (
 	<AbsoluteFill style={style}>
-		<svg width="100%" height="100%">
-			<defs>
-				<FiltresSable id="plateau" echelle={echelle} />
-			</defs>
-			<CouchesSable id="plateau" largeur="100%" hauteur="100%" />
-		</svg>
+		<Img src={staticFile(TEXTURE_SABLE)} style={{width: '100%', height: '100%'}} />
 		{lumiere ? (
 			<AbsoluteFill
 				style={{

@@ -1,12 +1,13 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, interpolate, spring} from 'remotion';
+import {FPS_BASE, useImage} from '../temps';
 import {Bille} from '../components/Bille';
 import {Damier} from '../components/Damier';
 import {Revele} from '../components/Revele';
 import {billes, couleurs, polices} from '../theme';
 
 const Bandes: React.FC = () => {
-	const frame = useCurrentFrame();
+	const frame = useImage();
 	const teintes = [couleurs.orange, couleurs.jaune, couleurs.craie];
 	return (
 		<AbsoluteFill style={{transform: 'rotate(-28deg) scale(1.6)', opacity: 0.95}}>
@@ -34,8 +35,8 @@ const Bandes: React.FC = () => {
 };
 
 export const Titre: React.FC = () => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 
 	const impact = spring({frame, fps, config: {damping: 12, stiffness: 200, mass: 0.8}});
 	const echelle24 = interpolate(impact, [0, 1], [2.6, 1]);

@@ -1,5 +1,6 @@
 import React from 'react';
-import {AbsoluteFill, Img, interpolate, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Img, interpolate, spring, staticFile} from 'remotion';
+import {FPS_BASE, useImage} from '../temps';
 import {Bille} from '../components/Bille';
 import {Revele} from '../components/Revele';
 import {Sable} from '../components/Sable';
@@ -8,8 +9,8 @@ import {billes, couleurs, polices, TEMPS} from '../theme';
 export const DUREE_FIN = 10 * TEMPS;
 
 export const Fin: React.FC = () => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 	const logo = spring({frame: frame - 4, fps, config: {damping: 9, stiffness: 120}});
 	const noir = interpolate(frame, [DUREE_FIN - 14, DUREE_FIN], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 	const bas = interpolate(frame, [3 * TEMPS, 3 * TEMPS + 12], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});

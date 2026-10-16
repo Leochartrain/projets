@@ -1,12 +1,13 @@
 import React from 'react';
-import {AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, interpolate, spring} from 'remotion';
+import {FPS_BASE, useImage} from '../temps';
 import {Damier} from '../components/Damier';
 import {Revele} from '../components/Revele';
 import {couleurs, polices, TEMPS} from '../theme';
 
 const Jour: React.FC<{n: string; debut: number}> = ({n, debut}) => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 	const s = spring({frame: frame - debut, fps, config: {damping: 10, stiffness: 180}});
 	return (
 		<span
@@ -22,8 +23,8 @@ const Jour: React.FC<{n: string; debut: number}> = ({n, debut}) => {
 };
 
 export const Dates: React.FC = () => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 	const descente = spring({frame, fps, config: {damping: 18}});
 
 	return (

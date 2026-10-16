@@ -1,5 +1,6 @@
 import React from 'react';
-import {AbsoluteFill, Img, interpolate, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Img, interpolate, Sequence, spring, staticFile, useVideoConfig} from 'remotion';
+import {enImages, FPS_BASE, useImage} from '../temps';
 import {Revele} from '../components/Revele';
 import {couleurs, polices, TEMPS} from '../theme';
 
@@ -28,8 +29,8 @@ const Coins: React.FC = () => {
 };
 
 const Plan: React.FC<{index: number}> = ({index}) => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 	const p = plans[index];
 	const zoom = interpolate(frame, [0, DUREE_PLAN + 10], [p.de, p.a]);
 	const flash = interpolate(frame, [0, 5], [0.7, 0], {extrapolateRight: 'clamp'});
@@ -96,12 +97,17 @@ const Plan: React.FC<{index: number}> = ({index}) => {
 };
 
 export const Photos: React.FC = () => {
-	const frame = useCurrentFrame();
+	const frame = useImage();
 	const fin = plans.length * DUREE_PLAN;
+	const {fps: fpsReel} = useVideoConfig();
 	return (
 		<AbsoluteFill style={{background: '#000'}}>
 			{plans.map((_, i) => (
-				<Sequence key={i} from={i * DUREE_PLAN} durationInFrames={i === plans.length - 1 ? 999 : DUREE_PLAN}>
+				<Sequence
+					key={i}
+					from={enImages(i * DUREE_PLAN, fpsReel)}
+					durationInFrames={enImages(i === plans.length - 1 ? 999 : DUREE_PLAN, fpsReel)}
+				>
 					<Plan index={i} />
 				</Sequence>
 			))}

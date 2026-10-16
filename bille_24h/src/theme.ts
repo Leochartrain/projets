@@ -31,7 +31,8 @@ export const couleurs = {
 
 export const billes = [couleurs.orange, couleurs.jaune, couleurs.rouge, couleurs.vert, couleurs.bleu];
 
-export const FPS = 30;
+// Rendu à 60 i/s ; les animations restent écrites en images à 30 i/s (voir temps.ts).
+export const FPS = 60;
 // Montage calé sur une musique à 120 BPM : un temps = 15 images.
 export const TEMPS = 15;
 

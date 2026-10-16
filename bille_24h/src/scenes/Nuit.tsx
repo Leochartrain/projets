@@ -1,5 +1,6 @@
 import React from 'react';
-import {AbsoluteFill, Easing, interpolate, interpolateColors, random, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Easing, interpolate, interpolateColors, random, spring} from 'remotion';
+import {FPS_BASE, useImage} from '../temps';
 import {Bille} from '../components/Bille';
 import {Revele} from '../components/Revele';
 import {couleurs, polices} from '../theme';
@@ -61,7 +62,7 @@ const Pins: React.FC = () => {
 };
 
 const Fanions: React.FC<{h: number}> = ({h}) => {
-	const frame = useCurrentFrame();
+	const frame = useImage();
 	const n = 16;
 	return (
 		<svg width={1080} height={300} style={{position: 'absolute', top: 1500}}>
@@ -84,8 +85,8 @@ const Fanions: React.FC<{h: number}> = ({h}) => {
 };
 
 export const Nuit: React.FC = () => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 
 	const h = interpolate(frame, [18, 190], [HEURE_DEBUT, HEURE_FIN], {
 		extrapolateLeft: 'clamp',

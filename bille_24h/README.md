@@ -1,6 +1,6 @@
 # 24 Heures de la Bille — teaser vidéo
 
-Teaser en motion design (vertical 1080×1920, 30 i/s, ~44 s) pour la 23e édition des
+Teaser en motion design (vertical 1080×1920, 60 i/s, ~44 s) pour la 23e édition des
 **24 Heures de la Bille** (21-23 mai 2027, Saint-Mars-de-Locquenay, Val-de-la-Hune, Sarthe),
 organisées par le Comité des Fêtes. Réalisé gratuitement par Léo Chartrain pour se faire connaître.
 
@@ -12,8 +12,9 @@ Fait avec [Remotion](https://www.remotion.dev) : chaque image est du React, tout
 npm install
 npm run dev        # Remotion Studio sur http://localhost:5210 (ou « lance bille »)
 npm run sons       # régénère la musique et les bruitages (public/sons)
-npm run render     # rend out/teaser-vertical.mp4 (qualité maximale, ~85 Mo, ~6 min)
-node scripts/apercus.mjs 30 230 560   # images fixes dans out/apercus pour vérifier un cadrage
+npm run textures   # précalcule le sable et le grain en PNG (public/textures, --force pour refaire)
+npm run render     # rend out/teaser-vertical.mp4 (qualité maximale)
+node scripts/apercus.mjs 60 460 1120  # images fixes (numéros à 60 i/s) dans out/apercus
 ```
 
 Version légère pour les réseaux (~25 Mo) :
@@ -37,6 +38,10 @@ Pour la version finale, demander au comité les originaux en haute définition e
 - `src/components/` : bille en verre, sable, damier, voiture miniature, texte animé, grain pellicule.
 - `src/transitions.tsx` : transitions maison (damier, balayage).
 - Montage calé sur 120 BPM : un temps = 15 images (`TEMPS` dans `src/theme.ts`).
+- Rendu à 60 i/s, mais toutes les animations sont écrites en images à 30 i/s : `useImage()`
+  (`src/temps.ts`) donne l’image courante dans cette unité, et `enImages()` convertit les durées.
+- Sable et grain sont précalculés en PNG (les filtres SVG recalculés à chaque image faisaient ramer).
+  Après une modification de `SableBrut` ou `GrainBrut`, relancer `npm run textures -- --force`.
 
 ## Musique
 

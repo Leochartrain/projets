@@ -12,7 +12,8 @@ import {Photos} from './scenes/Photos';
 import {Piste} from './scenes/Piste';
 import {Titre} from './scenes/Titre';
 import {balayage, damier} from './transitions';
-import {TEMPS} from './theme';
+import {FPS, TEMPS} from './theme';
+import {enImages} from './temps';
 
 const composants: Record<string, React.FC> = {
 	ouverture: Ouverture,
@@ -33,7 +34,7 @@ for (const s of montage.scenes) {
 	debuts[s.id] = curseur;
 	curseur += s.duree;
 }
-export const DUREE_TEASER = curseur;
+export const DUREE_TEASER = enImages(curseur, FPS);
 
 // Bruitages placés par scène (image relative au début de la scène).
 const bruitages: {scene: string; a: number; son: string; volume?: number}[] = [
@@ -67,12 +68,12 @@ export const Teaser: React.FC = () => (
 						<TransitionSeries.Transition
 							key={`t-${s.id}`}
 							presentation={s.transition.type === 'damier' ? damier() : balayage()}
-							timing={linearTiming({durationInFrames: s.transition.duree})}
+							timing={linearTiming({durationInFrames: enImages(s.transition.duree, FPS)})}
 						/>,
 					);
 				}
 				elements.push(
-					<TransitionSeries.Sequence key={s.id} durationInFrames={s.duree}>
+					<TransitionSeries.Sequence key={s.id} durationInFrames={enImages(s.duree, FPS)}>
 						<Scene />
 					</TransitionSeries.Sequence>,
 				);
@@ -83,7 +84,7 @@ export const Teaser: React.FC = () => (
 
 		<Audio src={staticFile('sons/musique.wav')} volume={0.85} />
 		{bruitages.map((b, i) => (
-			<Sequence key={i} from={debuts[b.scene] + b.a} durationInFrames={90} layout="none">
+			<Sequence key={i} from={enImages(debuts[b.scene] + b.a, FPS)} durationInFrames={enImages(90, FPS)} layout="none">
 				<Audio src={staticFile(`sons/${b.son}.wav`)} volume={b.volume ?? 1} />
 			</Sequence>
 		))}

@@ -1,5 +1,6 @@
 import React from 'react';
-import {AbsoluteFill, Easing, interpolate, spring, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Easing, interpolate, spring} from 'remotion';
+import {FPS_BASE, useImage} from '../temps';
 import {Bille} from '../components/Bille';
 import {Revele} from '../components/Revele';
 import {couleurs, polices, TEMPS} from '../theme';
@@ -13,7 +14,7 @@ const lignes = [
 
 // Tour de chronométrage en fond, qui défile comme sur un écran de course.
 const TourChrono: React.FC = () => {
-	const frame = useCurrentFrame();
+	const frame = useImage();
 	return (
 		<AbsoluteFill style={{opacity: 0.05, transform: `translateY(${-frame * 3}px)`}}>
 			{new Array(60).fill(0).map((_, i) => (
@@ -41,8 +42,8 @@ const TourChrono: React.FC = () => {
 };
 
 const Ligne: React.FC<{index: number}> = ({index}) => {
-	const frame = useCurrentFrame();
-	const {fps} = useVideoConfig();
+	const frame = useImage();
+	const fps = FPS_BASE;
 	const l = lignes[index];
 	const debut = 12 + index * 2 * TEMPS;
 	const entree = spring({frame: frame - debut, fps, config: {damping: 15, stiffness: 170}});
@@ -91,7 +92,7 @@ const Ligne: React.FC<{index: number}> = ({index}) => {
 };
 
 export const Chiffres: React.FC = () => {
-	const frame = useCurrentFrame();
+	const frame = useImage();
 	return (
 		<AbsoluteFill style={{background: couleurs.nuit, overflow: 'hidden'}}>
 			<TourChrono />
