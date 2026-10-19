@@ -1,0 +1,4 @@
+# Cloudflare Pages (envoi direct avec `npm run deploy`) : site statique, rien d'autre.
+name = "coiffure-demo"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-10-01"

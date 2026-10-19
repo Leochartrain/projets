@@ -32,7 +32,9 @@ npm run build      # version finale dans dist/
 
 ## Mise en ligne (Cloudflare Pages)
 
-Projet Pages `coiffure-demo`, en **envoi direct** (pas relié à GitHub) : `npm run deploy` (compile puis envoie `dist/` avec wrangler). Un push ne le redéploie donc pas.
+Projet Pages `coiffure-demo` (en ligne depuis le 2026-10-19), en **envoi direct** (pas relié à GitHub) : `npm run deploy` (compile puis envoie `dist/` avec wrangler). Un push ne le redéploie donc pas. Le site reste en ligne PC éteint : il est hébergé chez Cloudflare.
+
+`wrangler.toml` (avec `pages_build_output_dir`) est indispensable : sans lui, les wrangler récents « convertissent » les commandes Pages en Workers et ajoutent un adaptateur Cloudflare au projet.
 
 ## Photos
 
