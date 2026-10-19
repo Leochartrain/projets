@@ -1,0 +1,21 @@
+{
+  "name": "short-patisserie",
+  "private": true,
+  "description": "Short vertical de pâtisserie dans le style d'Irvin Pastry (Remotion)",
+  "scripts": {
+    "dev": "remotion studio --port 5220",
+    "render": "remotion render Short out/short-tarte-pomme-caramel.mp4",
+    "couverture": "remotion still Short out/couverture.jpg --frame=20"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.536",
+    "@remotion/google-fonts": "4.0.536",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "remotion": "4.0.536"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.2",
+    "typescript": "5.9.3"
+  }
+}
