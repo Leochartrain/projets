@@ -1,0 +1,486 @@
+---
+import { Image } from 'astro:assets';
+import '@fontsource/gloock/400.css';
+import '@fontsource/manrope/400.css';
+import '@fontsource/manrope/600.css';
+import { AUTHOR, HOURS, PRESTATIONS, SALON, TEAM } from '../config';
+import fauteuils from '../assets/photos/salon-fauteuils.jpg';
+import coupeFemme from '../assets/photos/coupe-femme.jpg';
+import coupeHomme from '../assets/photos/coupe-homme.jpg';
+import brushing from '../assets/photos/brushing.jpg';
+import chignon from '../assets/photos/chignon.jpg';
+import comptoir from '../assets/photos/comptoir.jpg';
+
+const hour = (h: number) => `${Math.floor(h)} h${h % 1 ? String(Math.round((h % 1) * 60)).padStart(2, '0') : ''}`;
+const slotsText = (slots: [number, number][]) => (slots.length ? slots.map(([a, b]) => `${hour(a)} – ${hour(b)}`).join(' · ') : 'Fermé');
+const duree = (m: number) => (m < 60 ? `${m} min` : `${Math.floor(m / 60)} h${m % 60 ? ` ${String(m % 60).padStart(2, '0')}` : ''}`);
+const prix = (p: { price: number; from?: boolean }) => `${p.from ? 'dès ' : ''}${p.price} €`;
+const { lat, lon } = SALON.map;
+const mapSrc = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.006},${lat - 0.003},${lon + 0.006},${lat + 0.003}&layer=mapnik&marker=${lat},${lon}`;
+const tel = SALON.phone.replaceAll(' ', '');
+
+const univers = [
+  { photo: coupeFemme, titre: 'Femmes', texte: 'Coupes courtes ou longues, brushing, séchage naturel : on prend le temps d’écouter ce que vous voulez.', alt: 'Une coiffeuse coupe les cheveux d’une cliente' },
+  { photo: coupeHomme, titre: 'Hommes', texte: 'Dégradés à la tondeuse, coupes aux ciseaux et taille de barbe soignée.', alt: 'Un coiffeur fait un dégradé à la tondeuse sur la nuque d’un client' },
+  { photo: brushing, titre: 'Couleur et soins', texte: 'Couleur, mèches, balayage et soins profonds, avec des produits professionnels.', alt: 'Brushing au sèche-cheveux sur des cheveux bruns' },
+  { photo: chignon, titre: 'Mariages', texte: 'Chignons et coiffures de cérémonie, avec un essai avant le grand jour.', alt: 'Une coiffeuse termine un chignon bouclé' },
+];
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{SALON.name} · Salon de coiffure (site de démonstration)</title>
+    <meta name="description" content="Exemple de site pour un salon de coiffure : tarifs, prise de rendez-vous en ligne, horaires, plan d'accès." />
+    <!-- Site d'exemple : il ne doit jamais apparaître dans Google. -->
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content="#f7f1ee" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>" />
+  </head>
+  <body>
+    <div class="demo" role="note">
+      <strong>Site de démonstration</strong> : ce salon est un exemple.
+      {AUTHOR.name ? <> Réalisé par {AUTHOR.name}{AUTHOR.contact && <> · {AUTHOR.contact}</>}.</> : ' Le vôtre pourrait ressembler à ça.'}
+    </div>
+
+    <header class="site">
+      <div class="wrap">
+        <a href="#" class="marque" data-nom>{SALON.name}</a>
+        <nav aria-label="Navigation">
+          <a href="#prestations">Prestations</a>
+          <a href="#tarifs">Tarifs</a>
+          <a href="#acces">Horaires et accès</a>
+          <a href="#rendez-vous" class="btn petit">Rendez-vous</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="wrap">
+          <div class="texte">
+            <p class="statut" id="statut" aria-live="polite">Salon de coiffure</p>
+            <h1 data-nom>{SALON.name}</h1>
+            <p class="intro">Coiffure femmes, hommes et enfants, au cœur de <span data-ville>{SALON.city}</span>. Réservez votre rendez-vous en ligne, à toute heure.</p>
+            <div class="actions">
+              <a class="btn" href="#rendez-vous">Prendre rendez-vous</a>
+              <a class="btn ghost" href="#tarifs">Voir les tarifs</a>
+            </div>
+            <ul class="atouts-hero">
+              <li><strong>24 h/24</strong> réservation en ligne</li>
+              <li><strong>Rappel</strong> par SMS la veille</li>
+              <li><strong>Tarifs</strong> affichés, sans surprise</li>
+            </ul>
+          </div>
+          <div class="photo">
+            <Image src={fauteuils} alt="Fauteuils rouges alignés face aux miroirs, à côté d’un grand palmier" widths={[400, 600, 800]} sizes="(max-width: 860px) 100vw, 45vw" format="webp" loading="eager" />
+          </div>
+        </div>
+      </section>
+
+      <section id="prestations">
+        <div class="wrap">
+          <p class="surtitre">Prestations</p>
+          <h2>Pour toute la famille</h2>
+          <div class="cartes">
+            {univers.map((u) => (
+              <article class="carte">
+                <Image src={u.photo} alt={u.alt} widths={[320, 480, 640]} sizes="(max-width: 560px) 100vw, (max-width: 1000px) 50vw, 25vw" format="webp" />
+                <div>
+                  <h3>{u.titre}</h3>
+                  <p class="doux">{u.texte}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="tarifs" class="tarifs">
+        <div class="wrap">
+          <p class="surtitre">Tarifs</p>
+          <h2>Les prix, tout simplement</h2>
+          <p class="doux sous-titre">Cliquez sur une prestation pour la réserver directement.</p>
+          <div class="grille-tarifs">
+            {PRESTATIONS.map((c, ci) => (
+              <div class="bloc-tarif">
+                <h3>{c.category}</h3>
+                <ul>
+                  {c.items.map((p, pi) => (
+                    <li>
+                      <a href="#rendez-vous" data-presta={`${ci}-${pi}`}>
+                        <span class="nom">{p.name}<span class="duree">{duree(p.minutes)}</span></span>
+                        <span class="pointilles" aria-hidden="true"></span>
+                        <span class="prix">{prix(p)}</span>
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="rendez-vous" class="rdv">
+        <div class="wrap grille">
+          <div>
+            <p class="surtitre">Rendez-vous en ligne</p>
+            <h2>Réservez en trois clics</h2>
+            <p class="doux">Choisissez la prestation, le jour et l’heure : seuls les créneaux encore libres sont proposés. Plus besoin d’appeler pendant que le salon est plein.</p>
+            <ul class="atouts">
+              <li>Confirmation immédiate</li>
+              <li>Rappel par SMS la veille</li>
+              <li>Annulation possible jusqu’à 24 h avant</li>
+            </ul>
+          </div>
+          <form id="form-rdv" class="formulaire" novalidate>
+            <label>Prestation
+              <select name="prestation" id="prestation">
+                {PRESTATIONS.map((c, ci) => (
+                  <optgroup label={c.category}>
+                    {c.items.map((p, pi) => <option value={`${ci}-${pi}`}>{p.name} · {duree(p.minutes)} · {prix(p)}</option>)}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
+            <fieldset>
+              <legend>Avec</legend>
+              <div class="choix">
+                <label class="puce"><input type="radio" name="avec" value="" checked /><span>Peu importe</span></label>
+                {TEAM.map((t) => <label class="puce"><input type="radio" name="avec" value={t} /><span>{t}</span></label>)}
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>Jour</legend>
+              <div class="choix" id="jours"></div>
+            </fieldset>
+            <fieldset>
+              <legend>Heure</legend>
+              <div class="choix" id="heures"><p class="doux petit">Choisissez d’abord un jour.</p></div>
+            </fieldset>
+            <div class="ligne">
+              <label>Votre nom<input name="nom" required autocomplete="name" /></label>
+              <label>Téléphone<input name="tel" type="tel" required autocomplete="tel" /></label>
+            </div>
+            <p class="recap" id="recap" hidden></p>
+            <button class="btn" type="submit">Confirmer le rendez-vous</button>
+            <p class="etat" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+
+      <section class="salon">
+        <div class="wrap grille">
+          <Image src={comptoir} alt="Le poste de travail du salon : flacon d’huile, cire et peignes sur un comptoir en bois" widths={[480, 720, 1024]} sizes="(max-width: 860px) 100vw, 50vw" format="webp" />
+          <div>
+            <p class="surtitre">Le salon</p>
+            <h2>Un salon de quartier, où l’on se sent bien</h2>
+            <p class="doux">Ici, l’histoire du salon : depuis quand il existe, qui vous accueille, ce qui fait votre différence (les conseils, les produits, l’ambiance). Quelques lignes et une photo de l’équipe suffisent pour donner envie de pousser la porte.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="acces" class="acces">
+        <div class="wrap grille">
+          <div>
+            <p class="surtitre">Horaires et accès</p>
+            <h2>Nous trouver</h2>
+            <table>
+              <tbody>
+                {HOURS.map((h, i) => (
+                  <tr data-jour={i}>
+                    <th scope="row">{h.day}</th>
+                    <td class={h.slots.length ? '' : 'ferme'}>{slotsText(h.slots)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            <p class="adresse">{SALON.address}, <span data-ville>{SALON.city}</span></p>
+            <p><a href={`tel:${tel}`} class="btn ghost">Appeler · {SALON.phone}</a></p>
+          </div>
+          <iframe title="Plan d'accès" src={mapSrc} loading="lazy"></iframe>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site">
+      <div class="wrap">
+        <span><span data-nom>{SALON.name}</span> · salon de coiffure</span>
+        <span class="doux">Exemple de site · photos libres de droits (CC0)</span>
+      </div>
+    </footer>
+
+    <script is:inline define:vars={{ HOURS, PRESTATIONS }}>
+      // Personnalisation de la démo par l'adresse : ?nom=…&ville=…
+      const params = new URLSearchParams(location.search);
+      const nom = params.get('nom')?.trim().slice(0, 60);
+      const ville = params.get('ville')?.trim().slice(0, 60);
+      if (nom) {
+        document.querySelectorAll('[data-nom]').forEach((el) => (el.textContent = nom));
+        document.title = `${nom} · Salon de coiffure (site de démonstration)`;
+      }
+      if (ville) document.querySelectorAll('[data-ville]').forEach((el) => (el.textContent = ville));
+
+      const fmt = (x) => `${Math.floor(x)} h${x % 1 ? String(Math.round((x % 1) * 60)).padStart(2, '0') : ''}`;
+      const jourSemaine = (d) => (d.getDay() + 6) % 7; // lundi = 0
+
+      // Ouvert ou fermé en ce moment, d'après les horaires.
+      const now = new Date();
+      const today = jourSemaine(now);
+      const h = now.getHours() + now.getMinutes() / 60;
+      document.querySelector(`[data-jour="${today}"]`)?.classList.add('aujourdhui');
+      const slot = HOURS[today].slots.find(([a, b]) => h >= a && h < b);
+      const next = HOURS[today].slots.find(([a]) => h < a);
+      const statut = document.getElementById('statut');
+      if (slot) {
+        statut.textContent = `Ouvert maintenant · jusqu'à ${fmt(slot[1])}`;
+        statut.classList.add('ouvert');
+      } else if (next) {
+        statut.textContent = `Fermé pour l'instant · ouvre à ${fmt(next[0])}`;
+      } else {
+        statut.textContent = 'Fermé pour l’instant · réservez en ligne';
+      }
+
+      // Prise de rendez-vous (démonstration : rien n'est envoyé).
+      const form = document.getElementById('form-rdv');
+      const select = document.getElementById('prestation');
+      const joursEl = document.getElementById('jours');
+      const heuresEl = document.getElementById('heures');
+      const recap = document.getElementById('recap');
+      const etat = form.querySelector('.etat');
+      let jour = null; // Date choisie
+      let heure = null; // heure décimale choisie
+
+      const presta = () => {
+        const [c, i] = select.value.split('-').map(Number);
+        return PRESTATIONS[c].items[i];
+      };
+      const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      // Créneaux déjà pris : tirés au hasard mais toujours les mêmes pour un jour et une heure donnés.
+      const pris = (d, t) => {
+        let x = 0;
+        for (const ch of `${iso(d)}${t}`) x = (x * 31 + ch.charCodeAt(0)) >>> 0;
+        return x % 10 < 4;
+      };
+
+      // Les 6 prochains jours d'ouverture.
+      const jours = [];
+      for (let k = 0; jours.length < 6 && k < 21; k++) {
+        const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() + k);
+        const slots = HOURS[jourSemaine(d)].slots;
+        if (!slots.length) continue;
+        if (k === 0 && !slots.some(([, b]) => b - 1 > h)) continue;
+        jours.push(d);
+      }
+      const libelleJour = new Intl.DateTimeFormat('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' });
+      const libelleLong = new Intl.DateTimeFormat('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' });
+
+      const bouton = (texte, onClick, disabled = false) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'puce';
+        b.textContent = texte;
+        b.disabled = disabled;
+        b.setAttribute('aria-pressed', 'false');
+        b.addEventListener('click', () => {
+          b.parentElement.querySelectorAll('[aria-pressed]').forEach((x) => x.setAttribute('aria-pressed', 'false'));
+          b.setAttribute('aria-pressed', 'true');
+          onClick();
+        });
+        return b;
+      };
+
+      const majRecap = () => {
+        const p = presta();
+        if (!jour || heure === null) {
+          recap.hidden = true;
+          return;
+        }
+        const avec = form.elements.avec.value;
+        recap.hidden = false;
+        recap.textContent = `${libelleLong.format(jour)} à ${fmt(heure)} · ${p.name}${avec ? ` avec ${avec}` : ''} · ${p.from ? 'dès ' : ''}${p.price} €`;
+      };
+
+      const afficherHeures = () => {
+        heure = null;
+        heuresEl.replaceChildren();
+        if (!jour) {
+          heuresEl.innerHTML = '<p class="doux petit">Choisissez d’abord un jour.</p>';
+          return majRecap();
+        }
+        const duree = presta().minutes / 60;
+        const estAujourdhui = iso(jour) === iso(now);
+        let libres = 0;
+        for (const [a, b] of HOURS[jourSemaine(jour)].slots) {
+          for (let t = a; t + duree <= b; t += 0.5) {
+            if (estAujourdhui && t <= h + 1) continue;
+            const occupe = pris(jour, t);
+            if (!occupe) libres++;
+            heuresEl.append(bouton(fmt(t).replace(' h', 'h'), () => { heure = t; majRecap(); }, occupe));
+          }
+        }
+        if (!libres) heuresEl.innerHTML = '<p class="doux petit">Plus de créneau libre ce jour-là, essayez un autre jour.</p>';
+        majRecap();
+      };
+
+      jours.forEach((d) => joursEl.append(bouton(libelleJour.format(d), () => { jour = d; afficherHeures(); })));
+      select.addEventListener('change', afficherHeures);
+      form.addEventListener('change', (e) => e.target.name === 'avec' && majRecap());
+
+      // Un clic sur un tarif choisit la prestation.
+      document.querySelectorAll('[data-presta]').forEach((a) =>
+        a.addEventListener('click', () => {
+          select.value = a.dataset.presta;
+          afficherHeures();
+        }),
+      );
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        etat.classList.remove('erreur');
+        if (!jour || heure === null) {
+          etat.classList.add('erreur');
+          etat.textContent = 'Choisissez un jour et une heure.';
+          return;
+        }
+        if (!form.elements.nom.value.trim() || !form.elements.tel.value.trim()) {
+          etat.classList.add('erreur');
+          etat.textContent = 'Indiquez votre nom et votre téléphone.';
+          return;
+        }
+        etat.textContent = `Démonstration : sur le vrai site, ce rendez-vous serait réservé tout de suite (${libelleLong.format(jour)} à ${fmt(heure)}), le salon le verrait dans son agenda et vous recevriez un SMS de rappel la veille.`;
+      });
+    </script>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --fond: #f7f1ee;
+    --carte: #fffaf8;
+    --prune: #7a2e42;
+    --prune-fonce: #43192a;
+    --laiton: #c8955a;
+    --texte: #241a1d;
+    --doux: #6f5e63;
+    --trait: #eadbd6;
+    --vert: #2f7a4a;
+    --rouge: #a3412d;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--fond); color: var(--texte); font: 17px/1.6 'Manrope', system-ui, sans-serif; }
+  img { display: block; max-width: 100%; height: auto; }
+  h1, h2, h3 { font-family: 'Gloock', Georgia, serif; font-weight: 400; line-height: 1.1; margin: 0; text-wrap: balance; }
+  h1 { font-size: clamp(2.6rem, 6.4vw, 4.8rem); color: var(--prune-fonce); }
+  h2 { font-size: clamp(1.8rem, 3.6vw, 2.6rem); }
+  h3 { font-size: 1.35rem; }
+  p { margin: 0; }
+  a { color: var(--prune); }
+  :focus-visible { outline: 3px solid var(--laiton); outline-offset: 3px; }
+  .wrap { width: min(1120px, 100% - 32px); margin-inline: auto; }
+  section { padding: 80px 0; scroll-margin-top: 60px; }
+  .surtitre { font-size: 0.8rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--prune); margin-bottom: 0.6rem; }
+  .doux { color: var(--doux); }
+  .petit { font-size: 0.92rem; }
+  .grille { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+  @media (max-width: 860px) { .grille { grid-template-columns: 1fr; gap: 32px; } section { padding: 56px 0; } }
+
+  .btn { display: inline-block; padding: 0.85rem 1.4rem; border: 0; border-radius: 999px; background: var(--prune); color: var(--carte); font: inherit; font-weight: 600; text-decoration: none; cursor: pointer; transition: background 0.2s; }
+  .btn:hover { background: var(--prune-fonce); }
+  .btn.ghost { background: transparent; color: var(--prune); box-shadow: inset 0 0 0 2px var(--prune); }
+  .btn.petit { padding: 0.5rem 1rem; }
+
+  .demo { background: var(--texte); color: var(--carte); text-align: center; font-size: 0.85rem; padding: 0.45rem 16px; }
+
+  header.site { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--fond) 90%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--trait); }
+  header.site .wrap { display: flex; align-items: center; justify-content: space-between; gap: 1rem; height: 68px; }
+  .marque { font-family: 'Gloock', serif; font-size: 1.35rem; color: var(--prune-fonce); text-decoration: none; }
+  nav { display: flex; align-items: center; gap: 1.4rem; }
+  nav a:not(.btn) { color: var(--doux); text-decoration: none; font-weight: 600; }
+  nav a:not(.btn):hover { color: var(--prune); }
+  @media (max-width: 860px) { nav a:not(.btn) { display: none; } .marque { font-size: 1.15rem; } }
+
+  .hero { padding: 48px 0 72px; }
+  .hero .wrap { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 56px; align-items: center; }
+  .statut { display: inline-block; padding: 0.3rem 0.8rem; border-radius: 999px; background: var(--carte); border: 1px solid var(--trait); font-size: 0.9rem; font-weight: 600; color: var(--doux); margin-bottom: 1.2rem; }
+  .statut.ouvert { color: var(--vert); border-color: color-mix(in srgb, var(--vert) 35%, transparent); }
+  .statut.ouvert::before { content: '● '; }
+  .intro { font-size: 1.2rem; color: var(--doux); margin: 1.2rem 0 2rem; max-width: 38ch; }
+  .actions { display: flex; flex-wrap: wrap; gap: 0.8rem; }
+  .atouts-hero { list-style: none; padding: 0; margin: 2.4rem 0 0; display: flex; flex-wrap: wrap; gap: 0.6rem 1.8rem; font-size: 0.92rem; color: var(--doux); }
+  .atouts-hero strong { display: block; font-family: 'Gloock', serif; font-weight: 400; font-size: 1.3rem; color: var(--prune-fonce); }
+  .hero .photo img { width: 100%; aspect-ratio: 3 / 4; object-fit: cover; border-radius: 999px 999px 28px 28px; box-shadow: 0 30px 60px -30px rgb(67 25 42 / 0.6); }
+  @media (max-width: 860px) {
+    .hero .wrap { grid-template-columns: 1fr; gap: 36px; }
+    .hero .photo img { aspect-ratio: 4 / 3; object-position: center 40%; border-radius: 180px 180px 20px 20px; }
+  }
+
+  .cartes { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 40px; }
+  .carte { background: var(--carte); border: 1px solid var(--trait); border-radius: 20px; overflow: hidden; }
+  .carte img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; }
+  .carte div { padding: 1.2rem 1.3rem 1.4rem; }
+  .carte p { margin-top: 0.5rem; font-size: 0.96rem; }
+  @media (max-width: 1000px) { .cartes { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 560px) { .cartes { grid-template-columns: 1fr; } }
+
+  .tarifs { background: var(--carte); border-block: 1px solid var(--trait); }
+  .sous-titre { margin-top: 0.8rem; }
+  .grille-tarifs { display: grid; grid-template-columns: 1fr 1fr; gap: 40px 64px; margin-top: 40px; }
+  @media (max-width: 760px) { .grille-tarifs { grid-template-columns: 1fr; } }
+  .bloc-tarif h3 { color: var(--prune); padding-bottom: 0.6rem; border-bottom: 2px solid var(--laiton); }
+  .bloc-tarif ul { list-style: none; margin: 0; padding: 0; }
+  .bloc-tarif a { display: flex; align-items: baseline; gap: 0.6rem; padding: 0.75rem 0.4rem; border-bottom: 1px dashed var(--trait); color: inherit; text-decoration: none; border-radius: 8px; transition: background 0.15s; }
+  .bloc-tarif a:hover { background: color-mix(in srgb, var(--laiton) 14%, transparent); }
+  .bloc-tarif .nom { font-weight: 600; }
+  .bloc-tarif .duree { display: block; font-weight: 400; font-size: 0.85rem; color: var(--doux); }
+  .pointilles { flex: 1; }
+  .bloc-tarif .prix { font-weight: 600; color: var(--prune-fonce); white-space: nowrap; }
+
+  .rdv { background: var(--prune-fonce); color: var(--carte); }
+  .rdv .grille { align-items: start; }
+  .rdv h2 { color: var(--carte); }
+  .rdv .surtitre { color: var(--laiton); }
+  .rdv > .wrap > div > .doux { color: #e8d3d8; margin-top: 1rem; }
+  .atouts { margin: 1.4rem 0 0; padding: 0; list-style: none; display: grid; gap: 0.4rem; }
+  .atouts li::before { content: '✓ '; color: var(--laiton); font-weight: 600; }
+  .formulaire { background: var(--carte); color: var(--texte); border-radius: 20px; padding: 28px; display: grid; gap: 18px; }
+  .ligne { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 560px) { .ligne { grid-template-columns: 1fr; } .formulaire { padding: 20px; } }
+  label { display: flex; flex-direction: column; gap: 0.3rem; font-weight: 600; font-size: 0.92rem; }
+  fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+  legend { font-weight: 600; font-size: 0.92rem; padding: 0; margin-bottom: 0.4rem; }
+  input, select { font: inherit; font-weight: 400; padding: 0.65rem 0.8rem; border: 1px solid #dcc7c1; border-radius: 12px; background: #fff; width: 100%; color: var(--texte); }
+  input:focus, select:focus { outline: 2px solid var(--laiton); outline-offset: 1px; }
+  .choix { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .puce { display: inline-flex; flex-direction: row; align-items: center; padding: 0.45rem 0.9rem; border: 1px solid #dcc7c1; border-radius: 999px; background: #fff; font: inherit; font-size: 0.92rem; font-weight: 600; color: var(--texte); cursor: pointer; }
+  .puce input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .puce:has(input:checked), .puce[aria-pressed='true'] { background: var(--prune); border-color: var(--prune); color: var(--carte); }
+  .puce:has(input:focus-visible) { outline: 3px solid var(--laiton); outline-offset: 2px; }
+  .puce:disabled { color: #b9a9ad; text-decoration: line-through; cursor: not-allowed; background: var(--fond); }
+  .recap { padding: 0.8rem 1rem; border-radius: 12px; background: color-mix(in srgb, var(--laiton) 16%, transparent); font-weight: 600; color: var(--prune-fonce); }
+  .recap::first-letter { text-transform: uppercase; }
+  .etat { font-weight: 600; color: var(--vert); }
+  .etat.erreur { color: var(--rouge); }
+
+  .salon img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 24px; }
+  .salon h2 + p { margin-top: 1rem; }
+
+  .acces { background: var(--carte); border-top: 1px solid var(--trait); }
+  .acces h2 { margin-bottom: 1.2rem; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { padding: 0.55rem 0.4rem; border-bottom: 1px dashed var(--trait); text-align: left; }
+  th { font-weight: 600; }
+  td { text-align: right; color: var(--doux); }
+  td.ferme { color: var(--rouge); }
+  tr.aujourdhui th, tr.aujourdhui td { color: var(--prune-fonce); font-weight: 600; background: color-mix(in srgb, var(--laiton) 16%, transparent); }
+  .adresse { font-size: 1.15rem; margin: 1.4rem 0 1rem; }
+  .acces iframe { width: 100%; height: 420px; border: 0; border-radius: 20px; }
+
+  footer.site { padding: 32px 0; border-top: 1px solid var(--trait); font-size: 0.9rem; }
+  footer.site .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.8rem; }
+
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
