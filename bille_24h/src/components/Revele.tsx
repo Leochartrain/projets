@@ -1,6 +1,7 @@
 import React from 'react';
 import {interpolate, spring} from 'remotion';
 import {FPS_BASE, useImage} from '../temps';
+import {BUDGET_CASCADE, courbes} from '../theme';
 
 type Props = {
 	texte: string;
@@ -30,6 +31,9 @@ export const Revele: React.FC<Props> = ({
 	const fps = FPS_BASE;
 	const mots = texte.split(' ');
 	let index = 0;
+	// Les textes longs se resserrent pour tenir dans le budget de cascade.
+	const nombre = par === 'lettre' ? texte.replace(/ /g, '').length : mots.length;
+	const pas = Math.min(decalage, BUDGET_CASCADE / Math.max(1, nombre - 1));
 
 	const sortieP =
 		sortie === undefined
@@ -37,6 +41,7 @@ export const Revele: React.FC<Props> = ({
 			: interpolate(frame, [sortie, sortie + 10], [0, 1], {
 					extrapolateLeft: 'clamp',
 					extrapolateRight: 'clamp',
+					easing: courbes.sortie,
 				});
 
 	return (
@@ -57,7 +62,7 @@ export const Revele: React.FC<Props> = ({
 						}}
 					>
 						{morceaux.map((c, i) => {
-							const delai = debut + index++ * decalage;
+							const delai = debut + index++ * pas;
 							const p = spring({frame: frame - delai, fps, config: {damping: 16, stiffness: 160, mass: 0.6}});
 							const y = interpolate(p, [0, 1], [110, 0]) - sortieP * 110;
 							return (

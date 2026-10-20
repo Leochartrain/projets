@@ -2,7 +2,7 @@ import React from 'react';
 import {AbsoluteFill, Easing, interpolate, spring} from 'remotion';
 import {FPS_BASE, useImage} from '../temps';
 import {Revele} from '../components/Revele';
-import {couleurs, polices, TEMPS} from '../theme';
+import {couleurs, courbes, polices, TEMPS} from '../theme';
 
 const stats = [
 	{valeur: 45, suffixe: '', titre: 'ÉQUIPAGES', sous: 'AU DÉPART', couleur: couleurs.orange, encre: couleurs.nuit},
@@ -93,7 +93,8 @@ const Stat: React.FC<{index: number}> = ({index}) => {
 						color: s.couleur,
 						background: s.encre,
 						padding: '6px 20px',
-						opacity: interpolate(t, [8, 12], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+						opacity: interpolate(t, [8, 11], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'}),
+						transform: `translateY(${interpolate(t, [8, 16], [24, 0], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: courbes.entree})}px)`,
 					}}
 				>
 					{s.sous}

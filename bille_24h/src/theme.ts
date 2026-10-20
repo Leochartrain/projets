@@ -1,3 +1,4 @@
+import {Easing} from 'remotion';
 import {loadFont as loadAnton} from '@remotion/google-fonts/Anton';
 import {loadFont as loadInter} from '@remotion/google-fonts/Inter';
 import {loadFont as loadMono} from '@remotion/google-fonts/JetBrainsMono';
@@ -30,6 +31,19 @@ export const couleurs = {
 };
 
 export const billes = [couleurs.orange, couleurs.jaune, couleurs.rouge, couleurs.vert, couleurs.bleu];
+
+// Identité de mouvement (personnalité « énergique », comme une course) : trois courbes pour tout le film.
+export const courbes = {
+	// Arrivée : part très vite et se pose en douceur.
+	entree: Easing.bezier(0.16, 1, 0.3, 1),
+	// Départ : démarre doucement et file en accélérant.
+	sortie: Easing.bezier(0.7, 0, 0.84, 0),
+	// Transitions : lent, fulgurant au milieu, lent (le flou de bougé se cale dessus).
+	traverse: Easing.bezier(0.87, 0, 0.13, 1),
+};
+
+// Budget de cascade : un texte ne met jamais plus d'une demi-seconde à s'écrire (15 images à 30 i/s).
+export const BUDGET_CASCADE = 15;
 
 // Rendu à 60 i/s ; les animations restent écrites en images à 30 i/s (voir temps.ts).
 export const FPS = 60;

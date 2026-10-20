@@ -38,13 +38,17 @@ const Damier: React.FC<TransitionPresentationComponentProps<SansProps>> = ({chil
 	);
 };
 
-// Balayage vertical rapide avec flou de bougé, façon caméra embarquée.
+// Balayage vertical rapide avec flou de bougé, façon caméra embarquée. La progression arrive
+// déjà courbée (courbes.traverse) : quasi immobile aux bords, fulgurant au milieu ; le flou et
+// l'étirement suivent cette vitesse.
 const Balayage: React.FC<TransitionPresentationComponentProps<SansProps>> = ({children, presentationDirection, presentationProgress}) => {
 	const p = presentationProgress;
-	const vitesse = Math.sin(p * Math.PI);
+	const vitesse = Math.sin(p * Math.PI) ** 2;
 	const y = presentationDirection === 'entering' ? (1 - p) * 100 : -p * 100;
 	return (
-		<AbsoluteFill style={{transform: `translateY(${y}%)`, filter: `blur(${vitesse * 14}px)`}}>{children}</AbsoluteFill>
+		<AbsoluteFill style={{transform: `translateY(${y}%) scaleY(${1 + vitesse * 0.08})`, filter: `blur(${vitesse * 22}px)`}}>
+			{children}
+		</AbsoluteFill>
 	);
 };
 

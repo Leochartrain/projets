@@ -12,7 +12,7 @@ import {Photos} from './scenes/Photos';
 import {Piste} from './scenes/Piste';
 import {Titre} from './scenes/Titre';
 import {balayage, damier} from './transitions';
-import {FPS, TEMPS} from './theme';
+import {courbes, FPS, TEMPS} from './theme';
 import {enImages, useImage} from './temps';
 
 const composants: Record<string, React.FC> = {
@@ -82,7 +82,10 @@ export const Teaser: React.FC = () => (
 						<TransitionSeries.Transition
 							key={`t-${s.id}`}
 							presentation={s.transition.type === 'damier' ? damier() : balayage()}
-							timing={linearTiming({durationInFrames: enImages(s.transition.duree, FPS)})}
+							timing={linearTiming({
+								durationInFrames: enImages(s.transition.duree, FPS),
+								easing: s.transition.type === 'damier' ? courbes.entree : courbes.traverse,
+							})}
 						/>,
 					);
 				}

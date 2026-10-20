@@ -9,6 +9,12 @@ Typo : Anton (titres d'affiche), JetBrains Mono (écrans de chronométrage), Int
 Finition : rendu 60 i/s, 3D temps réel (three.js) avec profondeur de champ et halo, pulsation de l'image
 sur chaque temps de la musique, textes qui arrivent avec un flou de mouvement, grain pellicule.
 
+Identité de mouvement (personnalité « énergique ») : trois courbes communes (`courbes` dans `src/theme.ts`) —
+arrivée qui se pose en douceur, départ qui accélère, transitions lentes aux bords et fulgurantes au milieu
+(flou et étirement calés sur la vitesse). Aucun texte ne met plus d'une demi-seconde à s'écrire. Les objets
+ont du poids : les billes tombent avec la gravité, s'écrasent au contact et rebondissent de moins en moins haut,
+le plan tremble quand le « 24 » s'écrase.
+
 | # | Scène | Durée | Ce qu'on voit | Son |
 |---|---|---|---|---|
 | 1 | Ouverture | 6,5 s | **3D** : gros plan d'une bille en verre (réfraction, profondeur de champ) sur le sable, de nuit, travelling lent, autres billes floues au fond. Chrono « SAMEDI · 14:29:57 ». « AU MANS, ILS ONT DES MOTEURS. » À 14:30:00 pile, la bille est tirée vers le fond : flash, secousse, gerbe de grains de sable en 3D. « À SAINT-MARS-DE-LOCQUENAY, ON A DES BILLES. » | Tic du chrono, nappe qui monte, tir |

@@ -4,7 +4,7 @@ import {FPS_BASE, useImage} from '../temps';
 import {Revele} from '../components/Revele';
 import {Bille3D} from '../three/Bille3D';
 import {Plateau3D} from '../three/Plateau3D';
-import {billes, couleurs, polices, TEMPS} from '../theme';
+import {billes, couleurs, courbes, polices, TEMPS} from '../theme';
 
 export const DUREE_FIN = 10 * TEMPS;
 
@@ -13,7 +13,8 @@ export const Fin: React.FC = () => {
 	const fps = FPS_BASE;
 	const logo = spring({frame: frame - 4, fps, config: {damping: 9, stiffness: 120}});
 	const noir = interpolate(frame, [DUREE_FIN - 14, DUREE_FIN], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
-	const bas = interpolate(frame, [3 * TEMPS, 3 * TEMPS + 12], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
+	const bas = interpolate(frame, [3 * TEMPS, 3 * TEMPS + 12], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: courbes.entree});
+	const voile = interpolate(frame, [TEMPS - 6, TEMPS + 8], [0, 1], {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'});
 
 	return (
 		<AbsoluteFill style={{background: couleurs.nuit, overflow: 'hidden'}}>
@@ -50,6 +51,14 @@ export const Fin: React.FC = () => {
 			>
 				<Img src={staticFile('club/logo.png')} style={{width: '100%', height: '100%', objectFit: 'contain'}} />
 			</div>
+
+			{/* voile sombre sous les textes : ils restent lisibles sur le sable clair */}
+			<AbsoluteFill
+				style={{
+					background: 'linear-gradient(180deg, rgba(7,10,20,0) 44%, rgba(7,10,20,0.72) 58%, rgba(7,10,20,0.9) 100%)',
+					opacity: voile,
+				}}
+			/>
 
 			<AbsoluteFill style={{top: 1000, alignItems: 'center'}}>
 				<Revele
@@ -98,9 +107,9 @@ export const Fin: React.FC = () => {
 					textAlign: 'center',
 					fontFamily: polices.texte,
 					fontWeight: 500,
-					fontSize: 22,
+					fontSize: 25,
 					lineHeight: 1.5,
-					color: 'rgba(247,242,232,0.6)',
+					color: 'rgba(247,242,232,0.78)',
 					opacity: bas,
 				}}
 			>
