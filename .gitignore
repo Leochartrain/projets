@@ -35,3 +35,6 @@ FPS1/public/assets/
 
 # Repair Café : dépôt privé à part (github.com/Leochartrain/repair-cafe)
 /repair_cafe/
+
+# Offres d'emploi : dépôt local à part (données et profil perso)
+/offres_emploi/
