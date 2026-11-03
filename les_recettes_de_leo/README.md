@@ -40,9 +40,15 @@ Chaque recette porte une fiche « Recipe » (schema.org) : Google peut afficher 
 
 ## Mettre en ligne (Cloudflare Pages)
 
-1. *Workers & Pages* → *Create* → *Pages* → *Connect to Git* → dépôt `projets`.
-2. *Root directory* : `les_recettes_de_leo`, *Build command* : `npm run build`, *Build output directory* : `dist`.
-3. Nom du projet : `les-recettes-de-leo` (adresse `https://les-recettes-de-leo.pages.dev`, déjà écrite dans `astro.config.mjs` et `public/robots.txt`). Chaque `git push` redéploie.
+En ligne depuis le 2026-11-03 : **https://les-recettes-de-leo.pages.dev**. Projet Pages `les-recettes-de-leo` en **envoi direct** (pas relié à GitHub) :
+
+```sh
+npm run deploy     # compile puis envoie dist/ avec wrangler
+```
+
+Un push ne redéploie donc pas le site : après chaque nouvelle recette, il faut relancer `npm run deploy`. Le site reste en ligne même PC éteint, il est hébergé chez Cloudflare.
+
+`wrangler.toml` (avec `pages_build_output_dir`) est indispensable : sans lui, les wrangler récents convertissent les commandes Pages en Workers.
 
 ## Structure
 

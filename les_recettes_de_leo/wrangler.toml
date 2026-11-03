@@ -1,0 +1,5 @@
+# Cloudflare Pages (envoi direct avec `npm run deploy`) : site statique, rien d'autre.
+# Indispensable : sans lui, les wrangler récents convertissent les commandes Pages en Workers.
+name = "les-recettes-de-leo"
+pages_build_output_dir = "./dist"
+compatibility_date = "2026-11-01"

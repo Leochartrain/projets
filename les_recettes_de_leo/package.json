@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "astro dev --port 4324",
     "build": "astro build",
-    "preview": "astro preview --port 4324"
+    "preview": "astro preview --port 4324",
+    "deploy": "astro build && npx wrangler pages deploy dist --project-name les-recettes-de-leo --branch main"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",
