@@ -1,0 +1,535 @@
+---
+import { Image, getImage } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import CarteRecette from '../../components/CarteRecette.astro';
+import Partage from '../../components/Partage.astro';
+import { SITE } from '../../config';
+import { categorie, duree, dureeIso, getRecettes, tempsTotal, type Recette } from '../../lib/recettes';
+import { formater } from '../../lib/quantite';
+
+export async function getStaticPaths() {
+  const recettes = await getRecettes();
+  return recettes.map((recette) => ({ params: { slug: recette.id }, props: { recette, recettes } }));
+}
+
+interface Props {
+  recette: Recette;
+  recettes: Recette[];
+}
+const { recette, recettes } = Astro.props;
+const d = recette.data;
+const cat = categorie(d.categorie);
+const { Content } = await render(recette);
+const autres = recettes.filter((r) => r.id !== recette.id && r.data.categorie === d.categorie).slice(0, 3);
+
+const temps = [
+  { label: 'Préparation', valeur: d.temps.preparation },
+  { label: 'Cuisson', valeur: d.temps.cuisson },
+  { label: 'Repos', valeur: d.temps.repos },
+].filter((t) => t.valeur > 0);
+
+// Fiche recette lisible par Google (photo, temps et ingrédients dans les résultats de recherche).
+const photoLd = await getImage({ src: d.photo, width: 1200, format: 'jpg' });
+const url = new URL(`/recettes/${recette.id}`, Astro.site).href;
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Recipe',
+  name: d.titre,
+  description: d.resume,
+  image: [new URL(photoLd.src, Astro.site).href],
+  author: { '@type': 'Person', name: SITE.author },
+  datePublished: d.date.toISOString().slice(0, 10),
+  prepTime: dureeIso(d.temps.preparation),
+  cookTime: dureeIso(d.temps.cuisson),
+  totalTime: dureeIso(tempsTotal(recette)),
+  recipeYield: `${d.parts} parts`,
+  recipeCategory: cat.name,
+  recipeCuisine: 'Française',
+  recipeIngredient: d.ingredients.flatMap((g) =>
+    g.liste.map((i) =>
+      [i.quantite ? formater(i.quantite, i.unite) : i.texte, i.unite, i.nom].filter(Boolean).join(' '),
+    ),
+  ),
+  recipeInstructions: d.etapes.map((g) => ({
+    '@type': 'HowToSection',
+    name: g.titre,
+    itemListElement: g.liste.map((texte) => ({ '@type': 'HowToStep', text: texte })),
+  })),
+  url,
+};
+---
+<Base title={d.titre} description={d.resume} image={d.photo} type="article">
+  <script type="application/ld+json" slot="head" set:html={JSON.stringify(jsonLd)} />
+
+  {d.exemple && (
+    <p class="bandeau-exemple">
+      Recette d'exemple pour montrer le site : la photo est provisoire.
+    </p>
+  )}
+
+  <article class="recette">
+    <header class="entete container">
+      <a class="surtitre" href={`/categorie/${cat.slug}`}>{cat.name}</a>
+      <h1>{d.titre}</h1>
+      <p class="resume">{d.resume}</p>
+      <dl class="infos">
+        {temps.map((t) => (
+          <div>
+            <dt class="caps">{t.label}</dt>
+            <dd>{duree(t.valeur)}</dd>
+          </div>
+        ))}
+        <div>
+          <dt class="caps">Difficulté</dt>
+          <dd>{d.difficulte}</dd>
+        </div>
+      </dl>
+    </header>
+
+    <figure class="photo container">
+      <Image src={d.photo} alt={d.photoAlt} widths={[700, 1100, 1600]} sizes="(max-width: 72rem) 100vw, 72rem" loading="eager" fetchpriority="high" />
+      {d.photoCredit && <figcaption class="small">{d.photoCredit}</figcaption>}
+    </figure>
+
+    <div class="chapo container">
+      <Content />
+    </div>
+
+    <div class="corps container">
+      <aside class="ingredients" aria-labelledby="titre-ingredients" data-portions data-parts={d.parts} data-cercle={d.cercle}>
+        <h2 id="titre-ingredients">Ingrédients</h2>
+
+        <div class="portions">
+          <button type="button" class="pas" data-moins aria-label="Une part de moins">−</button>
+          <p aria-live="polite">
+            <strong data-parts-affiche>{d.parts}</strong> <span data-parts-mot>parts</span>
+          </p>
+          <button type="button" class="pas" data-plus aria-label="Une part de plus">+</button>
+        </div>
+        {d.cercle && (
+          <p class="small cercle">
+            Cercle de <span data-cercle-affiche>{d.cercle}</span> cm
+          </p>
+        )}
+        <button type="button" class="reinit small" data-reinit hidden>Revenir à {d.parts} parts</button>
+
+        {d.ingredients.map((g) => (
+          <section class="groupe">
+            <h3 class="caps">{g.titre}</h3>
+            <ul>
+              {g.liste.map((i) => (
+                <li>
+                  <span class="qte">
+                    {i.quantite ? (
+                      <>
+                        <span data-base={i.quantite} data-unite={i.unite}>{formater(i.quantite, i.unite)}</span>
+                        {i.unite && ` ${i.unite}`}
+                      </>
+                    ) : (
+                      i.texte
+                    )}
+                  </span>
+                  <span class="nom">
+                    {i.nom}
+                    {i.note && <span class="note"> ({i.note})</span>}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </aside>
+
+      <div class="etapes">
+        <h2>Préparation</h2>
+        {d.etapes.map((g) => (
+          <section class="groupe">
+            <h3>{g.titre}</h3>
+            <ol>
+              {g.liste.map((texte) => <li>{texte}</li>)}
+            </ol>
+          </section>
+        ))}
+
+        {d.astuces.length > 0 && (
+          <section class="astuces" aria-labelledby="titre-astuces">
+            <h3 id="titre-astuces" class="caps">Mes astuces</h3>
+            <ul>
+              {d.astuces.map((a) => <li>{a}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <Partage titre={d.titre} url={url} />
+      </div>
+    </div>
+  </article>
+
+  {autres.length > 0 && (
+    <section class="container autres" aria-labelledby="titre-autres">
+      <h2 id="titre-autres">Dans la même catégorie</h2>
+      <div class="grille">
+        {autres.map((r) => <CarteRecette recette={r} />)}
+      </div>
+    </section>
+  )}
+</Base>
+
+<script>
+  import { quantitePour } from '../../lib/quantite';
+
+  // Calcul des portions : toutes les quantités suivent le nombre de parts choisi.
+  for (const bloc of document.querySelectorAll<HTMLElement>('[data-portions]')) {
+    const base = Number(bloc.dataset.parts);
+    const cercle = Number(bloc.dataset.cercle) || 0;
+    const affiche = bloc.querySelector('[data-parts-affiche]')!;
+    const mot = bloc.querySelector('[data-parts-mot]')!;
+    const cercleAffiche = bloc.querySelector('[data-cercle-affiche]');
+    const reinit = bloc.querySelector<HTMLButtonElement>('[data-reinit]')!;
+    const moins = bloc.querySelector<HTMLButtonElement>('[data-moins]')!;
+    let parts = base;
+
+    const maj = () => {
+      affiche.textContent = String(parts);
+      mot.textContent = parts > 1 ? 'parts' : 'part';
+      moins.disabled = parts <= 1;
+      reinit.hidden = parts === base;
+      for (const q of bloc.querySelectorAll<HTMLElement>('[data-base]')) {
+        q.textContent = quantitePour(Number(q.dataset.base), q.dataset.unite ?? '', base, parts);
+      }
+      // Même hauteur de gâteau : la surface du moule suit le nombre de parts.
+      if (cercleAffiche && cercle) cercleAffiche.textContent = String(Math.round(cercle * Math.sqrt(parts / base)));
+    };
+
+    moins.addEventListener('click', () => {
+      parts = Math.max(1, parts - 1);
+      maj();
+    });
+    bloc.querySelector('[data-plus]')!.addEventListener('click', () => {
+      parts = Math.min(60, parts + 1);
+      maj();
+    });
+    reinit.addEventListener('click', () => {
+      parts = base;
+      maj();
+    });
+  }
+</script>
+
+<style>
+  .entete {
+    text-align: center;
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    max-width: 52rem;
+  }
+
+  .entete .surtitre {
+    text-decoration: none;
+  }
+
+  .entete h1 {
+    margin: 1rem 0 1.25rem;
+  }
+
+  .resume {
+    color: var(--gris);
+    max-width: 38rem;
+    margin: 0 auto 2.25rem;
+  }
+
+  .infos {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid var(--filet);
+    border-bottom: 1px solid var(--filet);
+  }
+
+  .infos div {
+    padding: 1rem clamp(1rem, 4vw, 2.5rem);
+  }
+
+  .infos div + div {
+    border-left: 1px solid var(--filet);
+  }
+
+  .infos dt {
+    color: var(--gris);
+    font-size: 0.65rem;
+  }
+
+  .infos dd {
+    margin: 0.2rem 0 0;
+    font-family: var(--serif);
+    font-size: 1.35rem;
+  }
+
+  .photo {
+    margin: 3rem auto 0;
+  }
+
+  .photo :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+  }
+
+  .photo figcaption {
+    margin-top: 0.5rem;
+    text-align: right;
+    font-size: 0.75rem;
+  }
+
+  .chapo {
+    max-width: 44rem;
+    margin-top: 3rem;
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 1.45rem;
+    line-height: 1.5;
+  }
+
+  .chapo :global(p) {
+    margin: 0;
+  }
+
+  .corps {
+    display: grid;
+    grid-template-columns: minmax(17rem, 22rem) 1fr;
+    gap: clamp(2rem, 6vw, 5rem);
+    margin-top: 4rem;
+    align-items: start;
+  }
+
+  .ingredients {
+    position: sticky;
+    top: 1.5rem;
+    background: var(--blanc);
+    border: 1px solid var(--filet);
+    padding: 2rem 1.75rem;
+  }
+
+  .ingredients h2,
+  .etapes h2 {
+    margin-bottom: 1.5rem;
+  }
+
+  .ingredients h2 {
+    text-align: center;
+  }
+
+  .portions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
+  .portions p {
+    margin: 0;
+    min-width: 6rem;
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 1.4rem;
+  }
+
+  .portions strong {
+    font-weight: 500;
+  }
+
+  .pas {
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 1px solid var(--encre);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--encre);
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .pas:hover:not(:disabled) {
+    background: var(--encre);
+    color: var(--creme);
+  }
+
+  .pas:disabled {
+    opacity: 0.3;
+    cursor: default;
+  }
+
+  .cercle {
+    text-align: center;
+    margin: 0.5rem 0 0;
+  }
+
+  .reinit {
+    display: block;
+    margin: 0.5rem auto 0;
+    border: 0;
+    background: none;
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .reinit[hidden] {
+    display: none;
+  }
+
+  .ingredients .groupe {
+    margin-top: 1.75rem;
+  }
+
+  .ingredients h3 {
+    color: var(--accent);
+    font-size: 0.7rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--filet);
+  }
+
+  .ingredients ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ingredients li {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--filet);
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+
+  .ingredients li:last-child {
+    border-bottom: 0;
+  }
+
+  .qte {
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .note {
+    color: var(--gris);
+  }
+
+  .etapes .groupe + .groupe {
+    margin-top: 2.5rem;
+  }
+
+  .etapes h3 {
+    margin-bottom: 1rem;
+  }
+
+  .etapes ol {
+    list-style: none;
+    counter-reset: etape;
+    margin: 0;
+    padding: 0;
+  }
+
+  .etapes ol li {
+    counter-increment: etape;
+    position: relative;
+    padding: 0 0 1.1rem 3rem;
+  }
+
+  .etapes ol li::before {
+    content: counter(etape);
+    position: absolute;
+    left: 0;
+    top: -0.1rem;
+    width: 2rem;
+    height: 2rem;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--accent);
+    border-radius: 50%;
+    color: var(--accent);
+    font-family: var(--serif);
+    font-size: 1.1rem;
+  }
+
+  .astuces {
+    margin-top: 3rem;
+    padding: 1.75rem 2rem;
+    background: var(--accent-clair);
+  }
+
+  .astuces h3 {
+    color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .astuces ul {
+    margin: 0;
+    padding-left: 1.1rem;
+  }
+
+  .astuces li + li {
+    margin-top: 0.5rem;
+  }
+
+  .autres {
+    margin-top: 6rem;
+  }
+
+  .autres h2 {
+    text-align: center;
+    margin-bottom: 2.5rem;
+  }
+
+  @media (max-width: 52rem) {
+    .corps {
+      grid-template-columns: 1fr;
+    }
+
+    .ingredients {
+      position: static;
+    }
+
+    .photo {
+      padding: 0;
+    }
+
+    .photo :global(img) {
+      aspect-ratio: 4 / 3;
+    }
+
+    .photo figcaption {
+      padding: 0 var(--marge);
+    }
+
+    /* Les temps en grille 2 × 2 plutôt qu'une ligne qui déborde. */
+    .infos {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .infos div {
+      padding: 0.85rem 1rem;
+    }
+
+    .infos div + div {
+      border-left: 0;
+    }
+
+    .infos div:nth-child(even) {
+      border-left: 1px solid var(--filet);
+    }
+
+    .infos div:nth-child(n + 3) {
+      border-top: 1px solid var(--filet);
+    }
+  }
+</style>

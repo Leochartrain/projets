@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://les-recettes-de-leo.pages.dev/sitemap-index.xml

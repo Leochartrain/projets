@@ -1,0 +1,65 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config';
+import { getRecettes } from '../lib/recettes';
+
+const credits = (await getRecettes()).filter((r) => r.data.photoCredit);
+---
+<Base title="Mentions légales">
+  <article class="container legal">
+    <h1>Mentions légales</h1>
+
+    <h2>Éditeur</h2>
+    <p>
+      {SITE.name} est un site personnel et non commercial, édité par {SITE.author}, particulier.
+    </p>
+
+    <h2>Hébergement</h2>
+    <p>
+      Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États-Unis
+      (<a href="https://www.cloudflare.com" rel="noopener">cloudflare.com</a>).
+    </p>
+
+    <h2>Données personnelles et cookies</h2>
+    <p>
+      Ce site ne dépose aucun cookie, ne mesure pas l'audience et ne collecte aucune donnée personnelle.
+      Les boutons de partage ouvrent simplement WhatsApp ou votre application de messages.
+    </p>
+
+    <h2>Recettes et photos</h2>
+    <p>
+      Les recettes et les photos sont de {SITE.author}, sauf mention contraire. Vous pouvez les refaire et les partager
+      librement en indiquant d'où elles viennent.
+    </p>
+    {credits.length > 0 && (
+      <ul>
+        {credits.map((r) => (
+          <li>
+            <a href={`/recettes/${r.id}`}>{r.data.titre}</a> : {r.data.photoCredit}.
+          </li>
+        ))}
+      </ul>
+    )}
+  </article>
+</Base>
+
+<style>
+  .legal {
+    max-width: 44rem;
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  h1 {
+    margin-bottom: 2rem;
+  }
+
+  h2 {
+    font-size: 1.6rem;
+    margin: 2rem 0 0.5rem;
+  }
+
+  p,
+  li {
+    color: var(--gris);
+  }
+</style>

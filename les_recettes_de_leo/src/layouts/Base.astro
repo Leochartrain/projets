@@ -1,0 +1,83 @@
+---
+import { getImage } from 'astro:assets';
+import '@fontsource/cormorant-garamond/400.css';
+import '@fontsource/cormorant-garamond/500.css';
+import '@fontsource/cormorant-garamond/400-italic.css';
+import '@fontsource/jost/400.css';
+import '@fontsource/jost/500.css';
+import { SITE } from '../config';
+import { getRecettes } from '../lib/recettes';
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+  /** Image de partage (aperçu WhatsApp, Facebook…) : la photo de la recette, sinon la plus récente. */
+  image?: ImageMetadata;
+  type?: 'website' | 'article';
+}
+const recettes = await getRecettes();
+const { title, description = SITE.description, image = recettes[0]?.data.photo, type = 'website' } = Astro.props;
+const fullTitle = title ? `${title} · ${SITE.name}` : `${SITE.name} · Recettes de pâtisserie maison`;
+const share = image ? await getImage({ src: image, width: 1200, height: 630, fit: 'cover', format: 'jpg' }) : null;
+const path = Astro.url.pathname;
+// Tant qu'il reste une recette d'exemple, Google ne référence pas le site.
+const enConstruction = recettes.some((r) => r.data.exemple);
+const nav = [
+  { href: '/recettes', label: 'Recettes' },
+  { href: '/a-propos', label: 'À propos' },
+];
+---
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={new URL(path, Astro.site)} />
+    <meta property="og:type" content={type} />
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title ?? SITE.name} />
+    <meta property="og:description" content={description} />
+    {share && <meta property="og:image" content={new URL(share.src, Astro.site)} />}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#fbf7f1" />
+    {enConstruction && <meta name="robots" content="noindex, nofollow" />}
+    <slot name="head" />
+  </head>
+  <body>
+    <a class="skip" href="#contenu">Aller au contenu</a>
+    <header class="site-header">
+      <a href="/" class="logo" aria-label={`${SITE.name}, accueil`}>
+        <span class="logo-name">{SITE.name}</span>
+        <span class="logo-tagline">{SITE.tagline}</span>
+      </a>
+      <nav aria-label="Navigation principale">
+        <ul>
+          {nav.map((l) => (
+            <li>
+              <a href={l.href} aria-current={path === l.href || path.startsWith(`${l.href}/`) ? 'page' : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+    </header>
+
+    <main id="contenu">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <p class="logo-name">{SITE.name}</p>
+      <p>Recettes de pâtisserie maison, à refaire et à partager.</p>
+      <p class="small">
+        <a href="/recettes">Toutes les recettes</a>{' · '}<a href="/a-propos">À propos</a>{' · '}<a href="/mentions-legales">Mentions légales</a>
+      </p>
+    </footer>
+  </body>
+</html>

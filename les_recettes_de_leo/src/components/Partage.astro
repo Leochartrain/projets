@@ -1,0 +1,69 @@
+---
+interface Props {
+  titre: string;
+  url: string;
+}
+const { titre, url } = Astro.props;
+const message = `${titre} : ${url}`;
+---
+<section class="partage" aria-labelledby="titre-partage" data-partage data-titre={titre} data-url={url}>
+  <h3 id="titre-partage" class="caps">Partager la recette</h3>
+  <div class="boutons">
+    <button type="button" class="bouton" data-natif hidden>Partager…</button>
+    <a class="bouton" href={`https://wa.me/?text=${encodeURIComponent(message)}`} target="_blank" rel="noopener">WhatsApp</a>
+    <a class="bouton" href={`sms:?&body=${encodeURIComponent(message)}`}>SMS</a>
+    <button type="button" class="bouton" data-copier>Copier le lien</button>
+  </div>
+  <p class="small confirmation" data-confirmation aria-live="polite"></p>
+</section>
+
+<script>
+  for (const bloc of document.querySelectorAll<HTMLElement>('[data-partage]')) {
+    const { titre = '', url = '' } = bloc.dataset;
+    const confirmation = bloc.querySelector('[data-confirmation]')!;
+    const natif = bloc.querySelector<HTMLButtonElement>('[data-natif]')!;
+
+    // Sur téléphone, le menu de partage du système propose toutes les applis.
+    if (navigator.share) {
+      natif.hidden = false;
+      natif.addEventListener('click', () => navigator.share({ title: titre, url }).catch(() => {}));
+    }
+
+    bloc.querySelector('[data-copier]')!.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(url);
+        confirmation.textContent = 'Lien copié.';
+      } catch {
+        confirmation.textContent = url;
+      }
+    });
+  }
+</script>
+
+<style>
+  .partage {
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--filet);
+  }
+
+  .partage h3 {
+    color: var(--gris);
+    margin-bottom: 1rem;
+  }
+
+  .boutons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .boutons [hidden] {
+    display: none;
+  }
+
+  .confirmation {
+    min-height: 1.5em;
+    margin: 0.75rem 0 0;
+  }
+</style>

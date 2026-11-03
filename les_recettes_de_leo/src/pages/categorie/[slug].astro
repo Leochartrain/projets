@@ -1,0 +1,47 @@
+---
+import Base from '../../layouts/Base.astro';
+import CarteRecette from '../../components/CarteRecette.astro';
+import { categoriesUtilisees, getRecettes } from '../../lib/recettes';
+
+// Une page par catégorie qui contient au moins une recette.
+export async function getStaticPaths() {
+  const recettes = await getRecettes();
+  return categoriesUtilisees(recettes).map((c) => ({
+    params: { slug: c.slug },
+    props: { cat: c, recettes: recettes.filter((r) => r.data.categorie === c.slug) },
+  }));
+}
+
+const { cat, recettes } = Astro.props;
+---
+<Base title={cat.name} description={`${cat.name} : les recettes de Léo. ${cat.intro}`}>
+  <header class="entete container">
+    <a class="surtitre" href="/recettes">Toutes les recettes</a>
+    <h1>{cat.name}</h1>
+    <p>{cat.intro}</p>
+  </header>
+  <div class="container grille">
+    {recettes.map((r, i) => <CarteRecette recette={r} prioritaire={i === 0} />)}
+  </div>
+</Base>
+
+<style>
+  .entete {
+    text-align: center;
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    padding-bottom: 3rem;
+  }
+
+  .entete .surtitre {
+    text-decoration: none;
+  }
+
+  .entete h1 {
+    margin: 0.75rem 0 1rem;
+  }
+
+  .entete p:last-child {
+    color: var(--gris);
+    margin: 0;
+  }
+</style>

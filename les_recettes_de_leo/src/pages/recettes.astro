@@ -1,0 +1,207 @@
+---
+import Base from '../layouts/Base.astro';
+import CarteRecette from '../components/CarteRecette.astro';
+import { categorie, categoriesUtilisees, getRecettes, normaliser } from '../lib/recettes';
+
+const recettes = await getRecettes();
+const categories = categoriesUtilisees(recettes);
+// Texte dans lequel on cherche : titre, catégorie, résumé et ingrédients.
+const index = (r: (typeof recettes)[number]) =>
+  normaliser(
+    [r.data.titre, categorie(r.data.categorie).name, r.data.resume, ...r.data.ingredients.flatMap((g) => g.liste.map((i) => i.nom))].join(' '),
+  );
+---
+<Base title="Toutes les recettes" description="Toutes les recettes de pâtisserie de Léo, par catégorie : tartes, entremets, choux, viennoiseries, biscuits…">
+  <header class="entete container">
+    <p class="surtitre">{recettes.length} recette{recettes.length > 1 ? 's' : ''}</p>
+    <h1>Les recettes</h1>
+  </header>
+
+  <div class="container" data-recherche>
+    <form class="filtres" role="search" action="/recettes" onsubmit="return false">
+      <label class="champ">
+        <span class="caps">Rechercher</span>
+        <input type="search" name="q" placeholder="Un gâteau, un ingrédient : caramel, pistache…" autocomplete="off" data-q />
+      </label>
+      <fieldset class="puces">
+        <legend class="visually-hidden">Catégorie</legend>
+        <button type="button" class="puce" aria-pressed="true" data-cat="">Toutes</button>
+        {categories.map((c) => (
+          <button type="button" class="puce" aria-pressed="false" data-cat={c.slug}>{c.name}</button>
+        ))}
+      </fieldset>
+    </form>
+
+    <p class="small resultat" aria-live="polite" data-resultat></p>
+
+    <div class="grille">
+      {recettes.map((r, i) => (
+        <div data-item data-texte={index(r)} data-categorie={r.data.categorie}>
+          <CarteRecette recette={r} prioritaire={i === 0} />
+        </div>
+      ))}
+    </div>
+    <p class="vide" data-vide hidden>
+      Aucune recette ne correspond. Essayez un autre mot, ou <button type="button" class="lien" data-effacer>voyez toutes les recettes</button>.
+    </p>
+  </div>
+</Base>
+
+<script>
+  import { normaliser } from '../lib/texte';
+
+  const bloc = document.querySelector<HTMLElement>('[data-recherche]')!;
+  const champ = bloc.querySelector<HTMLInputElement>('[data-q]')!;
+  const puces = [...bloc.querySelectorAll<HTMLButtonElement>('[data-cat]')];
+  const items = [...bloc.querySelectorAll<HTMLElement>('[data-item]')];
+  const resultat = bloc.querySelector('[data-resultat]')!;
+  const vide = bloc.querySelector<HTMLElement>('[data-vide]')!;
+
+  const params = new URLSearchParams(location.search);
+  champ.value = params.get('q') ?? '';
+  let cat = params.get('categorie') ?? '';
+
+  const filtrer = () => {
+    const mots = normaliser(champ.value).split(/\s+/).filter(Boolean);
+    let n = 0;
+    for (const item of items) {
+      const ok = (!cat || item.dataset.categorie === cat) && mots.every((m) => item.dataset.texte!.includes(m));
+      item.hidden = !ok;
+      if (ok) n++;
+    }
+    for (const p of puces) p.setAttribute('aria-pressed', String(p.dataset.cat === cat));
+    vide.hidden = n > 0;
+    resultat.textContent = mots.length || cat ? `${n} recette${n > 1 ? 's' : ''}` : '';
+    // L'adresse garde la recherche : on peut la partager ou revenir en arrière.
+    const url = new URL(location.href);
+    url.search = '';
+    if (champ.value.trim()) url.searchParams.set('q', champ.value.trim());
+    if (cat) url.searchParams.set('categorie', cat);
+    history.replaceState(null, '', url);
+  };
+
+  champ.addEventListener('input', filtrer);
+  for (const p of puces) {
+    p.addEventListener('click', () => {
+      cat = p.dataset.cat ?? '';
+      filtrer();
+    });
+  }
+  bloc.querySelector('[data-effacer]')!.addEventListener('click', () => {
+    champ.value = '';
+    cat = '';
+    filtrer();
+    champ.focus();
+  });
+  filtrer();
+</script>
+
+<style>
+  .entete {
+    text-align: center;
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+    padding-bottom: 2.5rem;
+  }
+
+  .entete h1 {
+    margin-top: 0.75rem;
+  }
+
+  .filtres {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .champ {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    width: min(100%, 32rem);
+    text-align: center;
+    color: var(--gris);
+  }
+
+  .champ input {
+    width: 100%;
+    padding: 0.7rem 0.25rem;
+    border: 0;
+    border-bottom: 1px solid var(--encre);
+    background: transparent;
+    font: 400 1.35rem var(--serif);
+    color: var(--encre);
+    text-align: center;
+  }
+
+  .champ input:focus {
+    outline: none;
+    border-bottom-color: var(--accent);
+  }
+
+  .puces {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 0;
+    margin: 0;
+    padding: 0;
+  }
+
+  .puce {
+    min-height: 2.5rem;
+    padding: 0.4rem 1.1rem;
+    border: 1px solid var(--filet);
+    border-radius: 999px;
+    background: var(--blanc);
+    color: var(--encre);
+    font: 500 0.7rem var(--sans);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .puce[aria-pressed='true'] {
+    background: var(--encre);
+    border-color: var(--encre);
+    color: var(--creme);
+  }
+
+  .resultat {
+    text-align: center;
+    min-height: 1.5em;
+    margin: 0 0 2rem;
+  }
+
+  [data-item][hidden],
+  .vide[hidden] {
+    display: none;
+  }
+
+  .vide {
+    text-align: center;
+    color: var(--gris);
+    padding: 3rem 0;
+  }
+
+  .lien {
+    border: 0;
+    background: none;
+    padding: 0;
+    color: var(--accent);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+    cursor: pointer;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+  }
+</style>

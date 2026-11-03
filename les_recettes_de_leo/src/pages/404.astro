@@ -1,0 +1,28 @@
+---
+import Base from '../layouts/Base.astro';
+---
+<Base title="Page introuvable">
+  <section class="container introuvable">
+    <p class="surtitre">Erreur 404</p>
+    <h1>Cette page est sortie du four trop tôt</h1>
+    <p>Elle n'existe pas, ou plus. Les recettes, elles, sont toujours là.</p>
+    <a class="bouton" href="/recettes">Voir les recettes</a>
+  </section>
+</Base>
+
+<style>
+  .introuvable {
+    text-align: center;
+    max-width: 40rem;
+    padding-top: clamp(3rem, 8vw, 6rem);
+  }
+
+  h1 {
+    margin: 0.75rem 0 1rem;
+  }
+
+  p:not(.surtitre) {
+    color: var(--gris);
+    margin-bottom: 2rem;
+  }
+</style>

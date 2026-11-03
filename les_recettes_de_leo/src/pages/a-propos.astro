@@ -1,0 +1,79 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITE } from '../config';
+---
+<Base title="À propos" description={`${SITE.author}, pâtissier amateur, partage ses recettes de pâtisserie maison.`}>
+  <article class="container apropos">
+    {/* Portrait à ajouter : déposer la photo dans src/assets/ et l'afficher ici avec <Image>. */}
+    <div class="portrait" aria-hidden="true">
+      <span>Portrait<br />à venir</span>
+    </div>
+    <div class="texte">
+      <p class="surtitre">À propos</p>
+      <h1>{SITE.author}</h1>
+      <p class="accroche">Pâtissier amateur, passionné de tartes, d'entremets et de tout ce qui se poche à la douille.</p>
+      <p>
+        Ma famille et mes amis me demandent souvent mes recettes. Plutôt que de les recopier à chaque fois,
+        je les range ici, au même endroit, et je les ouvre à tous.
+      </p>
+      <p>
+        Chaque recette est testée dans ma cuisine, avec du matériel de particulier. Les quantités se recalculent
+        selon le nombre de parts, et je note à chaque fois les astuces qui m'ont évité de rater.
+      </p>
+      <a class="bouton" href="/recettes">Voir les recettes</a>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .apropos {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+    gap: clamp(2rem, 6vw, 5rem);
+    align-items: center;
+    padding-top: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .portrait {
+    aspect-ratio: 4 / 5;
+    background: var(--accent-clair);
+    display: grid;
+    place-items: center;
+    text-align: center;
+    color: var(--accent);
+    font-family: var(--serif);
+    font-size: 1.4rem;
+    font-style: italic;
+  }
+
+  .texte h1 {
+    margin: 0.75rem 0 1.25rem;
+  }
+
+  .accroche {
+    font-family: var(--serif);
+    font-size: 1.45rem;
+    line-height: 1.45;
+  }
+
+  .texte p:not(.surtitre):not(.accroche) {
+    color: var(--gris);
+  }
+
+  .bouton {
+    margin-top: 1rem;
+  }
+
+  @media (max-width: 50rem) {
+    .apropos {
+      grid-template-columns: 1fr;
+      text-align: center;
+    }
+
+    .portrait {
+      max-width: 20rem;
+      width: 100%;
+      margin: 0 auto;
+    }
+  }
+</style>

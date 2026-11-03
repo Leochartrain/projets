@@ -1,0 +1,261 @@
+/* Style « galerie » des grandes maisons de pâtisserie : fond crème, beaucoup d'air,
+   un serif fin pour les titres, des petites capitales espacées, une seule couleur d'accent. */
+
+:root {
+  --creme: #fbf7f1;
+  --blanc: #fffdf9;
+  --encre: #2b2420;
+  --gris: #6e625a;
+  --filet: #e6ddd2;
+  --accent: #8b5e34; /* caramel : liens, filets, prix des détails */
+  --accent-clair: #f1e6d8;
+
+  --serif: 'Cormorant Garamond', Garamond, 'Times New Roman', serif;
+  --sans: 'Jost', 'Futura', 'Century Gothic', system-ui, sans-serif;
+
+  --largeur: 72rem;
+  --marge: clamp(1.25rem, 5vw, 3rem);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--creme);
+  color: var(--encre);
+  font-family: var(--sans);
+  font-size: 1.0625rem;
+  line-height: 1.65;
+  font-weight: 400;
+  /* Chiffres alignés : ceux de Cormorant sont « elzéviriens » par défaut (le 1 ressemble à un i). */
+  font-variant-numeric: lining-nums;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration-color: var(--accent);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+}
+
+a:hover {
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--serif);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 0;
+}
+
+h1 {
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+}
+
+h2 {
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+}
+
+h3 {
+  font-size: 1.6rem;
+}
+
+/* Petites capitales espacées : menus, surtitres, boutons. */
+.caps {
+  font-family: var(--sans);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.small {
+  font-size: 0.875rem;
+  color: var(--gris);
+}
+
+.skip {
+  position: absolute;
+  left: -999px;
+}
+
+.skip:focus {
+  left: 1rem;
+  top: 1rem;
+  background: var(--blanc);
+  padding: 0.5rem 1rem;
+  z-index: 10;
+}
+
+.container {
+  max-width: var(--largeur);
+  margin: 0 auto;
+  padding: 0 var(--marge);
+}
+
+/* En-tête : logo centré façon maison, menu en petites capitales dessous. */
+.site-header {
+  text-align: center;
+  padding: 2rem var(--marge) 0;
+  border-bottom: 1px solid var(--filet);
+}
+
+.logo {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  gap: 0.35rem;
+}
+
+.logo-name {
+  font-family: var(--serif);
+  font-size: clamp(1.35rem, 4vw, 1.9rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+.logo-tagline {
+  font-size: 0.68rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+  color: var(--gris);
+}
+
+.logo:hover {
+  color: inherit;
+}
+
+.site-header nav ul {
+  display: flex;
+  justify-content: center;
+  gap: clamp(1.5rem, 5vw, 3rem);
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+}
+
+.site-header nav a {
+  display: inline-block;
+  padding: 0.6rem 0 0.9rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+
+.site-header nav a[aria-current='page'] {
+  border-bottom-color: var(--encre);
+}
+
+/* Pied de page */
+.site-footer {
+  margin-top: 6rem;
+  padding: 3rem var(--marge);
+  border-top: 1px solid var(--filet);
+  text-align: center;
+  color: var(--gris);
+}
+
+.site-footer .logo-name {
+  color: var(--encre);
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
+}
+
+.site-footer p {
+  margin: 0.25rem 0;
+}
+
+/* Boutons fins : un filet, du texte en petites capitales. */
+.bouton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 2.75rem;
+  padding: 0.6rem 1.6rem;
+  border: 1px solid var(--encre);
+  background: transparent;
+  color: var(--encre);
+  font: 500 0.72rem/1 var(--sans);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.bouton:hover {
+  background: var(--encre);
+  color: var(--creme);
+}
+
+/* Surtitre avec petit filet, comme les étiquettes des maisons. */
+.surtitre {
+  display: inline-block;
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+
+.filet {
+  width: 3rem;
+  height: 1px;
+  background: var(--accent);
+  border: 0;
+  margin: 1.5rem auto;
+}
+
+/* Bandeau d'avertissement (recette d'exemple) */
+.bandeau-exemple {
+  background: var(--accent-clair);
+  color: var(--encre);
+  text-align: center;
+  font-size: 0.875rem;
+  padding: 0.6rem var(--marge);
+}
+
+/* Grille de recettes */
+.grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17rem), 1fr));
+  gap: 2.5rem 1.75rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
