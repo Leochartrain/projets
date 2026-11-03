@@ -3,7 +3,9 @@ import Base from '../layouts/Base.astro';
 import { SITE } from '../config';
 import { getRecettes } from '../lib/recettes';
 
-const credits = (await getRecettes()).filter((r) => r.data.photoCredit);
+const recettes = await getRecettes();
+const credits = recettes.filter((r) => r.data.photoCredit);
+const sources = recettes.filter((r) => r.data.source);
 ---
 <Base title="Mentions légales">
   <article class="container legal">
@@ -31,6 +33,24 @@ const credits = (await getRecettes()).filter((r) => r.data.photoCredit);
       Les recettes et les photos sont de {SITE.author}, sauf mention contraire. Vous pouvez les refaire et les partager
       librement en indiquant d'où elles viennent.
     </p>
+    {sources.length > 0 && (
+      <>
+        <p>
+          Certaines recettes sont celles d'autres pâtissiers. Elles sont réécrites avec mes mots, créditées et reliées
+          à leur publication d'origine :
+        </p>
+        <ul>
+          {sources.map((r) => (
+            <li>
+              <a href={`/recettes/${r.id}`}>{r.data.titre}</a> : {r.data.source!.auteur}
+              {r.data.source!.compte && ` (${r.data.source!.compte})`},{' '}
+              <a href={r.data.source!.url} rel="noopener">{r.data.source!.plateforme}</a>.
+            </li>
+          ))}
+        </ul>
+      </>
+    )}
+    {credits.length > 0 && <p>Crédits des photos :</p>}
     {credits.length > 0 && (
       <ul>
         {credits.map((r) => (

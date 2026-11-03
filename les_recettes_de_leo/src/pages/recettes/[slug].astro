@@ -38,7 +38,11 @@ const jsonLd = {
   name: d.titre,
   description: d.resume,
   image: [new URL(photoLd.src, Astro.site).href],
-  author: { '@type': 'Person', name: SITE.author },
+  // Recette d'un autre pâtissier : c'est lui l'auteur, Léo ne fait que la partager.
+  author: d.source
+    ? { '@type': 'Person', name: d.source.auteur, url: d.source.url }
+    : { '@type': 'Person', name: SITE.author },
+  ...(d.source && { isBasedOn: d.source.url }),
   datePublished: d.date.toISOString().slice(0, 10),
   prepTime: dureeIso(d.temps.preparation),
   cookTime: dureeIso(d.temps.cuisson),
@@ -73,6 +77,14 @@ const jsonLd = {
       <a class="surtitre" href={`/categorie/${cat.slug}`}>{cat.name}</a>
       <h1>{d.titre}</h1>
       <p class="resume">{d.resume}</p>
+      {d.source && (
+        <p class="source">
+          Recette de{' '}
+          <a href={d.source.url} target="_blank" rel="noopener">
+            {d.source.auteur}{d.source.compte && ` (${d.source.compte})`}
+          </a>, partagée sur {d.source.plateforme}
+        </p>
+      )}
       <dl class="infos">
         {temps.map((t) => (
           <div>
@@ -112,6 +124,7 @@ const jsonLd = {
             Cercle de <span data-cercle-affiche>{d.cercle}</span> cm
           </p>
         )}
+        {d.moule && <p class="small cercle">{d.moule} pour {d.parts} parts</p>}
         <button type="button" class="reinit small" data-reinit hidden>Revenir à {d.parts} parts</button>
 
         {d.ingredients.map((g) => (
@@ -154,11 +167,18 @@ const jsonLd = {
 
         {d.astuces.length > 0 && (
           <section class="astuces" aria-labelledby="titre-astuces">
-            <h3 id="titre-astuces" class="caps">Mes astuces</h3>
+            <h3 id="titre-astuces" class="caps">{d.source ? 'Les astuces' : 'Mes astuces'}</h3>
             <ul>
               {d.astuces.map((a) => <li>{a}</li>)}
             </ul>
           </section>
+        )}
+
+        {d.source && (
+          <p class="credit small">
+            Cette recette est celle de {d.source.auteur}. Pour la voir en vidéo et soutenir son travail :{' '}
+            <a href={d.source.url} target="_blank" rel="noopener">sa publication sur {d.source.plateforme}</a>.
+          </p>
         )}
 
         <Partage titre={d.titre} url={url} />
@@ -236,6 +256,24 @@ const jsonLd = {
     color: var(--gris);
     max-width: 38rem;
     margin: 0 auto 2.25rem;
+  }
+
+  .source {
+    margin: -1.25rem auto 2.25rem;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: 1.2rem;
+  }
+
+  .source a,
+  .credit a {
+    color: var(--accent);
+  }
+
+  .credit {
+    margin: 2.5rem 0 0;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--filet);
   }
 
   .infos {

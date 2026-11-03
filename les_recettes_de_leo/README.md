@@ -28,6 +28,8 @@ Le format est vérifié à la compilation (`src/content.config.ts`). Les points 
 - `parts` = nombre de parts de la recette de base ; `cercle` = diamètre du moule rond en cm (facultatif), recalculé à hauteur égale.
 - `categorie` : une des catégories de `src/config.ts`. Une catégorie sans recette n'apparaît nulle part.
 - En YAML, une phrase qui contient « : » doit être entre guillemets.
+- **Recette d'un autre pâtissier** (vidéo Instagram, YouTube, livre…) : la créditer avec `source` (`auteur`, `compte`, `plateforme`, `url`). Le site affiche « Recette de … » sous le titre, un lien vers la publication en bas de page, et la liste dans les mentions légales. Réécrire les étapes avec ses propres mots, ne pas reprendre ses photos ni ses vidéos.
+- `moule` : moule non rond, affiché tel quel (« Moule à cake de 25 × 8 cm »).
 - Photo : celle de Léo de préférence. Sinon une photo libre de droits, avec `photoCredit` (repris dans les mentions légales).
 
 ## Référencement

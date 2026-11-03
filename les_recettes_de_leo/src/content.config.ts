@@ -31,10 +31,24 @@ const recettes = defineCollection({
       photoCredit: z.string().optional(),
       /** Recette de démonstration, en attendant les vraies : le site n'est pas référencé tant qu'il en reste une. */
       exemple: z.boolean().default(false),
+      /** Recette d'un autre pâtissier : toujours créditée, avec un lien vers la publication d'origine. */
+      source: z
+        .object({
+          /** Nom de l'auteur : « Nicolas Tonini ». */
+          auteur: z.string(),
+          /** Pseudo sur la plateforme : « @nicook_off ». */
+          compte: z.string().optional(),
+          /** Instagram, YouTube, un livre… */
+          plateforme: z.string(),
+          url: z.string().url(),
+        })
+        .optional(),
 
       parts: z.number().int().positive(),
       /** Diamètre en cm du cercle ou moule rond de la recette de base : sert à proposer un diamètre quand on change le nombre de parts. */
       cercle: z.number().positive().optional(),
+      /** Moule non rond de la recette de base, affiché tel quel : « Moule à cake de 25 × 8 cm ». */
+      moule: z.string().optional(),
       difficulte: z.enum(['facile', 'intermédiaire', 'avancée']),
       /** Temps en minutes. */
       temps: z.object({

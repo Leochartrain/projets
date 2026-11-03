@@ -5,7 +5,7 @@ export const SITE = {
   tagline: 'pâtisserie maison',
   author: 'Léo Chartrain',
   description:
-    'Les recettes de pâtisserie de Léo, pâtissier amateur : tartes, entremets, choux et gâteaux maison, expliqués pas à pas.',
+    'Les recettes de pâtisserie qu’utilise Léo, pâtissier amateur : les siennes et celles d’autres pâtissiers, toujours créditées, expliquées pas à pas.',
 };
 
 /**
