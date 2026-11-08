@@ -38,3 +38,6 @@ FPS1/public/assets/
 
 # Offres d'emploi : dépôt local à part (données et profil perso)
 /offres_emploi/
+
+# VoiceStudio : moteur, modèles et enregistrements de voix (données perso, plusieurs Go)
+VoiceStudio/
