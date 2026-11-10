@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crétacé — film généré par le code</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #000; overflow: hidden; font: 14px/1.4 system-ui, sans-serif; color: #cfc8b8; }
+  #stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  canvas { width: min(100vw, 177.78vh); height: min(56.25vw, 100vh); display: block; }
+  body.render #stage { display: block; } body.render canvas { width: 1920px; height: 1080px; }
+  #ui { position: fixed; left: 0; right: 0; bottom: 14px; text-align: center; pointer-events: none; }
+  #ui button { pointer-events: auto; font: inherit; color: #f1e6cf; background: rgba(40, 32, 20, .75); border: 1px solid #7d6a48; padding: 8px 18px; border-radius: 4px; cursor: pointer; }
+  #msg { margin-bottom: 8px; text-shadow: 0 1px 3px #000; }
+  body.render #ui, body.playing #ui { display: none; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<div id="stage"><canvas id="c" width="1920" height="1080"></canvas></div>
+<div id="ui"><div id="msg">Construction de la vallée…</div><button id="play" hidden>Lire le film (avec le son)</button></div>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

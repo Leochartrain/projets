@@ -1,0 +1,16 @@
+{
+  "name": "dino_film",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Film de 15 s de dinosaures entièrement généré par le code (Three.js + Web Audio).",
+  "scripts": {
+    "dev": "node serve.mjs",
+    "stills": "node render.mjs --stills",
+    "render": "node render.mjs"
+  },
+  "dependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "playwright-core": "^1.65.0"
+  }
+}
