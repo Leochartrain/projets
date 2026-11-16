@@ -47,7 +47,7 @@ impl Decoded {
             .ok_or_else(|| anyhow!("aucune piste audio"))?;
         let params = track.codec_params.clone();
         let track_id = track.id;
-        let decoder = symphonia::default::get_codecs()
+        let decoder = codecs()
             .make(&params, &DecoderOptions::default())
             .map_err(|_| anyhow!("ce format audio n'est pas encore pris en charge"))?;
         Ok(Decoded {
@@ -335,4 +335,16 @@ impl Source {
         self.delivered += written as u64;
         written
     }
+}
+
+/// Décodeurs : ceux de Symphonia, et pour l'AAC celui de Fraunhofer (FDK), qui gère aussi le HE-AAC
+/// (AAC à bas débit) que le décodeur natif de Symphonia ne sait pas lire. Enregistré en dernier : il remplace le natif.
+fn codecs() -> &'static symphonia::core::codecs::CodecRegistry {
+    static REGISTRY: std::sync::OnceLock<symphonia::core::codecs::CodecRegistry> = std::sync::OnceLock::new();
+    REGISTRY.get_or_init(|| {
+        let mut r = symphonia::core::codecs::CodecRegistry::new();
+        symphonia::default::register_enabled_codecs(&mut r);
+        r.register_all::<symphonia_adapter_fdk_aac::AacDecoder>();
+        r
+    })
 }

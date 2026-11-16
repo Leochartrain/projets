@@ -1,0 +1,4 @@
+# Voir fdk-mingw.h : correctif de compilation du décodeur HE-AAC (FDK AAC) avec MinGW.
+# Chemin absolu : à adapter si le projet change de dossier.
+[env]
+CFLAGS_x86_64_pc_windows_gnu = "-include D:/claude/Projets/sillon/src-tauri/.cargo/fdk-mingw.h"

@@ -19,5 +19,10 @@ dans le menu Démarrer et sur le bureau. Au premier lancement, le dossier **Musi
 
 La compilation Rust utilise la chaîne GNU (`stable-x86_64-pc-windows-gnu`).
 
+Formats lus : FLAC, ALAC, WAV, AIFF, MP3, OGG Vorbis et AAC (`.m4a`, `.aac`), y compris le **HE-AAC** (AAC à bas
+débit) grâce au décodeur Fraunhofer FDK (`symphonia-adapter-fdk-aac`), que Symphonia ne gère pas seul. Pour que FDK
+compile avec MinGW, `src-tauri/.cargo/config.toml` inclut d'office `fdk-mingw.h` (chemin absolu, à adapter si le
+projet change de dossier). Opus n'est pas encore lu sur ordinateur.
+
 ## Téléphone
 Voir [`mobile/README.md`](mobile/README.md).
