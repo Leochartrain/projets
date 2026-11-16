@@ -1,0 +1,57 @@
+[package]
+name = "sillon"
+version = "0.1.0"
+description = "Sillon, lecteur de musique local"
+authors = ["Léo Chartrain"]
+edition = "2024"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "sillon_lib"
+crate-type = ["rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["image-png", "protocol-asset", "tray-icon"] }
+tauri-plugin-opener = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+symphonia = { version = "0.5.4", features = ["all"] }
+cpal = "0.18.2"
+rubato = "0.16"
+lofty = "0.25.5"
+notify = "8.2.2"
+notify-debouncer-full = "0.7.0"
+walkdir = "2.5.0"
+rayon = "1.12.0"
+souvlaki = "0.9.3"
+rustfft = "6.4.1"
+ebur128 = "0.1.11"
+strsim = "0.11.1"
+parking_lot = "0.13.0"
+crossbeam-channel = "0.5.17"
+rand = "0.9"
+anyhow = "1.0.104"
+chrono = "0.4.45"
+rtrb = "0.4.1"
+tauri-plugin-dialog = "2.8.4"
+tauri-plugin-window-state = "2.5.0"
+tauri-plugin-single-instance = "2.5.5"
+rusqlite = { version = "0.41.1", features = ["bundled"] }
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png", "webp"] }
+ureq = { version = "3.5.1", features = ["json"] }
+
+
+# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+strip = true
