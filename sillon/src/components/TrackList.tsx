@@ -8,6 +8,7 @@ import { trackMenu } from "../lib/menus";
 import { player } from "../lib/player";
 import { useApp, type MenuItem } from "../lib/store";
 import { Cover, cx, Equalizer, LoveButton, QualityBadge, useScrollParent, useWidth } from "./ui";
+import { useCompact } from "../lib/compact";
 
 type SortKey = "title" | "artist" | "album" | "duration" | "plays" | "added" | "year" | "bpm" | "quality";
 
@@ -72,6 +73,8 @@ export function TrackList({ ids, variant = "full", sortable, extraMenu, albumArt
 
   const wide = width > 860;
   const medium = width > 620;
+  const narrow = width > 0 && width < 480;
+  const compact = useCompact();
   const full = variant === "full";
 
   const select = (e: React.MouseEvent | React.KeyboardEvent, index: number) => {
@@ -129,7 +132,9 @@ export function TrackList({ ids, variant = "full", sortable, extraMenu, albumArt
       : medium
         ? "grid-cols-[minmax(0,5fr)_minmax(0,3fr)_84px_56px]"
         : "grid-cols-[minmax(0,1fr)_56px]"
-    : "grid-cols-[34px_minmax(0,1fr)_84px_56px]";
+    : narrow
+      ? "grid-cols-[26px_minmax(0,1fr)_48px]"
+      : "grid-cols-[34px_minmax(0,1fr)_84px_56px]";
 
   return (
     <div ref={wrapRef} role="grid" aria-rowcount={rows.length}>
@@ -139,7 +144,7 @@ export function TrackList({ ids, variant = "full", sortable, extraMenu, albumArt
           {head("title", "Titre", full ? "pl-[52px]" : undefined)}
           {full && medium && head("artist", "Artiste")}
           {full && wide && head("album", "Album")}
-          {(medium || !full) && head("quality", "Qualité")}
+          {(medium || (!full && !narrow)) && head("quality", "Qualité")}
           {head("duration", "Durée", "justify-end")}
         </div>
       )}
@@ -160,7 +165,8 @@ export function TrackList({ ids, variant = "full", sortable, extraMenu, albumArt
               playing={playing}
               selected={selection.has(t.id)}
               showArtist={!full && !!albumArtist && t.artist !== albumArtist && !!t.artist}
-              onSelect={select}
+              onSelect={compact ? (_e, i) => player.playQueue(orderRef.current, i, { shuffle: false }) : select}
+              narrow={narrow}
               onKey={onKey}
               onPlay={() => player.playQueue(orderRef.current, v.index, { shuffle: false })}
               onMenu={(e) => {
@@ -188,6 +194,7 @@ interface RowProps {
   full: boolean;
   wide: boolean;
   medium: boolean;
+  narrow: boolean;
   current: boolean;
   playing: boolean;
   selected: boolean;
@@ -199,7 +206,7 @@ interface RowProps {
 }
 
 const Row = memo(
-  function Row({ track: t, index, top, grid, full, wide, medium, current, playing, selected, showArtist, onSelect, onKey, onPlay, onMenu }: RowProps) {
+  function Row({ track: t, index, top, grid, full, wide, medium, narrow, current, playing, selected, showArtist, onSelect, onKey, onPlay, onMenu }: RowProps) {
     return (
       <div
         role="row"
@@ -243,7 +250,7 @@ const Row = memo(
         </div>
         {full && medium && <div className="truncate text-ink-2">{t.artist}</div>}
         {full && wide && <div className="truncate text-ink-2">{t.album}</div>}
-        {(medium || !full) && (
+        {(medium || (!full && !narrow)) && (
           <div className="flex items-center">
             <QualityBadge quality={qualityOf(t)} />
             {qualityOf(t) === "lossy" && <span className="text-[11px] text-ink-3">{t.format}</span>}

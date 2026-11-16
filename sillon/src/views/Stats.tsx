@@ -225,7 +225,7 @@ export function Stats() {
         }
       />
       {!data ? null : empty ? (
-        <Empty icon={<BarChart3 />} title="Rien écouté sur cette période" text="Les statistiques se remplissent au fil de vos écoutes. Tout est calculé et conservé sur cet ordinateur." />
+        <Empty icon={<BarChart3 />} title="Rien écouté sur cette période" text="Les statistiques se remplissent au fil de vos écoutes. Tout est calculé et conservé sur cet appareil." />
       ) : (
         <motion.div key={`${period}-${offset}`} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
           <div className="mb-10 grid grid-cols-2 gap-4 xl:grid-cols-4">

@@ -7,7 +7,11 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "dev:mobile": "vite --config vite.mobile.config.ts",
+    "build:mobile": "tsc && vite build --config vite.mobile.config.ts",
+    "preview:mobile": "vite preview --config vite.mobile.config.ts",
+    "deploy:mobile": "npm run build:mobile && npx wrangler pages deploy dist-mobile --project-name sillon-musique --branch main"
   },
   "dependencies": {
     "@tanstack/react-virtual": "3.14.26",
@@ -16,6 +20,7 @@
     "@tauri-apps/plugin-opener": "^2",
     "lucide-react": "1.71.0",
     "motion": "14.12.0",
+    "music-metadata": "12.3.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "zustand": "5.1.0"

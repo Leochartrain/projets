@@ -81,13 +81,13 @@ export function DetailHeader({
 }) {
   const openMenu = useApp((s) => s.openMenu);
   return (
-    <header className="mb-8 flex flex-wrap items-end gap-7">
-      {coverNode ?? <Cover id={cover} size={1000} layoutId={layoutId} round={round} rounded="rounded-[16px]" className="w-[232px] shadow-[var(--shadow)]" />}
+    <header className="mb-8 flex flex-wrap items-end gap-7 max-md:flex-col max-md:items-stretch max-md:gap-5">
+      {coverNode ?? <Cover id={cover} size={1000} layoutId={layoutId} round={round} rounded="rounded-[16px]" className="w-[232px] shadow-[var(--shadow)] max-md:w-[min(64vw,260px)] max-md:self-center" />}
       <div className="min-w-0 flex-1 pb-1">
         <div className="text-[12px] font-semibold uppercase tracking-wider text-accent">{kicker}</div>
-        <h1 className="mt-1 text-[36px] font-bold leading-[1.1] tracking-tight [overflow-wrap:anywhere]">{title}</h1>
+        <h1 className="mt-1 text-[36px] max-md:text-[26px] font-bold leading-[1.1] tracking-tight [overflow-wrap:anywhere]">{title}</h1>
         {subtitle && (
-          <button type="button" disabled={!onSubtitle} onClick={onSubtitle} className={cx("mt-1 block text-left text-[20px] text-ink-2", onSubtitle && "hover:text-accent hover:underline")}>
+          <button type="button" disabled={!onSubtitle} onClick={onSubtitle} className={cx("mt-1 block text-left text-[20px] max-md:text-[17px] text-ink-2", onSubtitle && "hover:text-accent hover:underline")}>
             {subtitle}
           </button>
         )}

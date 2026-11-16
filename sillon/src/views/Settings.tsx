@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { api, type Folder } from "../lib/api";
 import { formatTime, plural, techLabel } from "../lib/library";
 import { applyEngineSettings, player } from "../lib/player";
+import { WEB } from "../lib/platform";
 import { findDuplicates } from "../lib/smart";
 import { useApp } from "../lib/store";
 import { Button, Cover, Empty, Heading, IconButton, Range, Section, Segmented, Toggle, TrackQuality } from "../components/ui";
@@ -12,9 +13,9 @@ import { pickFolders } from "./Library";
 
 function Row({ title, text, children }: { title: string; text?: ReactNode; children?: ReactNode }) {
   return (
-    <div className="flex items-center justify-between gap-6 border-b border-line py-3.5 last:border-0">
-      <div className="min-w-0">
-        <div className="text-[14px] font-medium">{title}</div>
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2.5 border-b border-line py-3.5 last:border-0">
+      <div className="min-w-0 flex-1 basis-[260px]">
+        <div className="text-[14px] font-medium [overflow-wrap:anywhere]">{title}</div>
         {text && <div className="mt-0.5 max-w-[560px] text-[12.5px] leading-relaxed text-ink-2">{text}</div>}
       </div>
       <div className="flex shrink-0 items-center gap-2">{children}</div>
@@ -22,7 +23,7 @@ function Row({ title, text, children }: { title: string; text?: ReactNode; child
   );
 }
 
-const Card = ({ children }: { children: ReactNode }) => <div className="rounded-[18px] bg-fill px-5 py-1.5">{children}</div>;
+const Card = ({ children }: { children: ReactNode }) => <div className="rounded-[18px] bg-fill px-5 py-1.5 max-md:px-4">{children}</div>;
 
 const SHORTCUTS: [string, string][] = [
   ["Espace", "Lecture / pause"],
@@ -79,29 +80,42 @@ export function Settings() {
         <Card>
           {folders.map((f) => (
             <Row key={f.id} title={f.path} text={plural(f.tracks, "morceau", "morceaux")}>
-              <IconButton label="Ouvrir le dossier" onClick={() => revealItemInDir(f.path).catch(() => {})}>
-                <FolderOpen size={16} />
-              </IconButton>
+              {!WEB && (
+                <IconButton label="Ouvrir le dossier" onClick={() => revealItemInDir(f.path).catch(() => {})}>
+                  <FolderOpen size={16} />
+                </IconButton>
+              )}
               <IconButton
-                label="Retirer ce dossier de la bibliothèque (les fichiers ne sont pas supprimés)"
+                label={WEB ? "Retirer tous les morceaux importés de cet appareil" : "Retirer ce dossier de la bibliothèque (les fichiers ne sont pas supprimés)"}
                 onClick={async () => {
+                  if (WEB && !window.confirm("Retirer tous les morceaux importés ? Ils seront effacés de l'application (les originaux du téléphone ne sont pas touchés). Les playlists sont gardées.")) return;
                   await api.removeFolder(f.id);
                   await loadFolders();
-                  toast("Dossier retiré de la bibliothèque (fichiers conservés)");
+                  toast(WEB ? "Morceaux retirés de l'application" : "Dossier retiré de la bibliothèque (fichiers conservés)");
                 }}
               >
                 <Trash2 size={16} />
               </IconButton>
             </Row>
           ))}
-          <Row title="Dossiers de musique" text="Scannés en profondeur et surveillés : les ajouts, suppressions et renommages sont détectés automatiquement.">
-            <Button onClick={() => api.rescan()} disabled={!!scan}>
-              <RefreshCw size={14} className={scan ? "animate-spin" : ""} /> {scan ? "Scan en cours…" : "Rescanner"}
-            </Button>
-            <Button primary onClick={() => pickFolders().then(loadFolders)}>
-              <FolderPlus size={15} /> Ajouter un dossier
-            </Button>
-          </Row>
+          {WEB ? (
+            <Row title="Importer des morceaux" text="Les fichiers choisis sont copiés dans l'application (stockage du navigateur) et restent lisibles sans réseau. Paroles .lrc et pochettes cover.jpg acceptées si vous les sélectionnez avec les morceaux.">
+              <Button primary onClick={() => pickFolders().then(loadFolders)} disabled={!!scan}>
+                <FolderPlus size={15} /> {scan ? "Import en cours…" : "Importer"}
+              </Button>
+            </Row>
+          ) : (
+            <Row title="Dossiers de musique" text="Scannés en profondeur et surveillés : les ajouts, suppressions et renommages sont détectés automatiquement.">
+              <Button onClick={() => api.rescan()} disabled={!!scan}>
+                <RefreshCw size={14} className={scan ? "animate-spin" : ""} /> {scan ? "Scan en cours…" : "Rescanner"}
+              </Button>
+              <Button primary onClick={() => pickFolders().then(loadFolders)}>
+                <FolderPlus size={15} /> Ajouter un dossier
+              </Button>
+            </Row>
+          )}
+          {!WEB && (
+          <>
           <Row
             title="Analyse audio en arrière-plan"
             text={
@@ -124,6 +138,8 @@ export function Settings() {
               label="Compléter les infos manquantes en ligne"
             />
           </Row>
+          </>
+          )}
           <Row title="Doublons" text="Repère un même morceau présent en plusieurs versions ou qualités, et indique la meilleure.">
             <Button onClick={() => navigate({ name: "duplicates" })}>
               <Copy size={14} /> Chercher les doublons
@@ -134,6 +150,8 @@ export function Settings() {
 
       <Section title="Lecture">
         <Card>
+          {!WEB && (
+          <>
           <Row title="Sortie audio" text={device ? `En cours : ${device}` : undefined}>
             <select aria-label="Sortie audio" value={settings.device ?? ""} onChange={(e) => engine("device", e.target.value || null)} className="h-9 max-w-[300px] rounded-[9px] bg-elev px-3 text-[13px] outline-none ring-1 ring-line">
               <option value="">Sortie par défaut du système</option>
@@ -148,11 +166,13 @@ export function Settings() {
           <Row title="Mode exclusif" text="Pas encore disponible : la bibliothèque de sortie audio utilisée (cpal) n'ouvre la carte son qu'en mode partagé. Sous Windows, le mélangeur du système reste donc dans la chaîne.">
             <span className="text-[12.5px] text-ink-3">Indisponible</span>
           </Row>
+          </>
+          )}
           <Row title="Fondu enchaîné" text="Désactivé automatiquement entre deux pistes qui se suivent sur un même album (lecture sans blanc).">
             <span className="w-[72px] text-right text-[13px] tabular-nums text-ink-2">{settings.crossfade === 0 ? "Désactivé" : `${settings.crossfade} s`}</span>
             <Range label="Durée du fondu enchaîné en secondes" className="thumb w-[180px]" min={0} max={12} step={1} value={settings.crossfade} onChange={(v) => engine("crossfade", v)} accent />
           </Row>
-          <Row title="ReplayGain" text="Égalise le volume d'un morceau à l'autre (piste) ou d'un album à l'autre (album). Utilise les valeurs des fichiers, sinon celles calculées par l'analyse.">
+          <Row title="ReplayGain" text={WEB ? "Égalise le volume d'un morceau à l'autre (piste) ou d'un album à l'autre (album), avec les valeurs inscrites dans les fichiers." : "Égalise le volume d'un morceau à l'autre (piste) ou d'un album à l'autre (album). Utilise les valeurs des fichiers, sinon celles calculées par l'analyse."}>
             <Segmented id="rg" value={settings.replayGain} onChange={(v) => engine("replayGain", v)} options={[{ value: "off", label: "Désactivé" }, { value: "track", label: "Piste" }, { value: "album", label: "Album" }]} />
           </Row>
           <Row title="Égaliseur" text={`${settings.eq.enabled ? "Activé" : "Désactivé"} — préréglage « ${settings.eq.preset} »`}>
@@ -180,6 +200,7 @@ export function Settings() {
         </Card>
       </Section>
 
+      {!WEB && (
       <Section title="Raccourcis clavier">
         <Card>
           <div className="grid grid-cols-1 gap-x-10 py-2 md:grid-cols-2">
@@ -192,6 +213,7 @@ export function Settings() {
           </div>
         </Card>
       </Section>
+      )}
     </div>
   );
 }

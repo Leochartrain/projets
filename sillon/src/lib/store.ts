@@ -21,7 +21,8 @@ export interface Route {
     | "stats"
     | "settings"
     | "search"
-    | "duplicates";
+    | "duplicates"
+    | "more";
   param?: string;
 }
 

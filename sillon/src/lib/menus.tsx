@@ -4,6 +4,7 @@ import { Disc3, FolderOpen, Heart, ListEnd, ListPlus, ListStart, Pencil, Play, R
 import { api } from "./api";
 import { albumArtistOf, albumKeyOf, type Album } from "./library";
 import { player } from "./player";
+import { WEB } from "./platform";
 import { getApp, type MenuItem } from "./store";
 
 const ic = (I: typeof Play) => <I size={15} strokeWidth={1.8} />;
@@ -70,7 +71,7 @@ export function trackMenu(ids: number[], extra: MenuItem[] = []): MenuItem[] {
     items.push({ label: "Aller à l'artiste", icon: ic(User), action: () => app.navigate({ name: "artist", param: albumArtistOf(first) }) });
   }
   items.push({ label: many ? "Modifier les informations…" : "Modifier les informations…", icon: ic(Pencil), action: () => app.set({ tagEditor: ids }) });
-  if (!many) items.push({ label: "Afficher dans le dossier", icon: ic(FolderOpen), action: () => revealItemInDir(first.path).catch(() => {}) });
+  if (!many && !WEB) items.push({ label: "Afficher dans le dossier", icon: ic(FolderOpen), action: () => revealItemInDir(first.path).catch(() => {}) });
   if (extra.length) items.push({ separator: true }, ...extra);
   return items;
 }

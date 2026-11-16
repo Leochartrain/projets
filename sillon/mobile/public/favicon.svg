@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ff5e72"/>
+      <stop offset="0.55" stop-color="#e8223f"/>
+      <stop offset="1" stop-color="#a3122d"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.55"/>
+      <stop offset="0.5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect x="32" y="32" width="960" height="960" rx="224" fill="url(#bg)"/>
+  <g fill="none" stroke="#fff" stroke-linecap="round">
+    <circle cx="512" cy="512" r="330" stroke-width="34"/>
+    <circle cx="512" cy="512" r="262" stroke-width="14" stroke-opacity="0.55"/>
+    <circle cx="512" cy="512" r="218" stroke-width="14" stroke-opacity="0.4"/>
+    <circle cx="512" cy="512" r="174" stroke-width="14" stroke-opacity="0.3"/>
+    <path d="M 512 182 A 330 330 0 0 1 842 512" stroke="url(#shine)" stroke-width="34"/>
+  </g>
+  <circle cx="512" cy="512" r="112" fill="#fff"/>
+  <circle cx="512" cy="512" r="30" fill="#e8223f"/>
+</svg>

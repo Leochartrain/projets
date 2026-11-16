@@ -11,6 +11,8 @@ import { CommandPalette, ContextMenu, Toasts } from "./components/Overlays";
 import { PlayerBar } from "./components/PlayerBar";
 import { QueuePanel } from "./components/QueuePanel";
 import { Sidebar } from "./components/Sidebar";
+import { MobileNav, MoreView } from "./components/MobileNav";
+import { useCompact } from "./lib/compact";
 import { ScrollContext, spring } from "./components/ui";
 import { AlbumDetail, Albums, ArtistDetail, Artists, GenreDetail, Genres, Home, MixView, Search, Tracks } from "./views/Library";
 import { PlaylistDetail, Playlists } from "./views/Playlists";
@@ -50,6 +52,8 @@ function View({ route }: { route: Route }) {
       return <Duplicates />;
     case "search":
       return <Search query={p} />;
+    case "more":
+      return <MoreView />;
   }
 }
 
@@ -166,6 +170,7 @@ export default function App() {
   const nowPlaying = useApp((s) => s.nowPlaying);
   const track = useCurrentTrack();
   const systemDark = useSystemDark();
+  const compact = useCompact();
   const scroll = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 
@@ -211,7 +216,7 @@ export default function App() {
             <i />
             <i />
           </div>
-          <Sidebar />
+          {!compact && <Sidebar />}
           <main
             ref={scroll}
             onScroll={(e) => scrollMemory.set(routeKey, e.currentTarget.scrollTop)}
@@ -223,7 +228,7 @@ export default function App() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-              className="mx-auto max-w-[1500px] px-8 pb-[132px] pt-8"
+              className={compact ? "px-4 pb-[170px] pt-[calc(env(safe-area-inset-top)+20px)]" : "mx-auto max-w-[1500px] px-8 pb-[132px] pt-8"}
             >
               <View route={route} />
             </motion.div>
@@ -237,14 +242,14 @@ export default function App() {
                 animate={{ x: 0, opacity: 1 }}
                 exit={{ x: 380, opacity: 0 }}
                 transition={spring}
-                className="glass-strong absolute bottom-[108px] right-4 top-4 z-20 flex w-[348px] flex-col rounded-[20px] border border-line pt-3 shadow-[var(--shadow)]"
+                className={compact ? "glass-strong absolute inset-x-0 bottom-0 top-[calc(env(safe-area-inset-top)+40px)] z-40 flex flex-col rounded-t-[22px] border border-line pt-3 shadow-[var(--shadow)]" : "glass-strong absolute bottom-[108px] right-4 top-4 z-20 flex w-[348px] flex-col rounded-[20px] border border-line pt-3 shadow-[var(--shadow)]"}
               >
                 <QueuePanel className="h-full" />
               </motion.aside>
             )}
           </AnimatePresence>
 
-          <PlayerBar />
+          {compact ? <MobileNav /> : <PlayerBar />}
           <NowPlaying />
           <EqPanel />
           <TagEditor />

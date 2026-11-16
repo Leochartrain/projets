@@ -7,6 +7,9 @@ import { api, coverUrl, type RuleSet, type Track } from "../lib/api";
 import { formatDuration, normalize, plural, qualityOf, searchTracks, splitGenres, type Album } from "../lib/library";
 import { albumMenu } from "../lib/menus";
 import { player } from "../lib/player";
+import { WEB } from "../lib/platform";
+import { useCompact } from "../lib/compact";
+import { MobileSearchField } from "../components/MobileNav";
 import { buildMixes, evaluate, weekKey, type Mix } from "../lib/smart";
 import { getApp, useApp } from "../lib/store";
 import { AlbumCard, AlbumGrid, DetailHeader, Shelf } from "../components/AlbumCard";
@@ -132,11 +135,11 @@ export function Home() {
       <Empty
         icon={<Disc3 size={30} />}
         title={scan ? "Lecture de votre musique…" : "Bienvenue dans Sillon"}
-        text={scan ? "Les morceaux apparaîtront ici au fur et à mesure." : "Choisissez le ou les dossiers qui contiennent votre musique. Tout reste sur cet ordinateur : aucun compte, aucun envoi."}
+        text={scan ? "Les morceaux apparaîtront ici au fur et à mesure." : WEB ? "Importez des morceaux depuis ce téléphone (FLAC, MP3, AAC…). Ils sont copiés dans l'application et lisibles sans réseau : aucun compte, aucun envoi." : "Choisissez le ou les dossiers qui contiennent votre musique. Tout reste sur cet ordinateur : aucun compte, aucun envoi."}
         action={
           !scan && (
             <Button primary onClick={pickFolders}>
-              <FolderPlus size={16} /> Choisir un dossier de musique
+              <FolderPlus size={16} /> {WEB ? "Importer des morceaux" : "Choisir un dossier de musique"}
             </Button>
           )
         }
@@ -464,9 +467,11 @@ export function Search({ query }: { query: string }) {
   const idSet = new Set(ids);
   const onlyLyrics = lyricIds.filter((id) => !idSet.has(id) && byId.has(id));
   const nothing = !ids.length && !albums.length && !artists.length && !onlyLyrics.length;
+  const compact = useCompact();
 
   return (
     <>
+      {compact && <MobileSearchField />}
       <Heading
         title={nq ? `« ${query.trim()} »` : "Recherche"}
         subtitle={nq || filters ? plural(ids.length, "morceau trouvé", "morceaux trouvés") : "Titres, artistes, albums, paroles — les fautes de frappe sont tolérées."}
@@ -481,7 +486,7 @@ export function Search({ query }: { query: string }) {
           <RuleEditor value={filters} onChange={setFilters} compact />
         </div>
       )}
-      {nothing && <Empty icon={<SearchIcon />} title={nq || filters ? "Aucun résultat" : "Que voulez-vous écouter ?"} text={nq || filters ? "Essayez un autre mot, ou retirez un filtre." : "Tapez dans le champ de recherche (Ctrl+F), ou ouvrez les filtres."} />}
+      {nothing && <Empty icon={<SearchIcon />} title={nq || filters ? "Aucun résultat" : "Que voulez-vous écouter ?"} text={nq || filters ? "Essayez un autre mot, ou retirez un filtre." : compact ? "Tapez dans le champ ci-dessus, ou ouvrez les filtres." : "Tapez dans le champ de recherche (Ctrl+F), ou ouvrez les filtres."} />}
       {artists.length > 0 && (
         <Section title="Artistes">
           <div className="flex flex-wrap gap-2">

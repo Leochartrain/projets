@@ -5,8 +5,10 @@ import { AnimatePresence, motion } from "motion/react";
 import { AudioLines, ChevronDown, ListMusic, Maximize2, MicVocal } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "../lib/api";
+import { useCompact } from "../lib/compact";
+import { WEB } from "../lib/platform";
 import { tintsFrom } from "../lib/color";
-import { albumArtistOf } from "../lib/library";
+import { albumArtistOf, techLabel } from "../lib/library";
 import { activeLine, parseLyrics, type Lyrics } from "../lib/lrc";
 import { trackMenu } from "../lib/menus";
 import { player } from "../lib/player";
@@ -173,7 +175,12 @@ export function NowPlaying() {
   const setSetting = useApp((s) => s.setSetting);
   const navigate = useApp((s) => s.navigate);
   const openMenu = useApp((s) => s.openMenu);
+  const compact = useCompact();
   const [panel, setPanel] = useState<"lyrics" | "queue">("lyrics");
+  // Téléphone : la pochette occupe l'écran, paroles et file d'attente la remplacent à la demande.
+  const [side, setSide] = useState<"cover" | "lyrics" | "queue">("cover");
+  const pick = (p: "lyrics" | "queue") => (compact ? setSide(side === p ? "cover" : p) : setPanel(p));
+  const isOn = (p: "lyrics" | "queue") => (compact ? side === p : panel === p);
   const close = () => useApp.setState({ nowPlaying: false });
 
   const tints = useMemo(() => tintsFrom(track?.cover ? covers[track.cover] : undefined, true), [track?.cover, covers]);
@@ -199,31 +206,66 @@ export function NowPlaying() {
             <i />
           </div>
 
-          <div className="relative flex items-center justify-between px-5 pt-4">
+          <div className={compact ? "relative flex items-center justify-between px-3 pt-[calc(env(safe-area-inset-top)+8px)]" : "relative flex items-center justify-between px-5 pt-4"}>
             <IconButton label="Fermer (Échap)" size={36} onClick={close}>
               <ChevronDown size={22} />
             </IconButton>
             <div className="flex items-center gap-1">
-              <IconButton label="Paroles" active={panel === "lyrics"} size={36} onClick={() => setPanel("lyrics")}>
+              <IconButton label="Paroles" active={isOn("lyrics")} size={compact ? 42 : 36} onClick={() => pick("lyrics")}>
                 <MicVocal size={18} />
               </IconButton>
-              <IconButton label="File d'attente" active={panel === "queue"} size={36} onClick={() => setPanel("queue")}>
+              <IconButton label="File d'attente" active={isOn("queue")} size={compact ? 42 : 36} onClick={() => pick("queue")}>
                 <ListMusic size={18} />
               </IconButton>
               <IconButton
                 label="Visualiseur : désactivé, spectre ou onde"
                 active={visualizer !== "off"}
-                size={36}
+                size={compact ? 42 : 36}
                 onClick={() => setSetting("visualizer", visualizer === "off" ? "bars" : visualizer === "bars" ? "wave" : "off")}
               >
                 <AudioLines size={18} />
               </IconButton>
-              <IconButton label="Plein écran (F11)" size={36} onClick={async () => { const w = getCurrentWindow(); w.setFullscreen(!(await w.isFullscreen())); }}>
+              {!compact && !WEB && <IconButton label="Plein écran (F11)" size={36} onClick={async () => { const w = getCurrentWindow(); w.setFullscreen(!(await w.isFullscreen())); }}>
                 <Maximize2 size={16} />
-              </IconButton>
+              </IconButton>}
             </div>
           </div>
 
+          {compact ? (
+            <div className="relative flex min-h-0 flex-1 flex-col px-6 pb-[calc(env(safe-area-inset-bottom)+18px)]">
+              <div className="flex min-h-0 flex-1 items-center justify-center py-4">
+                {side === "cover" ? (
+                  <div className="aspect-square w-full max-w-[min(100%,46vh)]" onContextMenu={(e) => openMenu(e, trackMenu([track.id]))}>
+                    <Cover id={track.cover} size={1000} layoutId="np-cover" rounded="rounded-[14px]" className="w-full shadow-[0_24px_60px_rgba(0,0,0,0.55)]" />
+                  </div>
+                ) : (
+                  <div className="h-full w-full">{side === "lyrics" ? <LyricsView trackId={track.id} /> : <QueuePanel className="h-full" />}</div>
+                )}
+              </div>
+              <div className="flex items-start justify-between gap-3">
+                <motion.div key={track.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={softSpring} className="min-w-0">
+                  <h2 className="truncate text-[22px] font-bold tracking-tight">{track.title}</h2>
+                  <button type="button" onClick={() => (close(), navigate({ name: "artist", param: albumArtistOf(track) }))} className="block max-w-full truncate text-left text-[16px] text-ink-2">
+                    {track.artist || "Artiste inconnu"}
+                  </button>
+                </motion.div>
+                <LoveButton track={track} size={42} />
+              </div>
+              <SeekBar big className="mt-3" />
+              <div className="mt-2">
+                <Transport big />
+              </div>
+              <div className="mt-3 flex items-center justify-center gap-2 text-[11.5px] text-ink-3">
+                <TrackQuality track={track} className="!bg-white/15 !text-white" />
+                <span className="truncate">{techLabel(track)}</span>
+              </div>
+              {visualizer !== "off" && side === "cover" && (
+                <div className="mt-3">
+                  <Visualizer mode={visualizer} height={56} />
+                </div>
+              )}
+            </div>
+          ) : (
           <div className="relative grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] gap-[5vw] px-[6vw] pb-8 pt-2">
             {/* Pochette et commandes */}
             <div className="flex min-h-0 flex-col items-center justify-center">
@@ -271,6 +313,7 @@ export function NowPlaying() {
               </AnimatePresence>
             </div>
           </div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
