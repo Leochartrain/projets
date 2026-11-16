@@ -11,7 +11,8 @@
     "dev:mobile": "vite --config vite.mobile.config.ts",
     "build:mobile": "tsc && vite build --config vite.mobile.config.ts",
     "preview:mobile": "vite preview --config vite.mobile.config.ts",
-    "deploy:mobile": "npm run build:mobile && npx wrangler pages deploy dist-mobile --project-name sillon-musique --branch main"
+    "deploy:mobile": "npm run build:mobile && npx wrangler pages deploy dist-mobile --project-name sillon-musique --branch main",
+    "serve:mobile": "npm run build:mobile && vite preview --config vite.mobile.config.ts"
   },
   "dependencies": {
     "@tanstack/react-virtual": "3.14.26",

@@ -27,7 +27,7 @@ function pwa(): Plugin {
             '<link rel="manifest" href="./manifest.webmanifest" />',
             '<link rel="icon" href="./favicon.svg" type="image/svg+xml" />',
             '<link rel="apple-touch-icon" href="./apple-touch-icon.png" />',
-            "<script>if('serviceWorker' in navigator&&location.protocol==='https:')addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'))</script>",
+            "<script>if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))addEventListener('load',()=>navigator.serviceWorker.register('./sw.js'))</script>",
             "</head>",
           ].join("\n    "),
         );
